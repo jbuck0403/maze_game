@@ -24,30 +24,34 @@ function App() {
   };
 
   function handleMovement(event) {
-    // console.log(playerNum);
     const { key } = event;
 
     switch (key) {
       case "w":
-        // console.log(playerNum);
-        r.mutate.moveCharacter({ direction: "UP", id: r.userID });
+        r.mutate.updatePlayerPosition({ direction: "UP", id: r.userID });
         break;
       case "a":
-        r.mutate.moveCharacter({ direction: "LEFT", id: r.userID });
+        r.mutate.updatePlayerPosition({ direction: "LEFT", id: r.userID });
         break;
       case "s":
-        r.mutate.moveCharacter({ direction: "DOWN", id: r.userID });
+        r.mutate.updatePlayerPosition({ direction: "DOWN", id: r.userID });
         break;
       case "d":
-        r.mutate.moveCharacter({ direction: "RIGHT", id: r.userID });
+        r.mutate.updatePlayerPosition({ direction: "RIGHT", id: r.userID });
         break;
       default:
         break;
     }
+    r.mutate.updateMaze({ id: r.userID });
   }
 
   const count = useSubscribe(r, (tx) => tx.get("count"), 0);
-  const playerPosition = useSubscribe(r, (tx) => tx.get("position"), [0, 0]);
+  const playerPosition = useSubscribe(
+    r,
+    (tx) => tx.get(`position${r.userID}`),
+    [0, 0]
+  );
+  console.log(playerPosition);
   const maze = useSubscribe(
     r,
     (tx) => tx.get("maze"),

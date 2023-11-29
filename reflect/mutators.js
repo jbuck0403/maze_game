@@ -19,11 +19,11 @@
 export const mutators = {
   increment,
   updateMaze,
-  moveCharacter,
+  updatePlayerPosition,
 };
 
-const startPositionByPlayer = (playerNum) => {
-  switch (playerNum) {
+const startPositionByPlayer = (playerID) => {
+  switch (playerID) {
     case 1:
       return [0, 0];
     case 2:
@@ -40,40 +40,50 @@ async function increment(tx, delta) {
   await tx.set("count", value + delta);
 }
 
-async function updateMaze(tx, playerNum, newCoords) {
-  const populateMaze = (playerNum) => {
-    const maze = Array.from({ length: 25 }, () => Array(25).fill(0));
-    const startingPosition = startPositionByPlayer(playerNum);
+async function updateMaze(tx, playerData) {
+  const playerID = playerData.id;
+  const newPosition =
+    (await tx.get(`position${playerID}`)) ?? startPositionByPlayer(playerID);
 
-    maze[startingPosition[0]][startingPosition[1]] = playerNum;
-    console.log(maze);
+  console.log(newPosition);
+  const populateMaze = (playerID) => {
+    const maze = Array.from({ length: 25 }, () => Array(25).fill(0));
+    const startingPosition = startPositionByPlayer(playerID);
+
+    maze[startingPosition[0]][startingPosition[1]] = playerID;
 
     return maze;
   };
 
-  const maze = (await tx.get("maze")) ?? populateMaze(playerNum);
+  // const maze = (await tx.get("maze")) ?? populateMaze(playerID);
 
-  if (maze[newCoords[0]][newCoords[1]] != playerNum) {
-    maze[newCoords[0]][newCoords[1]] = playerNum;
-  }
+  // if (maze[newPosition[0]][newPosition[1]] != playerID) {
+  //   maze[newPosition[0]][newPosition[1]] = playerID;
+  //   console.log("YES");
+  // }
+  // console.log(maze);
 
-  await tx.set("maze", maze);
+  // await tx.set("maze", maze);
 }
 
-async function moveCharacter(tx, args) {
-  const playerNum = args.id;
-  const direction = args.direction;
-  console.log(playerNum, direction);
+async function updatePlayerPosition(tx, playerData) {
+  const playerID = playerData.id;
+  const direction = playerData.direction;
+
   const checkValidMove = (newPosition, direction, highestX, highestY) => {
     switch (direction) {
       case "UP":
-        if (newPosition < highestY) return true;
+        if (newPosition <= highestY) return true;
+        else return false;
       case "DOWN":
         if (newPosition > 0) return true;
+        else return false;
       case "LEFT":
         if (newPosition > 0) return true;
+        else return false;
       case "RIGHT":
         if (newPosition < highestX) return true;
+        else return false;
       default:
         return false;
     }
@@ -82,33 +92,28 @@ async function moveCharacter(tx, args) {
   const moveInDirection = (direction) => {
     switch (direction) {
       case "UP":
-        if (checkValidMove(currentPosition[1], direction, 24, 24)) {
-          // console.log([currentPosition[0], currentPosition[1] + 1]);
+        if (checkValidMove(currentPosition[1] + 1, direction, 24, 24)) {
           return [currentPosition[0], currentPosition[1] + 1];
-        }
+        } else return currentPosition;
       case "DOWN":
         if (checkValidMove(currentPosition[1], direction, 24, 24)) {
           return [currentPosition[0], currentPosition[1] - 1];
-        }
+        } else return currentPosition;
       case "LEFT":
         if (checkValidMove(currentPosition[0], direction, 24, 24)) {
           return [currentPosition[0] - 1, currentPosition[1]];
-        }
+        } else return currentPosition;
       case "RIGHT":
         if (checkValidMove(currentPosition[0], direction, 24, 24)) {
           return [currentPosition[0] + 1, currentPosition[1]];
-        }
+        } else return currentPosition;
       default:
         return currentPosition;
     }
   };
   const currentPosition =
-    (await tx.get("position")) ?? startPositionByPlayer(playerNum);
+    (await tx.get(`position${playerID}`)) ?? startPositionByPlayer(playerID);
   const newPosition = moveInDirection(direction);
 
-  if (currentPosition != newPosition) {
-    updateMaze(playerNum, newPosition);
-  }
-
-  await tx.set("position", newPosition);
+  await tx.set(`position${playerID}`, newPosition);
 }
