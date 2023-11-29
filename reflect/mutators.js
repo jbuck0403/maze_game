@@ -22,6 +22,31 @@ export const mutators = {
   updatePlayerPosition,
 };
 
+export const populateMaze = (currentPlayers) => {
+  const maze = Array.from({ length: 25 }, () => Array(25).fill(0));
+
+  currentPlayers.forEach((player) => {
+    const startingPosition = startPositionByPlayer(player);
+    maze[startingPosition[0]][startingPosition[1]] = player;
+  });
+
+  return maze;
+};
+
+const moveCharacterInMaze = (
+  maze,
+  currentPosition,
+  newPosition,
+  characterToMove
+) => {
+  const mazeCopy = [...maze];
+
+  mazeCopy[currentPosition[0]][currentPosition[1]] = 0;
+  mazeCopy[newPosition[0]][newPosition[1]] = characterToMove;
+
+  return mazeCopy;
+};
+
 const startPositionByPlayer = (playerID) => {
   switch (playerID) {
     case 1:
@@ -42,28 +67,21 @@ async function increment(tx, delta) {
 
 async function updateMaze(tx, playerData) {
   const playerID = playerData.id;
+  const currentPlayers = playerData.currentPlayers;
   const newPosition =
     (await tx.get(`position${playerID}`)) ?? startPositionByPlayer(playerID);
 
   console.log(newPosition);
-  const populateMaze = (playerID) => {
-    const maze = Array.from({ length: 25 }, () => Array(25).fill(0));
-    const startingPosition = startPositionByPlayer(playerID);
+  const maze = (await tx.get("maze")) ?? populateMaze(currentPlayers);
 
-    maze[startingPosition[0]][startingPosition[1]] = playerID;
+  const updatedMaze = moveCharacterInMaze(
+    maze,
+    currentPosition,
+    newPosition,
+    playerID
+  );
 
-    return maze;
-  };
-
-  // const maze = (await tx.get("maze")) ?? populateMaze(playerID);
-
-  // if (maze[newPosition[0]][newPosition[1]] != playerID) {
-  //   maze[newPosition[0]][newPosition[1]] = playerID;
-  //   console.log("YES");
-  // }
-  // console.log(maze);
-
-  // await tx.set("maze", maze);
+  await tx.set("maze", updatedMaze);
 }
 
 async function updatePlayerPosition(tx, playerData) {

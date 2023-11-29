@@ -1,12 +1,14 @@
 import "./App.css";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { Reflect } from "@rocicorp/reflect/client";
 import { mutators } from "../reflect/mutators";
 import { useSubscribe } from "@rocicorp/reflect/react";
 
 import MazeComponent from "./components/maze";
+
+import { populateMaze } from "../reflect/mutators";
 
 const playerNum = 1;
 const gameID = 1;
@@ -42,9 +44,10 @@ function App() {
       default:
         break;
     }
-    r.mutate.updateMaze({ id: r.userID });
+    r.mutate.updateMaze({ id: r.userID, currentPlayers: currentPlayers });
   }
 
+  const [currentPlayers, setCurrentPlayers] = useState([playerNum]);
   const count = useSubscribe(r, (tx) => tx.get("count"), 0);
   const playerPosition = useSubscribe(
     r,
@@ -55,7 +58,7 @@ function App() {
   const maze = useSubscribe(
     r,
     (tx) => tx.get("maze"),
-    Array.from({ length: 25 }, () => Array(25).fill(0))
+    populateMaze(currentPlayers)
   );
 
   // Add event listener when the component mounts
