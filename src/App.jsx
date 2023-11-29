@@ -8,10 +8,13 @@ import { useSubscribe } from "@rocicorp/reflect/react";
 
 import MazeComponent from "./components/maze";
 
+const playerNum = 1;
+const gameID = 1;
+
 const r = new Reflect({
   server: "http://localhost:8080",
-  roomID: "myRoom",
-  userID: "myUser",
+  roomID: gameID,
+  userID: playerNum,
   mutators,
 });
 
@@ -20,33 +23,36 @@ function App() {
     void r.mutate.increment(1);
   };
 
-  const count = useSubscribe(r, (tx) => tx.get("count"), 0);
-  const maze = useSubscribe(
-    r,
-    (tx) => tx.get("maze"),
-    Array.from({ length: 25 }, () => Array(25).fill(0))
-  );
-
   function handleMovement(event) {
+    // console.log(playerNum);
     const { key } = event;
 
     switch (key) {
       case "w":
-        r.mutate.move("UP");
+        // console.log(playerNum);
+        r.mutate.moveCharacter({ direction: "UP", id: r.userID });
         break;
       case "a":
-        r.mutate.move("LEFT");
+        r.mutate.moveCharacter({ direction: "LEFT", id: r.userID });
         break;
       case "s":
-        r.mutate.move("DOWN");
+        r.mutate.moveCharacter({ direction: "DOWN", id: r.userID });
         break;
       case "d":
-        r.mutate.move("RIGHT");
+        r.mutate.moveCharacter({ direction: "RIGHT", id: r.userID });
         break;
       default:
         break;
     }
   }
+
+  const count = useSubscribe(r, (tx) => tx.get("count"), 0);
+  const playerPosition = useSubscribe(r, (tx) => tx.get("position"), [0, 0]);
+  const maze = useSubscribe(
+    r,
+    (tx) => tx.get("maze"),
+    Array.from({ length: 25 }, () => Array(25).fill(0))
+  );
 
   // Add event listener when the component mounts
   useEffect(() => {
