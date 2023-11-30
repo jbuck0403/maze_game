@@ -14,9 +14,21 @@ body {
 .cell {
   display: flex;
   border: 1px solid #000;
-  width: 45px;
-  height: 45px;
+  width: 35px;
+  height: 35px;
   text-align: center;
   align-items: center;
   justify-content: center;
+}
+
+.player1 {
+  background-color: red;
+}
+
+.player2 {
+  background-color: blue;
+}
+
+.player3 {
+  background-color: green;
 }

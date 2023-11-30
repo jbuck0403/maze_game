@@ -15,6 +15,8 @@
 // mutators defensively check the database when they run and do the appropriate
 // thing. The Reflect sync protocol ensures that the server-side result takes
 // precedence over the client-side optimistic result.
+import Maze from "../src/mazeGeneration/mazeClass";
+const mazeSize = 80;
 
 export const mutators = {
   increment,
@@ -24,12 +26,17 @@ export const mutators = {
 
 const emptySpace = 0;
 
-export const populateMaze = (currentPlayers) => {
-  const maze = Array.from({ length: 25 }, () => Array(25).fill(0));
+export const populateMaze = (tx, currentPlayers) => {
+  const maze = Array.from({ length: mazeSize }, () => Array(mazeSize).fill(0));
 
   currentPlayers.forEach((playerID) => {
-    console.log(playerID);
-    const startingPosition = startPositionByPlayer(playerID);
+    // console.log(playerID);
+    const startingPosition = startPositionByPlayer(
+      tx,
+      maze.length - 1,
+      maze[0].length - 1,
+      playerID
+    );
 
     maze[startingPosition[0]][startingPosition[1]] = playerID;
   });
@@ -48,7 +55,7 @@ export const populateMaze = (currentPlayers) => {
 
 const moveCharacterInMaze = (mazeData) => {
   // console.log(mazeData.characterID);
-  console.log("$$$", mazeData.prevPosition, mazeData.newPosition);
+  // console.log("$$$", mazeData.prevPosition, mazeData.newPosition);
   // const mazeCopy = [...mazeData.maze];
   const mazeCopy = mazeData.maze.map((row) => row.slice());
 
@@ -61,25 +68,25 @@ const moveCharacterInMaze = (mazeData) => {
   return mazeCopy;
 };
 
-const startPositionByPlayer = (playerID) => {
+const startPositionByPlayer = (tx, mazeYEnd, mazeXEnd, playerID) => {
   let position;
   switch (playerID) {
     case 1:
       position = [0, 0];
       break;
     case 2:
-      position = [0, 24];
+      position = [0, mazeXEnd];
       break;
     case 3:
-      position = [24, 0];
+      position = [mazeYEnd, 0];
       break;
     case 4:
-      position = [24, 24];
+      position = [mazeYEnd, mazeXEnd];
       break;
     default:
       return false;
   }
-
+  setCharacterPosition(tx, playerID, position);
   return position;
 };
 
@@ -103,7 +110,7 @@ async function updateMaze(tx, playerData) {
   const newPosition = playerData.newPosition;
   const prevPosition = playerData.prevPosition;
 
-  const maze = (await tx.get("maze")) ?? populateMaze(currentPlayers);
+  const maze = (await tx.get("maze")) ?? populateMaze(tx, currentPlayers);
 
   const updatedMaze = moveCharacterInMaze({
     maze: maze,
@@ -121,7 +128,7 @@ async function updatePlayerPosition(tx, playerData) {
   const playerID = playerData.id;
   const direction = playerData.direction;
   const currentPlayers = playerData.currentPlayers;
-  const maze = (await tx.get("maze")) ?? populateMaze(currentPlayers);
+  const maze = (await tx.get("maze")) ?? populateMaze(tx, currentPlayers);
 
   const checkObstacle = (maze, newPosition) => {
     if (maze[newPosition[0]][newPosition[1]] === emptySpace) {
@@ -131,14 +138,14 @@ async function updatePlayerPosition(tx, playerData) {
     }
   };
 
-  const checkValidMove = (maze, newPosition, direction, highestX, highestY) => {
+  const checkValidMove = (maze, newPosition, direction) => {
     switch (direction) {
       case "UP":
         if (newPosition[0] >= 0 && checkObstacle(maze, newPosition)) {
           return true;
         } else return false;
       case "DOWN":
-        if (newPosition[1] <= highestY && checkObstacle(maze, newPosition))
+        if (newPosition[0] < maze.length && checkObstacle(maze, newPosition))
           return true;
         else return false;
       case "LEFT":
@@ -146,7 +153,7 @@ async function updatePlayerPosition(tx, playerData) {
           return true;
         else return false;
       case "RIGHT":
-        if (newPosition[1] <= highestX && checkObstacle(maze, newPosition))
+        if (newPosition[1] < maze[0].length && checkObstacle(maze, newPosition))
           return true;
         else return false;
       default:
@@ -160,22 +167,22 @@ async function updatePlayerPosition(tx, playerData) {
     switch (direction) {
       case "UP":
         newPosition = [currentPosition[0] - 1, currentPosition[1]];
-        if (checkValidMove(maze, newPosition, direction, 24, 24)) {
+        if (checkValidMove(maze, newPosition, direction)) {
           return [currentPosition[0] - 1, currentPosition[1]];
         } else return currentPosition;
       case "DOWN":
         newPosition = [currentPosition[0] + 1, currentPosition[1]];
-        if (checkValidMove(maze, newPosition, direction, 24, 24)) {
+        if (checkValidMove(maze, newPosition, direction)) {
           return newPosition;
         } else return currentPosition;
       case "LEFT":
         newPosition = [currentPosition[0], currentPosition[1] - 1];
-        if (checkValidMove(maze, newPosition, direction, 24, 24)) {
+        if (checkValidMove(maze, newPosition, direction)) {
           return newPosition;
         } else return currentPosition;
       case "RIGHT":
         newPosition = [currentPosition[0], currentPosition[1] + 1];
-        if (checkValidMove(maze, newPosition, direction, 24, 24)) {
+        if (checkValidMove(maze, newPosition, direction)) {
           return newPosition;
         } else return currentPosition;
       default:
@@ -184,7 +191,8 @@ async function updatePlayerPosition(tx, playerData) {
   };
 
   const currentPosition =
-    (await tx.get(`position${playerID}`)) ?? startPositionByPlayer(playerID);
+    (await tx.get(`position${playerID}`)) ??
+    startPositionByPlayer(tx, maze.length - 1, maze[0].length - 1, playerID);
   const newPosition = moveInDirection(maze, direction);
 
   if (newPosition != currentPosition) {

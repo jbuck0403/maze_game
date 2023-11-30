@@ -2,7 +2,11 @@ import "./maze.css";
 
 function MazeComponent({ maze }) {
   const displayCell = (cell, xIndex, yIndex) => (
-    <td key={`${xIndex}|${yIndex}`} className="cell">
+    <td
+      key={`${xIndex}|${yIndex}`}
+      className="cell"
+      id={`_${xIndex}-${yIndex}`}
+    >
       {cell}
     </td>
   );

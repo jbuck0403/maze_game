@@ -7,9 +7,10 @@ import { mutators } from "../reflect/mutators";
 import { useSubscribe } from "@rocicorp/reflect/react";
 
 import MazeComponent from "./components/maze";
+import Maze from "./mazeGeneration/mazeClass";
 
 const playerNum = 1;
-const gameID = 10;
+const gameID = 25;
 const inputLimit = 20;
 const timeThreshold = 1000;
 let lastInputTime = 0;
@@ -55,18 +56,29 @@ function App() {
       lastInputTime = currentTime;
     }
   }
-
-  const [currentPlayers, setCurrentPlayers] = useState([playerNum, 2]);
-
-  const count = useSubscribe(r, (tx) => tx.get("count"), 0);
-  const playerPosition = useSubscribe(
-    r,
-    (tx) => tx.get(`position${r.userID}`),
-    [0, 0]
-  );
-
+  const [currentPlayers, setCurrentPlayers] = useState([playerNum, 2, 3]);
+  // const count = useSubscribe(r, (tx) => tx.get("count"), 0);
   const maze = useSubscribe(r, (tx) => tx.get("maze"), [[]]);
-  console.log(playerPosition);
+  const playerPositions = currentPlayers.map((player) => {
+    return useSubscribe(r, (tx) => tx.get(`position${player}`), [0, 0]);
+  });
+
+  console.log(playerPositions[0]);
+
+  const highlightPlayer = (playerPosition, playerNum) => {
+    const className = `player${playerNum}`;
+    const playerPositionID = `_${playerPosition[1]}-${playerPosition[0]}`;
+
+    const prevPosition = document.querySelector(`.${className}`);
+    const currentPosition = document.getElementById(playerPositionID);
+
+    if (prevPosition) prevPosition.classList.remove(className);
+    if (currentPosition) currentPosition.classList.add(className);
+  };
+
+  currentPlayers.forEach((player, idx) => {
+    highlightPlayer(playerPositions[idx], player);
+  });
 
   // Add event listener when the component mounts
   useEffect(() => {
@@ -83,9 +95,9 @@ function App() {
       <div>
         <MazeComponent maze={maze} />
       </div>
-      <div className="card">
+      {/* <div className="card">
         <button onClick={onClick}>count is {count}</button>
-      </div>
+      </div> */}
     </>
   );
 }
