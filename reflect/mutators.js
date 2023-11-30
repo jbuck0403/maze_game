@@ -25,7 +25,6 @@ export const mutators = {
 const emptySpace = 0;
 
 export const populateMaze = (currentPlayers) => {
-  // console.log("populating");
   const maze = Array.from({ length: 25 }, () => Array(25).fill(0));
 
   currentPlayers.forEach((playerID) => {
