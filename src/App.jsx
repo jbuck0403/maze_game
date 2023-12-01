@@ -9,7 +9,7 @@ import { useSubscribe } from "@rocicorp/reflect/react";
 import MazeComponent from "./components/maze";
 
 const playerNum = 1;
-const gameID = 65;
+const gameID = 68;
 const inputLimit = 20;
 const timeThreshold = 1000;
 let lastInputTime = 0;
@@ -21,7 +21,7 @@ const r = new Reflect({
   mutators,
 });
 
-const startingPlayers = [playerNum, 2];
+const startingPlayers = [playerNum, 2, 3, 4];
 r.mutate.initMaze(startingPlayers);
 
 function App() {

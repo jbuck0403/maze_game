@@ -7,6 +7,11 @@ body {
   margin: 0;
 }
 
+/* .maze {
+  width: 100%;
+  height: 100%;
+} */
+
 .row {
   display: flex;
 }
@@ -14,8 +19,10 @@ body {
 .cell {
   display: flex;
   border: 1px solid rgba(255, 255, 255, 0);
-  width: 35px;
-  height: 35px;
+  width: 1.8vh;
+  min-width: 10px;
+  height: 1.8vh;
+  min-height: 10px;
   text-align: center;
   align-items: center;
   justify-content: center;

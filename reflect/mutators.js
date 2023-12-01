@@ -32,11 +32,13 @@ export const highlightPlayer = (playerPosition, playerNum) => {
   const className = `player${playerNum}`;
   const playerPositionID = `_${playerPosition[1]}-${playerPosition[0]}`;
 
-  const prevPosition = document.querySelector(`.${className}`);
-  const currentPosition = document.getElementById(playerPositionID);
+  if (document) {
+    const prevPosition = document.querySelector(`.${className}`);
+    const currentPosition = document.getElementById(playerPositionID);
 
-  if (prevPosition) prevPosition.classList.remove(className);
-  if (currentPosition) currentPosition.classList.add(className);
+    if (prevPosition) prevPosition.classList.remove(className);
+    if (currentPosition) currentPosition.classList.add(className);
+  }
 };
 
 export const populateMaze = (tx, currentPlayers, mazeSize) => {
@@ -93,7 +95,7 @@ const startPositionByPlayer = (tx, mazeYEnd, mazeXEnd, playerID) => {
 
 async function setCharacterPosition(tx, characterID, position) {
   await tx.set(`position${characterID}`, position);
-  highlightPlayer(position, characterID);
+  // highlightPlayer(position, characterID);
 }
 
 async function setPrevCharacterPosition(tx, characterID, position) {
