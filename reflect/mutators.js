@@ -16,21 +16,32 @@
 // thing. The Reflect sync protocol ensures that the server-side result takes
 // precedence over the client-side optimistic result.
 import Maze from "../src/mazeGeneration/mazeClass";
-const mazeSize = 80;
+const mazeSize = 25;
 
 export const mutators = {
   increment,
   updateMaze,
   updatePlayerPosition,
+  initMaze,
 };
 
 const emptySpace = 0;
+
+export const highlightPlayer = (playerPosition, playerNum) => {
+  const className = `player${playerNum}`;
+  const playerPositionID = `_${playerPosition[1]}-${playerPosition[0]}`;
+
+  const prevPosition = document.querySelector(`.${className}`);
+  const currentPosition = document.getElementById(playerPositionID);
+
+  if (prevPosition) prevPosition.classList.remove(className);
+  if (currentPosition) currentPosition.classList.add(className);
+};
 
 export const populateMaze = (tx, currentPlayers) => {
   const maze = Array.from({ length: mazeSize }, () => Array(mazeSize).fill(0));
 
   currentPlayers.forEach((playerID) => {
-    // console.log(playerID);
     const startingPosition = startPositionByPlayer(
       tx,
       maze.length - 1,
@@ -40,23 +51,11 @@ export const populateMaze = (tx, currentPlayers) => {
 
     maze[startingPosition[0]][startingPosition[1]] = playerID;
   });
-  // console.log(maze);
 
   return maze;
 };
 
-// async function getPrevPosition(tx, characterID) {
-//   const currentPosition =
-//     (await tx.get(`prevPosition${characterID}`)) ??
-//     startPositionByPlayer(characterID);
-
-//   return currentPosition;
-// }
-
 const moveCharacterInMaze = (mazeData) => {
-  // console.log(mazeData.characterID);
-  // console.log("$$$", mazeData.prevPosition, mazeData.newPosition);
-  // const mazeCopy = [...mazeData.maze];
   const mazeCopy = mazeData.maze.map((row) => row.slice());
 
   if (mazeData.newPosition != mazeData.prevPosition) {
@@ -92,10 +91,16 @@ const startPositionByPlayer = (tx, mazeYEnd, mazeXEnd, playerID) => {
 
 async function setCharacterPosition(tx, characterID, position) {
   await tx.set(`position${characterID}`, position);
+  highlightPlayer(position, characterID);
 }
 
 async function setPrevCharacterPosition(tx, characterID, position) {
   await tx.set(`prevPosition${characterID}`, position);
+}
+
+async function initMaze(tx, startingPlayers) {
+  const maze = (await tx.get("maze")) ?? populateMaze(tx, startingPlayers);
+  await tx.set("maze", maze);
 }
 
 //WORKING
@@ -105,6 +110,8 @@ async function increment(tx, delta) {
 }
 
 async function updateMaze(tx, playerData) {
+  if (playerData?.init) {
+  }
   const playerID = playerData.characterID;
   const currentPlayers = playerData.currentPlayers;
   const newPosition = playerData.newPosition;

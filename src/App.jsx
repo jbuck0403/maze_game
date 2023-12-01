@@ -3,14 +3,14 @@ import "./App.css";
 import { useEffect, useState } from "react";
 
 import { Reflect } from "@rocicorp/reflect/client";
-import { mutators } from "../reflect/mutators";
+import { mutators, highlightPlayer } from "../reflect/mutators";
 import { useSubscribe } from "@rocicorp/reflect/react";
 
 import MazeComponent from "./components/maze";
-import Maze from "./mazeGeneration/mazeClass";
+import { createInitialBlock } from "./mazeGeneration/mazeClass";
 
 const playerNum = 1;
-const gameID = 25;
+const gameID = 60;
 const inputLimit = 20;
 const timeThreshold = 1000;
 let lastInputTime = 0;
@@ -22,10 +22,15 @@ const r = new Reflect({
   mutators,
 });
 
+createInitialBlock();
+
+const startingPlayers = [playerNum, 2];
+r.mutate.initMaze(startingPlayers);
+
 function App() {
-  const onClick = () => {
-    void r.mutate.increment(1);
-  };
+  // const onClick = () => {
+  //   void r.mutate.increment(1);
+  // };
 
   function handleMovement(event) {
     const currentTime = Date.now();
@@ -56,29 +61,18 @@ function App() {
       lastInputTime = currentTime;
     }
   }
-  const [currentPlayers, setCurrentPlayers] = useState([playerNum, 2, 3]);
   // const count = useSubscribe(r, (tx) => tx.get("count"), 0);
+  const [currentPlayers, setCurrentPlayers] = useState(startingPlayers);
   const maze = useSubscribe(r, (tx) => tx.get("maze"), [[]]);
   const playerPositions = currentPlayers.map((player) => {
     return useSubscribe(r, (tx) => tx.get(`position${player}`), [0, 0]);
   });
 
-  console.log(playerPositions[0]);
-
-  const highlightPlayer = (playerPosition, playerNum) => {
-    const className = `player${playerNum}`;
-    const playerPositionID = `_${playerPosition[1]}-${playerPosition[0]}`;
-
-    const prevPosition = document.querySelector(`.${className}`);
-    const currentPosition = document.getElementById(playerPositionID);
-
-    if (prevPosition) prevPosition.classList.remove(className);
-    if (currentPosition) currentPosition.classList.add(className);
-  };
-
   currentPlayers.forEach((player, idx) => {
     highlightPlayer(playerPositions[idx], player);
   });
+
+  console.log(playerPositions[0]);
 
   // Add event listener when the component mounts
   useEffect(() => {

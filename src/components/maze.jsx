@@ -6,9 +6,7 @@ function MazeComponent({ maze }) {
       key={`${xIndex}|${yIndex}`}
       className="cell"
       id={`_${xIndex}-${yIndex}`}
-    >
-      {cell}
-    </td>
+    ></td>
   );
 
   const displayRow = (row, yIndex) => (

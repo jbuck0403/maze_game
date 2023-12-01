@@ -13,7 +13,7 @@ body {
 
 .cell {
   display: flex;
-  border: 1px solid #000;
+  border: 1px solid rgba(255, 255, 255, 0.377);
   width: 35px;
   height: 35px;
   text-align: center;
@@ -31,4 +31,8 @@ body {
 
 .player3 {
   background-color: green;
+}
+
+.player4 {
+  background-color: yellow;
 }
