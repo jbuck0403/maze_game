@@ -15,8 +15,9 @@
 // mutators defensively check the database when they run and do the appropriate
 // thing. The Reflect sync protocol ensures that the server-side result takes
 // precedence over the client-side optimistic result.
-import Maze from "../src/mazeGeneration/mazeClass";
-const mazeSize = 25;
+import createMazeFromBlocks from "../src/mazeGeneration/mazeGenerator";
+
+const mazeSize = 8;
 
 export const mutators = {
   increment,
@@ -38,8 +39,9 @@ export const highlightPlayer = (playerPosition, playerNum) => {
   if (currentPosition) currentPosition.classList.add(className);
 };
 
-export const populateMaze = (tx, currentPlayers) => {
-  const maze = Array.from({ length: mazeSize }, () => Array(mazeSize).fill(0));
+export const populateMaze = (tx, currentPlayers, mazeSize) => {
+  // const maze = Array.from({ length: mazeSize }, () => Array(mazeSize).fill(0));
+  const maze = createMazeFromBlocks(mazeSize);
 
   currentPlayers.forEach((playerID) => {
     const startingPosition = startPositionByPlayer(
@@ -71,16 +73,16 @@ const startPositionByPlayer = (tx, mazeYEnd, mazeXEnd, playerID) => {
   let position;
   switch (playerID) {
     case 1:
-      position = [0, 0];
+      position = [1, 1];
       break;
     case 2:
-      position = [0, mazeXEnd];
+      position = [1, mazeXEnd - 1];
       break;
     case 3:
-      position = [mazeYEnd, 0];
+      position = [mazeYEnd - 1, 1];
       break;
     case 4:
-      position = [mazeYEnd, mazeXEnd];
+      position = [mazeYEnd - 1, mazeXEnd - 1];
       break;
     default:
       return false;
@@ -98,8 +100,9 @@ async function setPrevCharacterPosition(tx, characterID, position) {
   await tx.set(`prevPosition${characterID}`, position);
 }
 
-async function initMaze(tx, startingPlayers) {
-  const maze = (await tx.get("maze")) ?? populateMaze(tx, startingPlayers);
+async function initMaze(tx, startingPlayers, mazeSize) {
+  const maze =
+    (await tx.get("maze")) ?? populateMaze(tx, startingPlayers, mazeSize);
   await tx.set("maze", maze);
 }
 
@@ -117,7 +120,8 @@ async function updateMaze(tx, playerData) {
   const newPosition = playerData.newPosition;
   const prevPosition = playerData.prevPosition;
 
-  const maze = (await tx.get("maze")) ?? populateMaze(tx, currentPlayers);
+  const maze =
+    (await tx.get("maze")) ?? populateMaze(tx, currentPlayers, mazeSize);
 
   const updatedMaze = moveCharacterInMaze({
     maze: maze,
@@ -135,7 +139,8 @@ async function updatePlayerPosition(tx, playerData) {
   const playerID = playerData.id;
   const direction = playerData.direction;
   const currentPlayers = playerData.currentPlayers;
-  const maze = (await tx.get("maze")) ?? populateMaze(tx, currentPlayers);
+  const maze =
+    (await tx.get("maze")) ?? populateMaze(tx, currentPlayers, mazeSize);
 
   const checkObstacle = (maze, newPosition) => {
     if (maze[newPosition[0]][newPosition[1]] === emptySpace) {

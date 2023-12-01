@@ -7,10 +7,9 @@ import { mutators, highlightPlayer } from "../reflect/mutators";
 import { useSubscribe } from "@rocicorp/reflect/react";
 
 import MazeComponent from "./components/maze";
-import { createInitialBlock } from "./mazeGeneration/mazeClass";
 
 const playerNum = 1;
-const gameID = 60;
+const gameID = 65;
 const inputLimit = 20;
 const timeThreshold = 1000;
 let lastInputTime = 0;
@@ -21,8 +20,6 @@ const r = new Reflect({
   userID: playerNum,
   mutators,
 });
-
-createInitialBlock();
 
 const startingPlayers = [playerNum, 2];
 r.mutate.initMaze(startingPlayers);

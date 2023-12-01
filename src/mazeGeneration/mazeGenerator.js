@@ -80,7 +80,7 @@ function createBlock(row, col, numBlocks) {
   return block;
 }
 
-export default function createMazeFromBlocks(numBlocks = 5) {
+export default function createMazeFromBlocks(numBlocks = 10) {
   const removeBottom = (block) => {
     return block.slice(0, block.length - 1);
   };

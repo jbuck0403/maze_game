@@ -4,7 +4,7 @@ function MazeComponent({ maze }) {
   const displayCell = (cell, xIndex, yIndex) => (
     <td
       key={`${xIndex}|${yIndex}`}
-      className="cell"
+      className={`cell ${cell == "x" ? "wall" : ""}`}
       id={`_${xIndex}-${yIndex}`}
     ></td>
   );
