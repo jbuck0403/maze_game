@@ -32,65 +32,34 @@ let keyDown = [];
 
 function handleMovement() {
   if (keyDown.length > 0) {
+    // if the player is currently holding a key
     const currentTime = Date.now();
+    // ensure the player can only move at a maximum rate
     if (currentTime - lastInputTime > refreshRate) {
       moveDirection = null;
-      if (keyDown[0] === "w") moveDirection = "UP";
+      if (keyDown[0] === "w")
+        moveDirection = "UP"; // check which key is being pressed
       else if (keyDown[0] === "a") moveDirection = "LEFT";
       else if (keyDown[0] === "s") moveDirection = "DOWN";
       else if (keyDown[0] === "d") moveDirection = "RIGHT";
 
+      // if a key is being pressed
       if (moveDirection) {
+        // process the key press into player movement
         r.mutate.updatePlayerPosition({
           direction: moveDirection,
           id: r.userID,
           currentPlayers: startingPlayers,
         });
-        lastInputTime = currentTime;
+        lastInputTime = currentTime; // update the time since the last key press
       }
     }
   }
-  setTimeout(handleMovement, refreshRate);
+  setTimeout(handleMovement, refreshRate); // call the movement function at a fixed rate
 }
 
 function App() {
-  // const onClick = () => {
-  //   void r.mutate.increment(1);
-  // };
-
-  // OLD MOVEMENT FUNCTION
-  // function handleMovement(event) {
-  //   const currentTime = Date.now();
-  //   if (currentTime - lastInputTime > timeThreshold / inputLimit) {
-  //     const { key } = event;
-  //     let moveDirection;
-  //     switch (key) {
-  //       case "w":
-  //         moveDirection = "UP";
-  //         break;
-  //       case "a":
-  //         moveDirection = "LEFT";
-  //         break;
-  //       case "s":
-  //         moveDirection = "DOWN";
-  //         break;
-  //       case "d":
-  //         moveDirection = "RIGHT";
-  //         break;
-  //       default:
-  //         return false;
-  //     }
-  //     console.log(event.keyCode);
-  //     r.mutate.updatePlayerPosition({
-  //       direction: moveDirection,
-  //       id: r.userID,
-  //       currentPlayers: currentPlayers,
-  //     });
-  //     lastInputTime = currentTime;
-  //     // itemSpawner.spawnItem("x", 1);
-  //   }
-  // }
-
+  // checks which key is pressed for movement
   function keyDownHandler(event) {
     const { key } = event;
     if (["w", "a", "s", "d"].includes(key)) {
@@ -100,21 +69,23 @@ function App() {
     }
   }
 
+  // checks when the player stops trying to move
   function keyUpHandler(event) {
     const { key } = event;
     keyDown = keyDown.filter((e) => e !== key);
   }
 
+  // keep the maze up to date on each change
   const maze = useSubscribe(r, (tx) => tx.get("maze"), [[]]);
+  // maintain a record of all player positions
   const playerPositions = startingPlayers.map((player) => {
     return useSubscribe(r, (tx) => tx.get(`position${player}`), [0, 0]);
   });
 
+  // show player colors
   startingPlayers.forEach((player, idx) => {
     highlightPlayer(playerPositions[idx], player);
   });
-
-  console.log(playerPositions[0]);
 
   // Add event listener when the component mounts
   useEffect(() => {
