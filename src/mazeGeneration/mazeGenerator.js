@@ -1,4 +1,5 @@
 //utilizes a modified tessellation algorithm for maze generation
+export const emptySpace = 0;
 
 function createBlock(row, col, numBlocks) {
   let topPath = row == 0 ? false : true;
@@ -6,7 +7,7 @@ function createBlock(row, col, numBlocks) {
   let leftPath = col == 0 ? false : true;
   let rightPath = col == numBlocks ? false : true;
   const x = "x";
-  const o = 0;
+  const o = emptySpace;
   let wallCoords;
   let block = [
     [x, x, x, x, x],
@@ -19,6 +20,7 @@ function createBlock(row, col, numBlocks) {
   function randomNum(max) {
     return Math.floor(Math.random() * max);
   }
+
   function addFirstWall() {
     const possibilities = [
       [1, 2],
@@ -71,7 +73,6 @@ function createBlock(row, col, numBlocks) {
 
     accessible.forEach((direction) => {
       const randWall = randomNum(direction.length);
-      console.log(direction);
       block[direction[randWall][0]][direction[randWall][1]] = o;
     });
   }
@@ -80,7 +81,7 @@ function createBlock(row, col, numBlocks) {
   return block;
 }
 
-export default function createMazeFromBlocks(numBlocks = 10) {
+export function createMazeFromBlocks(numBlocks = 10) {
   const removeBottom = (block) => {
     return block.slice(0, block.length - 1);
   };

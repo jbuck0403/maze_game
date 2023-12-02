@@ -15,15 +15,20 @@
 // mutators defensively check the database when they run and do the appropriate
 // thing. The Reflect sync protocol ensures that the server-side result takes
 // precedence over the client-side optimistic result.
-import createMazeFromBlocks from "../src/mazeGeneration/mazeGenerator";
+// import ItemSpawner from "../src/itemSpawning/spawnItems";
+import { createMazeFromBlocks } from "../src/mazeGeneration/mazeGenerator";
+// import MazeTools from "../src/mazeGeneration/mazeTools";
 
 const mazeSize = 8;
+// const mazeTool = new MazeTools();
 
 export const mutators = {
   increment,
-  updateMaze,
+  updateMazeAfterMovement,
   updatePlayerPosition,
   initMaze,
+  updateMaze,
+  getMaze,
 };
 
 const emptySpace = 0;
@@ -60,6 +65,8 @@ export const populateMaze = (tx, currentPlayers, mazeSize) => {
 };
 
 const moveCharacterInMaze = (mazeData) => {
+  // let mazeCopy = mazeTool.createMazeCopy(mazeData.maze);
+  // mazeCopy = itemSpawner.spawnItem(mazeCopy, "@", 1);
   const mazeCopy = mazeData.maze.map((row) => row.slice());
 
   if (mazeData.newPosition != mazeData.prevPosition) {
@@ -114,9 +121,15 @@ async function increment(tx, delta) {
   await tx.set("count", value + delta);
 }
 
-async function updateMaze(tx, playerData) {
-  if (playerData?.init) {
-  }
+async function getMaze(tx) {
+  return await tx.get("maze");
+}
+
+async function updateMaze(tx, updatedMaze) {
+  await tx.set("maze", updatedMaze);
+}
+
+async function updateMazeAfterMovement(tx, playerData) {
   const playerID = playerData.characterID;
   const currentPlayers = playerData.currentPlayers;
   const newPosition = playerData.newPosition;
@@ -215,7 +228,7 @@ async function updatePlayerPosition(tx, playerData) {
 
   setCharacterPosition(tx, playerID, newPosition);
 
-  return updateMaze(tx, {
+  return updateMazeAfterMovement(tx, {
     characterID: playerID,
     currentPlayers: currentPlayers,
     newPosition: newPosition,

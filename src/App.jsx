@@ -7,14 +7,15 @@ import { mutators, highlightPlayer } from "../reflect/mutators";
 import { useSubscribe } from "@rocicorp/reflect/react";
 
 import MazeComponent from "./components/maze";
+import Spawner from "./itemSpawning/spawnItems";
 
 const playerNum = 1;
-const gameID = 68;
+const gameID = 71;
 const inputLimit = 20;
 const timeThreshold = 1000;
 let lastInputTime = 0;
 
-const r = new Reflect({
+export const r = new Reflect({
   server: "http://localhost:8080",
   roomID: gameID,
   userID: playerNum,
@@ -23,6 +24,7 @@ const r = new Reflect({
 
 const startingPlayers = [playerNum, 2, 3, 4];
 r.mutate.initMaze(startingPlayers);
+const itemSpawner = new Spawner();
 
 function App() {
   // const onClick = () => {
@@ -56,6 +58,7 @@ function App() {
         currentPlayers: currentPlayers,
       });
       lastInputTime = currentTime;
+      // itemSpawner.spawnItem("x", 1);
     }
   }
   // const count = useSubscribe(r, (tx) => tx.get("count"), 0);
