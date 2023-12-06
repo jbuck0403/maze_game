@@ -34,6 +34,7 @@ export const mutators = {
   setBarricade,
   getbarricadePosition,
   getPlayerPosition,
+  removeUsersBarricades,
 };
 
 // const emptySpace = 0;
@@ -42,6 +43,22 @@ const createMazeCopy = async (tx) => {
   const maze = await getMaze(tx);
   return maze.map((row) => row.slice());
 };
+
+async function removeUsersBarricades(tx, playerNum) {
+  // get the current barricades placed by the current user
+  const currentBarricades = await getbarricadePosition(tx, playerNum);
+
+  if (currentBarricades.length > 0) {
+    // create a shallow copy of the maze array
+    const mazeCopy = await createMazeCopy(tx);
+    // remove all barricades
+    currentBarricades.forEach((barricadeCoords) => {
+      mazeCopy[barricadeCoords[0]][barricadeCoords[1]] = emptySpace;
+    });
+    tx.set(`barricades${playerNum}`, []);
+    updateMaze(tx, mazeCopy);
+  }
+}
 
 async function setBarricade(tx, barricadeData) {
   // unpack the barricadeData dict

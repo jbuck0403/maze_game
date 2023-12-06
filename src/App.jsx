@@ -79,7 +79,14 @@ function App() {
     }
   }
 
-  async function barricadeKeyHandler(event) {
+  function removeBarricadeKeyHandler(event) {
+    const { key } = event;
+    if (key === " ") {
+      r.mutate.removeUsersBarricades(r.userID);
+    }
+  }
+
+  function barricadeKeyHandler(event) {
     const { key } = event;
     //if the player hasn't fired a barricade and an arrow key was pressed
     if (key.slice(0, 5) === "Arrow") {
@@ -112,6 +119,7 @@ function App() {
   useEffect(() => {
     window.addEventListener("keydown", movementKeyDownHandler);
     window.addEventListener("keydown", barricadeKeyHandler);
+    window.addEventListener("keydown", removeBarricadeKeyHandler);
     window.addEventListener("keyup", movementKeyUpHandler);
     handleCharacterMovement(keyDown);
 
@@ -119,6 +127,7 @@ function App() {
     return () => {
       window.removeEventListener("keydown", movementKeyDownHandler);
       window.removeEventListener("keydown", barricadeKeyHandler);
+      window.removeEventListener("keydown", removeBarricadeKeyHandler);
       window.removeEventListener("keyup", movementKeyUpHandler);
     };
   }, []); // Empty dependency array means this effect runs once when the component mounts
