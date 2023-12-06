@@ -1,10 +1,13 @@
 import MazeTools from "../mazeGeneration/mazeTools";
+import { highlightCell } from "../../reflect/mutators";
 import { emptySpace } from "../mazeGeneration/mazeGenerator";
 import { r } from "../App";
 
 const mazeTool = new MazeTools();
 
 export default class Spawner {
+  itemIDs = { wall: "x" };
+
   async spawnItem(itemToSpawn, numToSpawn, coords = false) {
     const maze = await mazeTool.createMazeCopy(); // create a copy of the current state of the maze
 
@@ -24,7 +27,7 @@ export default class Spawner {
 
     const addItemToMaze = async (row, col) => {
       const mazeCopy = await mazeTool.createMazeCopy();
-      mazeCopy[row][col] = itemToSpawn;
+      mazeCopy[row][col] = `${itemToSpawn}${r.userID}`;
 
       r.mutate.updateMaze(mazeCopy);
     };

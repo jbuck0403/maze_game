@@ -3,14 +3,15 @@ import "./App.css";
 import { useEffect, useState } from "react";
 
 import { Reflect } from "@rocicorp/reflect/client";
-import { mutators, highlightPlayer } from "../reflect/mutators";
+import { mutators, highlightCell } from "../reflect/mutators";
 import { useSubscribe } from "@rocicorp/reflect/react";
 
 import MazeComponent from "./components/maze";
 import Spawner from "./itemSpawning/spawnItems";
+import MazeMovement from "./mazeGeneration/mazeMovement";
 
 const playerNum = 1;
-const gameID = 71;
+const gameID = 73;
 const inputLimit = 10;
 const timeThreshold = 1000;
 const refreshRate = timeThreshold / inputLimit;
@@ -27,10 +28,11 @@ export const r = new Reflect({
 const startingPlayers = [playerNum, 2, 3, 4];
 r.mutate.initMaze(startingPlayers);
 const itemSpawner = new Spawner();
+const mazeMovementTool = new MazeMovement();
 
 let keyDown = [];
 
-function handleMovement() {
+function handleCharacterMovement() {
   if (keyDown.length > 0) {
     // if the player is currently holding a key
     const currentTime = Date.now();
@@ -55,22 +57,41 @@ function handleMovement() {
       }
     }
   }
-  setTimeout(handleMovement, refreshRate); // call the movement function at a fixed rate
+  setTimeout(handleCharacterMovement, refreshRate); // call the movement function at a fixed rate
 }
 
 function App() {
   // checks which key is pressed for movement
-  function keyDownHandler(event) {
+  function movementKeyDownHandler(event) {
     const { key } = event;
+    // console.log(key);
     if (["w", "a", "s", "d"].includes(key)) {
       if (!keyDown.includes(key)) {
+        //do initial movement immediately on key press
+        r.mutate.updatePlayerPosition({
+          direction: key,
+          id: r.userID,
+          currentPlayers: startingPlayers,
+        });
+        //queue up continued movement for if key is held down
         keyDown.push(key);
       }
     }
   }
 
+  async function barricadeKeyHandler(event) {
+    const { key } = event;
+    //if the player hasn't fired a barricade and an arrow key was pressed
+    if (key.slice(0, 5) === "Arrow") {
+      r.mutate.setBarricade({
+        playerNum: r.userID,
+        direction: key.slice(5).toUpperCase(),
+      });
+    }
+  }
+
   // checks when the player stops trying to move
-  function keyUpHandler(event) {
+  function movementKeyUpHandler(event) {
     const { key } = event;
     keyDown = keyDown.filter((e) => e !== key);
   }
@@ -84,28 +105,27 @@ function App() {
 
   // show player colors
   startingPlayers.forEach((player, idx) => {
-    highlightPlayer(playerPositions[idx], player);
+    highlightCell(playerPositions[idx], player);
   });
 
   // Add event listener when the component mounts
   useEffect(() => {
-    window.addEventListener("keydown", keyDownHandler);
-    window.addEventListener("keyup", keyUpHandler);
-    handleMovement(keyDown);
+    window.addEventListener("keydown", movementKeyDownHandler);
+    window.addEventListener("keydown", barricadeKeyHandler);
+    window.addEventListener("keyup", movementKeyUpHandler);
+    handleCharacterMovement(keyDown);
 
     // Clean up the event listener when the component unmounts
     return () => {
-      window.removeEventListener("keydown", keyDownHandler);
-      window.removeEventListener("keyup", keyUpHandler);
+      window.removeEventListener("keydown", movementKeyDownHandler);
+      window.removeEventListener("keydown", barricadeKeyHandler);
+      window.removeEventListener("keyup", movementKeyUpHandler);
     };
   }, []); // Empty dependency array means this effect runs once when the component mounts
 
-  console.log("Reached return");
   return (
     <>
-      <div>
-        <MazeComponent maze={maze} />
-      </div>
+      <MazeComponent maze={maze} />
     </>
   );
 }

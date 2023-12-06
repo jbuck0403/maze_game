@@ -1,12 +1,14 @@
 //utilizes a modified tessellation algorithm for maze generation
-export const emptySpace = 0;
+export const emptySpace = "0";
+export const wall = "x";
+export const passableSpace = [emptySpace];
 
 function createBlock(row, col, numBlocks) {
   let topPath = row == 0 ? false : true;
   let bottomPath = row == numBlocks ? false : true;
   let leftPath = col == 0 ? false : true;
   let rightPath = col == numBlocks ? false : true;
-  const x = "x";
+  const x = wall;
   const o = emptySpace;
   let wallCoords;
   let block = [
