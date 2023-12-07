@@ -35,6 +35,8 @@ export const mutators = {
   getbarricadePosition,
   getPlayerPosition,
   removeUsersBarricades,
+  getPlayerRoster,
+  addToPlayerRoster,
 };
 
 // const emptySpace = 0;

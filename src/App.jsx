@@ -32,11 +32,15 @@ let moveDirection;
 export const r = new Reflect({
   server: "http://localhost:8080",
   roomID: gameID,
-  userID: playerNum,
+  userID: userID,
   mutators,
 });
 
-const startingPlayers = [playerNum, 2, 3, 4];
+const currentRoster = r.mutate.getPlayerRoster();
+if (currentRoster.length < 4) {
+  r.mutate.addToPlayerRoster(r.userID);
+}
+
 r.mutate.initMaze(startingPlayers);
 const itemSpawner = new Spawner();
 const mazeMovementTool = new MazeMovement();
@@ -128,7 +132,7 @@ function App() {
   });
 
   //only allow players in the startingPlayers array (first 4 in the room) to play
-  // if (startingPlayers.includes(r.userID)) {
+  // if (currentRoster.includes(r.userID)) {
   // Add event listener when the component mounts
   useEffect(() => {
     window.addEventListener("keydown", movementKeyDownHandler);
