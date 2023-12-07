@@ -20,6 +20,15 @@ const refreshRate = timeThreshold / inputLimit;
 let lastInputTime = 0;
 let moveDirection;
 
+//give random user id
+//add them to the room
+//if player roster has fewer than 4 players
+//  add the most recent user id to roster (allow them to play)
+//else do nothing (allow them to spectate)
+
+//startingPlayers should be the index + 1 of everyone on the player roster
+//condense all player logic into one block and only allow it to happen if your user id is in the roster
+
 export const r = new Reflect({
   server: "http://localhost:8080",
   roomID: gameID,
@@ -92,6 +101,7 @@ function App() {
     const { key } = event;
     //if the player hasn't fired a barricade and an arrow key was pressed
     if (key.slice(0, 5) === "Arrow") {
+      event.preventDefault();
       r.mutate.setBarricade({
         playerNum: r.userID,
         direction: key.slice(5).toUpperCase(),
@@ -117,6 +127,8 @@ function App() {
     highlightCell(playerPositions[idx], player);
   });
 
+  //only allow players in the startingPlayers array (first 4 in the room) to play
+  // if (startingPlayers.includes(r.userID)) {
   // Add event listener when the component mounts
   useEffect(() => {
     window.addEventListener("keydown", movementKeyDownHandler);
@@ -133,6 +145,7 @@ function App() {
       window.removeEventListener("keyup", movementKeyUpHandler);
     };
   }, []); // Empty dependency array means this effect runs once when the component mounts
+  // }
 
   return (
     <>
