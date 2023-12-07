@@ -1,6 +1,7 @@
 import "./App.css";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { nanoid } from "nanoid";
 
 import { Reflect } from "@rocicorp/reflect/client";
 import { mutators, highlightCell } from "../reflect/mutators";
@@ -10,6 +11,7 @@ import MazeComponent from "./components/maze";
 import Spawner from "./itemSpawning/spawnItems";
 import MazeMovement from "./mazeGeneration/mazeMovement";
 
+const userID = nanoid();
 const playerNum = 1;
 const gameID = 73;
 const inputLimit = 10;

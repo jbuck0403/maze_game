@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@rocicorp/reflect": "^0.38.202311200859",
+    "nanoid": "^5.0.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

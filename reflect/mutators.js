@@ -150,6 +150,17 @@ async function getbarricadePosition(tx, playerNum) {
 //   await tx.set(`${playerNum}${objectID}`, keys);
 // };
 
+async function getPlayerRoster(tx) {
+  return (await tx.get("roster")) ?? [];
+}
+
+async function addToPlayerRoster(tx, userName) {
+  const roster = getPlayerRoster(tx);
+  if (roster.length < 4) {
+    tx.set("roster", [...roster, userName]);
+  }
+}
+
 async function getPlayerPosition(tx, playerNum) {
   return (await tx.get(`position${playerNum}`)) ?? false;
 }
