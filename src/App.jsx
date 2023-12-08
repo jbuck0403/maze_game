@@ -36,7 +36,7 @@ export const r = new Reflect({
   mutators,
 });
 
-const startingPlayers = [playerNum, 2, 3, 4];
+const startingPlayers = [1, 2, 3, 4];
 r.mutate.initMaze(startingPlayers);
 const itemSpawner = new Spawner();
 const mazeMovementTool = new MazeMovement();
