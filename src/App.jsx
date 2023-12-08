@@ -12,7 +12,7 @@ import Spawner from "./itemSpawning/spawnItems";
 import MazeMovement from "./mazeGeneration/mazeMovement";
 
 const userID = nanoid();
-const gameID = 85;
+const gameID = 87;
 let playerNum = -1;
 const inputLimit = 10;
 const timeThreshold = 1000;
@@ -20,33 +20,12 @@ const refreshRate = timeThreshold / inputLimit;
 let lastInputTime = 0;
 let moveDirection;
 
-//give random user id
-//add them to the room
-//if player roster has fewer than 4 players
-//  add the most recent user id to roster (allow them to play)
-//else do nothing (allow them to spectate)
-
-//startingPlayers should be the index + 1 of everyone on the player roster
-//condense all player logic into one block and only allow it to happen if your user id is in the roster
-
 export const r = new Reflect({
   server: "http://localhost:8080",
   roomID: gameID,
   userID: userID,
   mutators,
 });
-
-// // get the current roster from reflect
-// let currentRoster = await r.mutate.getPlayerRoster();
-// // if the current roster has fewer than 4 players
-// if (currentRoster.length < 4) {
-//   // add the current player to the roster
-//   currentRoster = await r.mutate.addToPlayerRoster(r.userID);
-//   playerNum =
-//     (await currentRoster.findIndex((player) => player === r.userID)) + 1;
-//   console.log("after playernum assigned", currentRoster);
-//   console.log(playerNum);
-// }
 
 //need to pair startingplayers numbers with ids in roster
 const startingPlayers = [1, 2, 3, 4];
@@ -143,8 +122,6 @@ function App() {
     highlightCell(playerPositions[idx], player);
   });
 
-  //only allow players in the startingPlayers array (first 4 in the room) to play
-
   // Add event listener when the component mounts
   useEffect(() => {
     window.addEventListener("keydown", movementKeyDownHandler);
@@ -160,7 +137,7 @@ function App() {
       window.removeEventListener("keydown", removeBarricadeKeyHandler);
       window.removeEventListener("keyup", movementKeyUpHandler);
     };
-  }, []); // Empty dependency array means this effect runs once when the component mounts
+  }, []); // Empty dependency array means this effect runs once when the component mounts}
 
   return (
     <>
@@ -168,5 +145,4 @@ function App() {
     </>
   );
 }
-
 export default App;
