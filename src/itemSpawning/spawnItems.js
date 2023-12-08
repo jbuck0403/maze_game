@@ -27,7 +27,7 @@ export default class Spawner {
 
     const addItemToMaze = async (row, col) => {
       const mazeCopy = await mazeTool.createMazeCopy();
-      mazeCopy[row][col] = `${itemToSpawn}${r.userID}`;
+      mazeCopy[row][col] = `${itemToSpawn}`;
 
       r.mutate.updateMaze(mazeCopy);
     };

@@ -5,41 +5,33 @@ import { nanoid } from "nanoid";
 
 import { Reflect } from "@rocicorp/reflect/client";
 import { mutators, highlightCell } from "../reflect/mutators";
-import { useSubscribe } from "@rocicorp/reflect/react";
+import { useSubscribe, usePresence } from "@rocicorp/reflect/react";
 
 import MazeComponent from "./components/maze";
 import Spawner from "./itemSpawning/spawnItems";
 import MazeMovement from "./mazeGeneration/mazeMovement";
 
 const userID = nanoid();
-const playerNum = 1;
-const gameID = 73;
+const gameID = 87;
+let playerNum = -1;
 const inputLimit = 10;
 const timeThreshold = 1000;
 const refreshRate = timeThreshold / inputLimit;
 let lastInputTime = 0;
 let moveDirection;
 
-//give random user id
-//add them to the room
-//if player roster has fewer than 4 players
-//  add the most recent user id to roster (allow them to play)
-//else do nothing (allow them to spectate)
-
-//startingPlayers should be the index + 1 of everyone on the player roster
-//condense all player logic into one block and only allow it to happen if your user id is in the roster
-
 export const r = new Reflect({
   server: "http://localhost:8080",
   roomID: gameID,
-  userID: playerNum,
+  userID: userID,
   mutators,
 });
 
+//need to pair startingplayers numbers with ids in roster
 const startingPlayers = [1, 2, 3, 4];
+
 r.mutate.initMaze(startingPlayers);
-const itemSpawner = new Spawner();
-const mazeMovementTool = new MazeMovement();
+r.mutate.addToPlayerRoster(r.userID);
 
 let keyDown = [];
 
@@ -61,7 +53,7 @@ function handleCharacterMovement() {
         // process the key press into player movement
         r.mutate.updatePlayerPosition({
           direction: moveDirection,
-          id: r.userID,
+          id: playerNum,
           currentPlayers: startingPlayers,
         });
         lastInputTime = currentTime; // update the time since the last key press
@@ -81,7 +73,7 @@ function App() {
         //do initial movement immediately on key press
         r.mutate.updatePlayerPosition({
           direction: key,
-          id: r.userID,
+          id: playerNum,
           currentPlayers: startingPlayers,
         });
         //queue up continued movement for if key is held down
@@ -93,7 +85,7 @@ function App() {
   function removeBarricadeKeyHandler(event) {
     const { key } = event;
     if (key === " ") {
-      r.mutate.removeUsersBarricades(r.userID);
+      r.mutate.removeUsersBarricades(playerNum);
     }
   }
 
@@ -103,7 +95,7 @@ function App() {
     if (key.slice(0, 5) === "Arrow") {
       event.preventDefault();
       r.mutate.setBarricade({
-        playerNum: r.userID,
+        playerNum: playerNum,
         direction: key.slice(5).toUpperCase(),
       });
     }
@@ -117,6 +109,8 @@ function App() {
 
   // keep the maze up to date on each change
   const maze = useSubscribe(r, (tx) => tx.get("maze"), [[]]);
+  const roster = useSubscribe(r, (tx) => tx.get("roster"), []);
+  playerNum = roster.findIndex((player) => player === r.userID) + 1;
   // maintain a record of all player positions
   const playerPositions = startingPlayers.map((player) => {
     return useSubscribe(r, (tx) => tx.get(`position${player}`), [0, 0]);
@@ -127,8 +121,6 @@ function App() {
     highlightCell(playerPositions[idx], player);
   });
 
-  //only allow players in the startingPlayers array (first 4 in the room) to play
-  // if (startingPlayers.includes(r.userID)) {
   // Add event listener when the component mounts
   useEffect(() => {
     window.addEventListener("keydown", movementKeyDownHandler);
@@ -144,8 +136,7 @@ function App() {
       window.removeEventListener("keydown", removeBarricadeKeyHandler);
       window.removeEventListener("keyup", movementKeyUpHandler);
     };
-  }, []); // Empty dependency array means this effect runs once when the component mounts
-  // }
+  }, []); // Empty dependency array means this effect runs once when the component mounts}
 
   return (
     <>
@@ -153,5 +144,4 @@ function App() {
     </>
   );
 }
-
 export default App;

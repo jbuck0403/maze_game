@@ -35,6 +35,8 @@ export const mutators = {
   getbarricadePosition,
   getPlayerPosition,
   removeUsersBarricades,
+  getPlayerRoster,
+  addToPlayerRoster,
 };
 
 // const emptySpace = 0;
@@ -155,8 +157,9 @@ async function getPlayerRoster(tx) {
 }
 
 async function addToPlayerRoster(tx, userName) {
-  const roster = getPlayerRoster(tx);
-  if (roster.length < 4) {
+  const roster = await getPlayerRoster(tx);
+
+  if (roster.length < 4 && !roster.includes(userName)) {
     tx.set("roster", [...roster, userName]);
   }
 }
