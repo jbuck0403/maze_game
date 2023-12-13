@@ -22,7 +22,7 @@ const userID = userTool.getUserID();
 
 //variables
 //reflect room variables
-const gameID = 88;
+const gameID = 90;
 
 //game variables
 const inputLimit = 10;
