@@ -7,12 +7,32 @@ import { Reflect } from "@rocicorp/reflect/client";
 import { mutators, highlightCell } from "../reflect/mutators";
 import { useSubscribe, usePresence } from "@rocicorp/reflect/react";
 
-import MazeComponent from "./components/maze";
-import Spawner from "./itemSpawning/spawnItems";
-import MazeMovement from "./mazeGeneration/mazeMovement";
+import MazeComponent from "./components/Maze/Maze";
 
-const userID = nanoid();
-const gameID = 87;
+const getCookie = (name) => {
+  const cookies = document.cookie.split("; ");
+  for (const cookie of cookies) {
+    const [cookieName, cookieValue] = cookie.split("=");
+    if (cookieName === name) {
+      return decodeURIComponent(cookieValue);
+    }
+  }
+  return null;
+};
+
+const setCookie = (name, value, daysToExpire = 1) => {
+  const date = new Date();
+  date.setTime(date.getTime() + daysToExpire * 24 * 60 * 60 * 1000);
+  const expires = `expires=${date.toUTCString()}`;
+  document.cookie = `${name}=${value};${expires};path=/`;
+
+  return value;
+};
+
+const cookieUserName = getCookie("userID");
+const userID =
+  cookieUserName === null ? setCookie("userID", nanoid()) : cookieUserName;
+const gameID = 88;
 let playerNum = -1;
 const inputLimit = 10;
 const timeThreshold = 1000;

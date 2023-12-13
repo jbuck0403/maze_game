@@ -5,7 +5,7 @@ import { initializeApp } from "firebase/app";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: process.env.VITE_FIREBASE_API_KEY,
+  apiKey: process.env.FIREBASE_API_KEY,
   authDomain: "maze-game-fcc3d.firebaseapp.com",
   projectId: "maze-game-fcc3d",
   storageBucket: "maze-game-fcc3d.appspot.com",
