@@ -1,4 +1,4 @@
-import "./maze.css";
+import "./Maze.css";
 
 function MazeComponent({ maze }) {
   const displayCell = (cell, xIndex, yIndex) => (

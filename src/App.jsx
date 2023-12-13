@@ -1,25 +1,40 @@
+//imports
 import "./App.css";
 
+//react imports
 import { useEffect } from "react";
-import { nanoid } from "nanoid";
+import { useSubscribe } from "@rocicorp/reflect/react";
 
+//reflect imports
 import { Reflect } from "@rocicorp/reflect/client";
-import { mutators, highlightCell } from "../reflect/mutators";
-import { useSubscribe, usePresence } from "@rocicorp/reflect/react";
+import { mutators } from "../reflect/mutators";
 
-import MazeComponent from "./components/maze";
-import Spawner from "./itemSpawning/spawnItems";
-import MazeMovement from "./mazeGeneration/mazeMovement";
+//component imports
+import MazeComponent from "./components/Maze/Maze";
 
-const userID = nanoid();
-const gameID = 87;
-let playerNum = -1;
+//custom game tool imports
+import MazeTools from "./mazeGeneration/mazeTools";
+import UserTools from "./users/getUserID";
+
+//find the userid via firebase or cookies, in that order
+const userTool = new UserTools();
+const userID = userTool.getUserID();
+
+//variables
+//reflect room variables
+const gameID = 88;
+
+//game variables
 const inputLimit = 10;
 const timeThreshold = 1000;
 const refreshRate = timeThreshold / inputLimit;
+const startingPlayers = [1, 2, 3, 4];
+let playerNum = -1;
 let lastInputTime = 0;
 let moveDirection;
+let keyDown = [];
 
+//create a new reflect room for multiplayer to sync maze and players
 export const r = new Reflect({
   server: "http://localhost:8080",
   roomID: gameID,
@@ -27,13 +42,12 @@ export const r = new Reflect({
   mutators,
 });
 
-//need to pair startingplayers numbers with ids in roster
-const startingPlayers = [1, 2, 3, 4];
+//instantiate the maze tool
+const mazeTool = new MazeTools(r);
 
+//init the maze and add player avatars
 r.mutate.initMaze(startingPlayers);
 r.mutate.addToPlayerRoster(r.userID);
-
-let keyDown = [];
 
 function handleCharacterMovement() {
   if (keyDown.length > 0) {
@@ -42,8 +56,8 @@ function handleCharacterMovement() {
     // ensure the player can only move at a maximum rate
     if (currentTime - lastInputTime > refreshRate) {
       moveDirection = null;
-      if (keyDown[0] === "w")
-        moveDirection = "UP"; // check which key is being pressed
+      // check which key is being pressed
+      if (keyDown[0] === "w") moveDirection = "UP";
       else if (keyDown[0] === "a") moveDirection = "LEFT";
       else if (keyDown[0] === "s") moveDirection = "DOWN";
       else if (keyDown[0] === "d") moveDirection = "RIGHT";
@@ -67,7 +81,7 @@ function App() {
   // checks which key is pressed for movement
   function movementKeyDownHandler(event) {
     const { key } = event;
-    // console.log(key);
+
     if (["w", "a", "s", "d"].includes(key)) {
       if (!keyDown.includes(key)) {
         //do initial movement immediately on key press
@@ -82,11 +96,10 @@ function App() {
     }
   }
 
-  function removeBarricadeKeyHandler(event) {
+  // checks when the player stops trying to move
+  function movementKeyUpHandler(event) {
     const { key } = event;
-    if (key === " ") {
-      r.mutate.removeUsersBarricades(playerNum);
-    }
+    keyDown = keyDown.filter((e) => e !== key);
   }
 
   function barricadeKeyHandler(event) {
@@ -101,16 +114,18 @@ function App() {
     }
   }
 
-  // checks when the player stops trying to move
-  function movementKeyUpHandler(event) {
+  function removeBarricadeKeyHandler(event) {
     const { key } = event;
-    keyDown = keyDown.filter((e) => e !== key);
+    if (key === " ") {
+      r.mutate.removeUsersBarricades(playerNum);
+    }
   }
 
   // keep the maze up to date on each change
   const maze = useSubscribe(r, (tx) => tx.get("maze"), [[]]);
   const roster = useSubscribe(r, (tx) => tx.get("roster"), []);
   playerNum = roster.findIndex((player) => player === r.userID) + 1;
+
   // maintain a record of all player positions
   const playerPositions = startingPlayers.map((player) => {
     return useSubscribe(r, (tx) => tx.get(`position${player}`), [0, 0]);
@@ -118,7 +133,7 @@ function App() {
 
   // show player colors
   startingPlayers.forEach((player, idx) => {
-    highlightCell(playerPositions[idx], player);
+    mazeTool.highlightCell(playerPositions[idx], player);
   });
 
   // Add event listener when the component mounts

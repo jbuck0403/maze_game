@@ -19,11 +19,9 @@
 import { createMazeFromBlocks } from "../src/mazeGeneration/mazeGenerator";
 import MazeMovement from "../src/mazeGeneration/mazeMovement";
 import { emptySpace, wall } from "../src/mazeGeneration/mazeGenerator";
-// import Spawner from "../src/itemSpawning/spawnItems";
 
 const mazeSize = 8;
 const mazeMoveTool = new MazeMovement();
-// const spawner = new Spawner();
 
 export const mutators = {
   updateMazeAfterMovement,
@@ -104,54 +102,6 @@ async function getbarricadePosition(tx, playerNum) {
   return (await tx.get(`barricades${playerNum}`)) ?? [];
 }
 
-// const moveObjectInMaze = (tx, playerNum, objectID, direction) => {
-//   //find by tx.get
-//   getCurrentCombatObjects(tx, playerNum);
-//   //remove prev cell id
-//   //move object
-//   //set with tx.set
-//   //update new cell id
-// };
-// const spawnObjectFromCharacter = async (
-//   tx,
-//   playerNum,
-//   objectID,
-//   objectKey,
-//   direction
-// ) => {
-//   const maze = await getMaze(tx);
-//   const characterPosition = await getPlayerPosition(tx, playerNum);
-//   const spawnPosition = mazeMoveTool.moveInDirection(
-//     maze,
-//     direction,
-//     characterPosition
-//   );
-
-//   // if the desired spawn location is valid
-//   if (spawnPosition != characterPosition) {
-//     await tx.set(`${playerNum}${objectID}${objectKey}`);
-//     // spawner.spawnItem(objectID, 1, spawnPosition);
-//   }
-// };
-
-// const getCurrentCombatObjects = async (tx, playerNum, objectID) => {
-//   //returns an array of keys matching that object id for the given player which are currently on the map
-//   return (await tx.get(`${playerNum}${objectID}`)) ?? null;
-// };
-
-// const getCurrentProjectile = async(tx, playerNum);
-
-// const setCurrentCombatObjects = async (tx, data) => {
-//   const [playerNum, objectID, keys] = [
-//     data.playerNum,
-//     data.objectID,
-//     data.keys,
-//   ];
-//   //requires an array of keys for current objects of a given ID currently in the maze
-//   //ex player num 1, object id 'projectile' keys [1,2,3] = 1projectile => [1,2,3] meaning 3 projectiles currently in maze from player 1
-//   await tx.set(`${playerNum}${objectID}`, keys);
-// };
-
 async function getPlayerRoster(tx) {
   return (await tx.get("roster")) ?? [];
 }
@@ -168,27 +118,7 @@ async function getPlayerPosition(tx, playerNum) {
   return (await tx.get(`position${playerNum}`)) ?? false;
 }
 
-export const highlightCell = (position, playerNum, objectType = "player") => {
-  const className = `${objectType}${playerNum}`;
-  const genericClassName = `${objectType}`;
-  const positionID = `_${position[1]}-${position[0]}`;
-
-  if (document) {
-    const prevPosition = document.querySelector(`.${className}`);
-    const currentPosition = document.getElementById(positionID);
-
-    if (prevPosition) {
-      prevPosition.classList.remove(genericClassName);
-      prevPosition.classList.remove(className);
-    }
-    if (currentPosition) {
-      currentPosition.classList.add(genericClassName);
-      currentPosition.classList.add(className);
-    }
-  }
-};
-
-export const populateMaze = (tx, currentPlayers, mazeSize) => {
+function populateMaze(tx, currentPlayers, mazeSize) {
   const maze = createMazeFromBlocks(mazeSize);
 
   currentPlayers.forEach((playerID) => {
@@ -203,7 +133,7 @@ export const populateMaze = (tx, currentPlayers, mazeSize) => {
   });
 
   return maze;
-};
+}
 
 const moveCharacterInMaze = (mazeData) => {
   const mazeCopy = mazeData.maze.map((row) => row.slice());
@@ -280,65 +210,6 @@ async function updateMazeAfterMovement(tx, playerData) {
   await tx.set("maze", updatedMaze);
   return updatedMaze;
 }
-
-// const checkObstacle = (maze, newPosition) => {
-//   if (maze[newPosition[0]][newPosition[1]] === emptySpace) {
-//     return true;
-//   } else {
-//     return false;
-//   }
-// };
-
-// const checkValidMove = (maze, newPosition, direction) => {
-//   switch (direction) {
-//     case "UP":
-//       if (newPosition[0] >= 0 && checkObstacle(maze, newPosition)) {
-//         return true;
-//       } else return false;
-//     case "DOWN":
-//       if (newPosition[0] < maze.length && checkObstacle(maze, newPosition))
-//         return true;
-//       else return false;
-//     case "LEFT":
-//       if (newPosition[0] >= 0 && checkObstacle(maze, newPosition)) return true;
-//       else return false;
-//     case "RIGHT":
-//       if (newPosition[1] < maze[0].length && checkObstacle(maze, newPosition))
-//         return true;
-//       else return false;
-//     default:
-//       return false;
-//     // }
-//   }
-// };
-
-// const moveInDirection = (maze, direction, currentPosition) => {
-//   let newPosition;
-//   switch (direction) {
-//     case "UP":
-//       newPosition = [currentPosition[0] - 1, currentPosition[1]];
-//       if (checkValidMove(maze, newPosition, direction)) {
-//         return [currentPosition[0] - 1, currentPosition[1]];
-//       } else return currentPosition;
-//     case "DOWN":
-//       newPosition = [currentPosition[0] + 1, currentPosition[1]];
-//       if (checkValidMove(maze, newPosition, direction)) {
-//         return newPosition;
-//       } else return currentPosition;
-//     case "LEFT":
-//       newPosition = [currentPosition[0], currentPosition[1] - 1];
-//       if (checkValidMove(maze, newPosition, direction)) {
-//         return newPosition;
-//       } else return currentPosition;
-//     case "RIGHT":
-//       newPosition = [currentPosition[0], currentPosition[1] + 1];
-//       if (checkValidMove(maze, newPosition, direction)) {
-//         return newPosition;
-//       } else return currentPosition;
-//     default:
-//       return currentPosition;
-//   }
-// };
 
 async function updatePlayerPosition(tx, playerData) {
   const playerID = playerData.id;
