@@ -1,45 +1,40 @@
+//imports
 import "./App.css";
 
+//react imports
 import { useEffect } from "react";
-import { nanoid } from "nanoid";
+import { useSubscribe } from "@rocicorp/reflect/react";
 
+//reflect imports
 import { Reflect } from "@rocicorp/reflect/client";
-import { mutators, highlightCell } from "../reflect/mutators";
-import { useSubscribe, usePresence } from "@rocicorp/reflect/react";
+import { mutators } from "../reflect/mutators";
 
+//component imports
 import MazeComponent from "./components/Maze/Maze";
 
-const getCookie = (name) => {
-  const cookies = document.cookie.split("; ");
-  for (const cookie of cookies) {
-    const [cookieName, cookieValue] = cookie.split("=");
-    if (cookieName === name) {
-      return decodeURIComponent(cookieValue);
-    }
-  }
-  return null;
-};
+//custom game tool imports
+import MazeTools from "./mazeGeneration/mazeTools";
+import UserTools from "./users/getUserID";
 
-const setCookie = (name, value, daysToExpire = 1) => {
-  const date = new Date();
-  date.setTime(date.getTime() + daysToExpire * 24 * 60 * 60 * 1000);
-  const expires = `expires=${date.toUTCString()}`;
-  document.cookie = `${name}=${value};${expires};path=/`;
+//find the userid via firebase or cookies, in that order
+const userTool = new UserTools();
+const userID = userTool.getUserID();
 
-  return value;
-};
-
-const cookieUserName = getCookie("userID");
-const userID =
-  cookieUserName === null ? setCookie("userID", nanoid()) : cookieUserName;
+//variables
+//reflect room variables
 const gameID = 88;
-let playerNum = -1;
+
+//game variables
 const inputLimit = 10;
 const timeThreshold = 1000;
 const refreshRate = timeThreshold / inputLimit;
+const startingPlayers = [1, 2, 3, 4];
+let playerNum = -1;
 let lastInputTime = 0;
 let moveDirection;
+let keyDown = [];
 
+//create a new reflect room for multiplayer to sync maze and players
 export const r = new Reflect({
   server: "http://localhost:8080",
   roomID: gameID,
@@ -47,13 +42,12 @@ export const r = new Reflect({
   mutators,
 });
 
-//need to pair startingplayers numbers with ids in roster
-const startingPlayers = [1, 2, 3, 4];
+//instantiate the maze tool
+const mazeTool = new MazeTools(r);
 
+//init the maze and add player avatars
 r.mutate.initMaze(startingPlayers);
 r.mutate.addToPlayerRoster(r.userID);
-
-let keyDown = [];
 
 function handleCharacterMovement() {
   if (keyDown.length > 0) {
@@ -131,7 +125,7 @@ function App() {
   const maze = useSubscribe(r, (tx) => tx.get("maze"), [[]]);
   const roster = useSubscribe(r, (tx) => tx.get("roster"), []);
   playerNum = roster.findIndex((player) => player === r.userID) + 1;
-  console.log(playerNum, roster, r.userID);
+
   // maintain a record of all player positions
   const playerPositions = startingPlayers.map((player) => {
     return useSubscribe(r, (tx) => tx.get(`position${player}`), [0, 0]);
@@ -139,7 +133,7 @@ function App() {
 
   // show player colors
   startingPlayers.forEach((player, idx) => {
-    highlightCell(playerPositions[idx], player);
+    mazeTool.highlightCell(playerPositions[idx], player);
   });
 
   // Add event listener when the component mounts
