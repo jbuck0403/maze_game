@@ -56,8 +56,8 @@ function handleCharacterMovement() {
     // ensure the player can only move at a maximum rate
     if (currentTime - lastInputTime > refreshRate) {
       moveDirection = null;
-      if (keyDown[0] === "w")
-        moveDirection = "UP"; // check which key is being pressed
+      // check which key is being pressed
+      if (keyDown[0] === "w") moveDirection = "UP";
       else if (keyDown[0] === "a") moveDirection = "LEFT";
       else if (keyDown[0] === "s") moveDirection = "DOWN";
       else if (keyDown[0] === "d") moveDirection = "RIGHT";
@@ -81,7 +81,7 @@ function App() {
   // checks which key is pressed for movement
   function movementKeyDownHandler(event) {
     const { key } = event;
-    // console.log(key);
+
     if (["w", "a", "s", "d"].includes(key)) {
       if (!keyDown.includes(key)) {
         //do initial movement immediately on key press
@@ -96,11 +96,10 @@ function App() {
     }
   }
 
-  function removeBarricadeKeyHandler(event) {
+  // checks when the player stops trying to move
+  function movementKeyUpHandler(event) {
     const { key } = event;
-    if (key === " ") {
-      r.mutate.removeUsersBarricades(playerNum);
-    }
+    keyDown = keyDown.filter((e) => e !== key);
   }
 
   function barricadeKeyHandler(event) {
@@ -115,10 +114,11 @@ function App() {
     }
   }
 
-  // checks when the player stops trying to move
-  function movementKeyUpHandler(event) {
+  function removeBarricadeKeyHandler(event) {
     const { key } = event;
-    keyDown = keyDown.filter((e) => e !== key);
+    if (key === " ") {
+      r.mutate.removeUsersBarricades(playerNum);
+    }
   }
 
   // keep the maze up to date on each change

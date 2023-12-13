@@ -19,11 +19,9 @@
 import { createMazeFromBlocks } from "../src/mazeGeneration/mazeGenerator";
 import MazeMovement from "../src/mazeGeneration/mazeMovement";
 import { emptySpace, wall } from "../src/mazeGeneration/mazeGenerator";
-// import Spawner from "../src/itemSpawning/spawnItems";
 
 const mazeSize = 8;
 const mazeMoveTool = new MazeMovement();
-// const spawner = new Spawner();
 
 export const mutators = {
   updateMazeAfterMovement,
@@ -120,7 +118,7 @@ async function getPlayerPosition(tx, playerNum) {
   return (await tx.get(`position${playerNum}`)) ?? false;
 }
 
-export const populateMaze = (tx, currentPlayers, mazeSize) => {
+function populateMaze(tx, currentPlayers, mazeSize) {
   const maze = createMazeFromBlocks(mazeSize);
 
   currentPlayers.forEach((playerID) => {
@@ -135,7 +133,7 @@ export const populateMaze = (tx, currentPlayers, mazeSize) => {
   });
 
   return maze;
-};
+}
 
 const moveCharacterInMaze = (mazeData) => {
   const mazeCopy = mazeData.maze.map((row) => row.slice());
