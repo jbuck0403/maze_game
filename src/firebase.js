@@ -6,12 +6,12 @@ import { getAuth } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCVwmHcZfVWIIlURalxQj6rWf7udczsHAs",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "maze-game-fcc3d.firebaseapp.com",
   projectId: "maze-game-fcc3d",
   storageBucket: "maze-game-fcc3d.appspot.com",
   messagingSenderId: "132925999988",
-  appId: "1:132925999988:web:bc8ead9bd48775ed3c7a21",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 // Initialize firebase
