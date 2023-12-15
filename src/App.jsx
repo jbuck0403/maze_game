@@ -11,33 +11,33 @@ import MazeTools from "./mazeGeneration/mazeTools";
 import { Reflect } from "@rocicorp/reflect/client";
 
 //find the userid via firebase or cookies, in that order
-const userTool = new UserTools();
-const userID = userTool.getUserID();
-const server = "http://localhost:8080";
+// const userTool = new UserTools();
+// const userID = userTool.getUserID();
+// const server = "http://localhost:8080";
 
-//variables
-//reflect room variables
-const gameID = 7;
+// //variables
+// //reflect room variables
+// const gameID = 7;
 
-// create a new reflect room for multiplayer to sync maze and players
-export const r = new Reflect({
-  server,
-  roomID: gameID,
-  userID: userID,
-  mutators,
-});
-
-const mazeTool = new MazeTools(r);
+// // create a new reflect room for multiplayer to sync maze and players
+// export const r = new Reflect({
+//   server,
+//   roomID: gameID,
+//   userID: userID,
+//   mutators,
+// });
 
 function App() {
   // const roomAssignment = useOrchestration(
   //   {
-  //     server,
+  //     server: server,
   //     roomID: "orchestrator",
-  //     userID,
+  //     userID: userID,
   //   },
   //   orchestrationOptions
   // );
+
+  // console.log("$$$$", roomAssignment);
 
   // const [r, setR] = useState();
   // useEffect(() => {
@@ -46,9 +46,9 @@ function App() {
   //     return;
   //   }
   //   const reflect = new Reflect({
-  //     server,
+  //     server: server,
   //     roomID: roomAssignment.roomID,
-  //     userID,
+  //     userID: userID,
   //     mutators,
   //   });
   //   console.log(reflect);
@@ -59,10 +59,10 @@ function App() {
   //     setR(undefined);
   //   };
   // }, [roomAssignment]);
-  // console.log(r);
+
   return (
     <>
-      <Game r={r} mazeTool={mazeTool} />
+      <Game />
     </>
   );
 }

@@ -27,15 +27,15 @@ let moveDirection;
 let keyDown = [];
 let movementTimeoutID;
 
-// //find the userid via firebase or cookies, in that order
-// const userTool = new UserTools();
-// const userID = userTool.getUserID();
+//find the userid via firebase or cookies, in that order
+const userTool = new UserTools();
+const userID = userTool.getUserID();
 
-// //variables
-// //reflect room variables
-// const gameID = 5;
+//variables
+//reflect room variables
+const gameID = 1;
 
-// // create a new reflect room for multiplayer to sync maze and players
+// create a new reflect room for multiplayer to sync maze and players
 // export const r = new Reflect({
 //   server: "http://localhost:8080",
 //   roomID: gameID,
@@ -47,7 +47,18 @@ let movementTimeoutID;
 
 //instantiate the maze tool
 
-function Game({ r, mazeTool }) {
+const r = new Reflect({
+  server: "http://localhost:8080",
+  roomID: gameID,
+  userID: userID,
+  mutators,
+});
+const mazeTool = new MazeTools(r);
+
+function Game() {
+  // const [r, setR] = useState(null);
+  // const [mazeTool, setMazeTool] = useState(null);
+
   // Add event listener when the component mounts
   useEffect(() => {
     function handleCharacterMovement() {
@@ -122,6 +133,17 @@ function Game({ r, mazeTool }) {
       }
     }
 
+    // const reflect = new Reflect({
+    //   server: "http://localhost:8080",
+    //   roomID: gameID,
+    //   userID: userID,
+    //   mutators,
+    // });
+    // const mt = new MazeTools(reflect);
+
+    // setR(reflect);
+    // setMazeTool(mt);
+
     //init the maze and add player avatars
     r.mutate.initMaze(startingPlayers);
     r.mutate.addToPlayerRoster(r.userID);
@@ -152,15 +174,13 @@ function Game({ r, mazeTool }) {
     return useSubscribe(r, (tx) => tx.get(`position${player}`), [0, 0]);
   });
 
-  // show player colors
-  startingPlayers.forEach((player, idx) => {
-    mazeTool.highlightCell(playerPositions[idx], player);
-  });
+  useEffect(() => {
+    // show player colors
+    startingPlayers.forEach((player, idx) => {
+      mazeTool.highlightCell(playerPositions[idx], player);
+    });
+  }, [playerPositions]);
 
-  return (
-    <>
-      <MazeComponent maze={maze} />
-    </>
-  );
+  return <>{mazeTool && <MazeComponent maze={maze} />}</>;
 }
 export default Game;
