@@ -1,3 +1,3 @@
 export const orchestrationOptions = {
-  maxClientsPerRoom: 4,
+  maxClientsPerRoom: 1,
 };

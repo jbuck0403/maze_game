@@ -10,14 +10,14 @@ import { useState, useEffect } from "react";
 import MazeTools from "./mazeGeneration/mazeTools";
 import { Reflect } from "@rocicorp/reflect/client";
 
-//find the userid via firebase or cookies, in that order
+// find the userid via firebase or cookies, in that order
 const userTool = new UserTools();
 const userID = userTool.getUserID();
 const server = "http://localhost:8080";
 
 //variables
 //reflect room variables
-const gameID = 7;
+const gameID = 15;
 
 // // create a new reflect room for multiplayer to sync maze and players
 // export const r = new Reflect({
@@ -37,9 +37,8 @@ function App() {
     orchestrationOptions
   );
 
-  console.log("$$$$", roomAssignment);
-
   const [r, setR] = useState();
+  const [mazeTool, setMazeTool] = useState();
   useEffect(() => {
     if (!roomAssignment) {
       setR(undefined);
@@ -51,19 +50,20 @@ function App() {
       userID: userID,
       mutators,
     });
-    console.log(reflect);
 
     setR(reflect);
+    setMazeTool();
     return () => {
       void reflect?.close();
       setR(undefined);
     };
   }, [roomAssignment]);
 
-  return (
-    <>
-      <Game />
-    </>
-  );
+  useEffect(() => {
+    const mazeToolInit = new MazeTools(r);
+    setMazeTool(mazeToolInit);
+  }, [r]);
+
+  return <>{r && mazeTool && <Game r={r} mazeTool={mazeTool} />}</>;
 }
 export default App;
