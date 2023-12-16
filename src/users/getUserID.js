@@ -1,4 +1,5 @@
 import CookieTools from "../cookies/cookies";
+import { nanoid } from "nanoid";
 
 const cookieTool = new CookieTools();
 

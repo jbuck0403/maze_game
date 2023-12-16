@@ -16,7 +16,8 @@
     "nanoid": "^5.0.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.20.1"
+    "react-router-dom": "^6.20.1",
+    "reflect-orchestrator": "^0.0.4"
   },
   "devDependencies": {
     "@types/react": "^18.2.37",
