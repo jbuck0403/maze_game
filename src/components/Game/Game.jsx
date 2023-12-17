@@ -18,17 +18,6 @@ import MazeComponent from "../Maze/Maze";
 import MazeTools from "../../mazeGeneration/mazeTools";
 import UserTools from "../../users/getUserID";
 
-<<<<<<< HEAD
-//find the userid via firebase or cookies, in that order
-const userTool = new UserTools();
-const userID = userTool.getUserID();
-
-//variables
-//reflect room variables
-const gameID = 90;
-
-=======
->>>>>>> dev
 //game variables
 const inputLimit = 10;
 const timeThreshold = 1000;
