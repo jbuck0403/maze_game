@@ -37,6 +37,8 @@ function App() {
     orchestrationOptions
   );
 
+  console.log("$$$", roomAssignment);
+
   const [r, setR] = useState();
   const [mazeTool, setMazeTool] = useState();
   useEffect(() => {

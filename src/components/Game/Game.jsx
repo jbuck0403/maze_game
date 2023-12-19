@@ -59,7 +59,7 @@ const server = "http://localhost:8080";
 // const mazeTool = new MazeTools(r);
 
 function Game({ r, mazeTool }) {
-  console.log("mounted game", mazeTool);
+  console.log("mounted game", r.roomID);
   // const [r, setR] = useState(null);
   // const [mazeTool, setMazeTool] = useState(null);
 
