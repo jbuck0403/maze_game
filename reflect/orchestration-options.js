@@ -1,3 +1,3 @@
 export const orchestrationOptions = {
-  maxUsersPerRoom: 2,
+  maxUsersPerRoom: 4,
 };

@@ -14,8 +14,8 @@ import { nanoid } from "nanoid";
 
 // find the userid via firebase or cookies, in that order
 const userTool = new UserTools();
-// const userID = userTool.getUserID();
-const userID = nanoid();
+const userID = userTool.getUserID();
+// const userID = nanoid();
 const server = "http://localhost:8080";
 
 //variables
