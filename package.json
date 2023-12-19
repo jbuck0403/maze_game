@@ -11,13 +11,14 @@
   },
   "dependencies": {
     "@rocicorp/reflect": "^0.38.202311200859",
+    "@rocicorp/reflect-orchestrator": "file:../../custom_packages/rocicorp-reflect-orchestrator-0.0.1.tgz",
     "dotenv": "^16.3.1",
     "firebase": "^10.7.1",
     "nanoid": "^5.0.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.1",
-    "reflect-orchestrator": "^0.0.4"
+    "reflect-server": "^1.1.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.37",

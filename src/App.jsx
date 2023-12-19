@@ -4,20 +4,23 @@ import "./App.css";
 import Game from "./components/Game/Game";
 import UserTools from "./users/getUserID";
 import { orchestrationOptions } from "../reflect/orchestration-options";
-import { useOrchestration } from "reflect-orchestrator";
+// import { useOrchestration } from "reflect-orchestrator";
+import { useOrchestration } from "@rocicorp/reflect-orchestrator";
 import { mutators } from "../reflect/mutators";
 import { useState, useEffect } from "react";
 import MazeTools from "./mazeGeneration/mazeTools";
 import { Reflect } from "@rocicorp/reflect/client";
+import { nanoid } from "nanoid";
 
 // find the userid via firebase or cookies, in that order
 const userTool = new UserTools();
-const userID = userTool.getUserID();
+// const userID = userTool.getUserID();
+const userID = nanoid();
 const server = "http://localhost:8080";
 
 //variables
 //reflect room variables
-const gameID = 15;
+// const gameID = 15;
 
 // // create a new reflect room for multiplayer to sync maze and players
 // export const r = new Reflect({
@@ -33,9 +36,12 @@ function App() {
       server: server,
       roomID: "orchestrator",
       userID: userID,
+      auth: userID,
     },
     orchestrationOptions
   );
+
+  console.log(roomAssignment);
 
   const [r, setR] = useState();
   const [mazeTool, setMazeTool] = useState();
@@ -48,6 +54,7 @@ function App() {
       server: server,
       roomID: roomAssignment.roomID,
       userID: userID,
+      auth: userID,
       mutators,
     });
 

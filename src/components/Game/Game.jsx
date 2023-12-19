@@ -6,16 +6,16 @@ import { useEffect, useState } from "react";
 import { useSubscribe } from "@rocicorp/reflect/react";
 
 //reflect imports
-import { Reflect } from "@rocicorp/reflect/client";
-import { mutators } from "../../../reflect/mutators";
-import { useOrchestration } from "reflect-orchestrator";
-import { orchestrationOptions } from "../../../reflect/orchestration-options";
+// import { Reflect } from "@rocicorp/reflect/client";
+// import { mutators } from "../../../reflect/mutators";
+// import { useOrchestration } from "reflect-orchestrator";
+// import { orchestrationOptions } from "../../../reflect/orchestration-options";
 
 //component imports
 import MazeComponent from "../Maze/Maze";
 
 //custom game tool imports
-import MazeTools from "../../mazeGeneration/mazeTools";
+// import MazeTools from "../../mazeGeneration/mazeTools";
 import UserTools from "../../users/getUserID";
 
 //game variables
@@ -35,8 +35,8 @@ const userID = userTool.getUserID();
 
 //variables
 //reflect room variables
-const gameID = 20;
-const server = "http://localhost:8080";
+// const gameID = 20;
+// const server = "http://localhost:8080";
 
 // create a new reflect room for multiplayer to sync maze and players
 // export const r = new Reflect({
@@ -59,7 +59,6 @@ const server = "http://localhost:8080";
 // const mazeTool = new MazeTools(r);
 
 function Game({ r, mazeTool }) {
-  console.log("mounted game", mazeTool);
   // const [r, setR] = useState(null);
   // const [mazeTool, setMazeTool] = useState(null);
 
