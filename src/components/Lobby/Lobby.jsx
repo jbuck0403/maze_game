@@ -6,12 +6,13 @@ const Lobby = ({ r, mazeTool }) => {
   const handleForceStart = () => {
     r.mutate.forceStartOptIn(r.userID);
   };
+  const roster = useSubscribe(r, (tx) => tx.get("roster"));
   const startingPlayers = useSubscribe(r, (tx) => tx.get("startingPlayers"));
   const forceStartDict = useSubscribe(r, (tx) => tx.get("forceStart"));
   let forceStart = false;
 
   console.log(startingPlayers);
-  if (startingPlayers && startingPlayers.length == 3) {
+  if (startingPlayers && startingPlayers.length == 4) {
     forceStart = true;
   }
 
@@ -21,8 +22,15 @@ const Lobby = ({ r, mazeTool }) => {
 
   return (
     <>
-      {!forceStart && (
-        <button onClick={() => handleForceStart()}>Force Start</button>
+      {!forceStart && roster && (
+        <>
+          <div>
+            {roster.map((player, idx) => {
+              return <div key={`${player}${idx}`}>{player}</div>;
+            })}
+          </div>
+          <button onClick={() => handleForceStart()}>Force Start</button>
+        </>
       )}
       {forceStart && (
         <Game r={r} mazeTool={mazeTool} startingPlayers={startingPlayers} />
