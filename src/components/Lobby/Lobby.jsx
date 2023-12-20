@@ -3,16 +3,27 @@ import { useSubscribe } from "@rocicorp/reflect/react";
 import Game from "../Game/Game";
 
 const Lobby = ({ r, mazeTool }) => {
+  const handleForceStart = () => {
+    r.mutate.forceStartOptIn(r.userID);
+  };
   const startingPlayers = useSubscribe(r, (tx) => tx.get("startingPlayers"));
+  const forceStartDict = useSubscribe(r, (tx) => tx.get("forceStart"));
   let forceStart = false;
 
   console.log(startingPlayers);
-  if (startingPlayers && startingPlayers.length == 2) {
+  if (startingPlayers && startingPlayers.length == 3) {
     forceStart = true;
   }
 
+  useEffect(() => {
+    console.log(forceStartDict);
+  }, [forceStartDict]);
+
   return (
     <>
+      {!forceStart && (
+        <button onClick={() => handleForceStart()}>Force Start</button>
+      )}
       {forceStart && (
         <Game r={r} mazeTool={mazeTool} startingPlayers={startingPlayers} />
       )}

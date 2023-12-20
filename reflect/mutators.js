@@ -39,10 +39,27 @@ export const mutators = {
   getPlayerRoster,
   addToPlayerRoster,
   getStartingPlayers,
+  forceStartOptIn,
   ...createOrchestrationMutators(orchestrationOptions),
 };
 
 // const emptySpace = 0;
+
+async function forceStartOptIn(tx, userID) {
+  const initForceStart = () => {
+    const forceStart = {};
+    roster.forEach((user) => {
+      forceStart[user] = false;
+    });
+
+    return forceStart;
+  };
+  const roster = await getPlayerRoster(tx);
+  const forceStart = (await tx.get("forceStart")) ?? initForceStart();
+  const updatedForceStart = { ...forceStart, [userID]: true };
+
+  tx.set("forceStart", updatedForceStart);
+}
 
 const createMazeCopy = async (tx) => {
   const maze = await getMaze(tx);
