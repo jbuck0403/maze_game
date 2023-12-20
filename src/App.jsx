@@ -33,46 +33,10 @@ const server = "http://localhost:8080";
 // });
 
 function App() {
-  const roomAssignment = useOrchestration(
-    {
-      server: server,
-      roomID: "orchestrator",
-      userID: userID,
-      auth: userID,
-    },
-    orchestrationOptions
+  return (
+    <>
+      <Lobby />
+    </>
   );
-
-  const [r, setR] = useState();
-  const [mazeTool, setMazeTool] = useState();
-
-  useEffect(() => {
-    if (!roomAssignment) {
-      setR(undefined);
-      return;
-    }
-    const reflect = new Reflect({
-      server: server,
-      roomID: roomAssignment.roomID,
-      userID: userID,
-      auth: userID,
-      mutators,
-    });
-    reflect.mutate.addToPlayerRoster(userID);
-
-    setR(reflect);
-    setMazeTool();
-    return () => {
-      void reflect?.close();
-      setR(undefined);
-    };
-  }, [roomAssignment]);
-
-  useEffect(() => {
-    const mazeToolInit = new MazeTools(r);
-    setMazeTool(mazeToolInit);
-  }, [r]);
-
-  return <>{r && mazeTool && <Lobby r={r} mazeTool={mazeTool} />}</>;
 }
 export default App;
