@@ -13,6 +13,7 @@ import { useSubscribe } from "@rocicorp/reflect/react";
 
 //component imports
 import MazeComponent from "../Maze/Maze";
+import Lobby from "../Lobby/Lobby";
 
 //custom game tool imports
 // import MazeTools from "../../mazeGeneration/mazeTools";
@@ -22,7 +23,6 @@ import UserTools from "../../users/getUserID";
 const inputLimit = 10;
 const timeThreshold = 1000;
 const refreshRate = timeThreshold / inputLimit;
-const startingPlayers = [1, 2, 3, 4];
 let playerNum = -1;
 let lastInputTime = 0;
 let moveDirection;
@@ -58,7 +58,7 @@ const userID = userTool.getUserID();
 // });
 // const mazeTool = new MazeTools(r);
 
-function Game({ r, mazeTool }) {
+function Game({ r, mazeTool, startingPlayers }) {
   // const [r, setR] = useState(null);
   // const [mazeTool, setMazeTool] = useState(null);
 
@@ -148,8 +148,9 @@ function Game({ r, mazeTool }) {
     // setMazeTool(mt);
 
     //init the maze and add player avatars
+    // r.mutate.addToPlayerRoster(r.userID);
+
     r.mutate.initMaze(startingPlayers);
-    r.mutate.addToPlayerRoster(r.userID);
 
     window.addEventListener("keydown", movementKeyDownHandler);
     window.addEventListener("keydown", barricadeKeyHandler);

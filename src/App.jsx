@@ -11,11 +11,13 @@ import { useState, useEffect } from "react";
 import MazeTools from "./mazeGeneration/mazeTools";
 import { Reflect } from "@rocicorp/reflect/client";
 import { nanoid } from "nanoid";
+import Lobby from "./components/Lobby/Lobby";
 
 // find the userid via firebase or cookies, in that order
 const userTool = new UserTools();
 const userID = userTool.getUserID();
 // const userID = nanoid();
+// const userID = "johnson";
 const server = "http://localhost:8080";
 
 //variables
@@ -41,10 +43,9 @@ function App() {
     orchestrationOptions
   );
 
-  console.log(roomAssignment);
-
   const [r, setR] = useState();
   const [mazeTool, setMazeTool] = useState();
+
   useEffect(() => {
     if (!roomAssignment) {
       setR(undefined);
@@ -57,6 +58,7 @@ function App() {
       auth: userID,
       mutators,
     });
+    reflect.mutate.addToPlayerRoster(userID);
 
     setR(reflect);
     setMazeTool();
@@ -71,6 +73,6 @@ function App() {
     setMazeTool(mazeToolInit);
   }, [r]);
 
-  return <>{r && mazeTool && <Game r={r} mazeTool={mazeTool} />}</>;
+  return <>{r && mazeTool && <Lobby r={r} mazeTool={mazeTool} />}</>;
 }
 export default App;

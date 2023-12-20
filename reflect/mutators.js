@@ -38,6 +38,7 @@ export const mutators = {
   removeUsersBarricades,
   getPlayerRoster,
   addToPlayerRoster,
+  getStartingPlayers,
   ...createOrchestrationMutators(orchestrationOptions),
 };
 
@@ -102,6 +103,29 @@ async function setBarricade(tx, barricadeData) {
   }
 }
 
+async function setStartingPlayers(tx, roster) {
+  const generateStartingPlayers = () => {
+    const startingPlayers = [];
+    for (let i = 1; i <= numPlayers; i++) {
+      startingPlayers.push(i);
+    }
+    return startingPlayers;
+  };
+
+  const numPlayers = roster.length;
+  const startingPlayers = generateStartingPlayers();
+
+  await tx.set("startingPlayers", startingPlayers);
+
+  return startingPlayers;
+}
+
+async function getStartingPlayers(tx) {
+  const startingPlayers = await tx.get("startingPlayers");
+
+  return startingPlayers;
+}
+
 async function getbarricadePosition(tx, playerNum) {
   return (await tx.get(`barricades${playerNum}`)) ?? [];
 }
@@ -114,7 +138,10 @@ async function addToPlayerRoster(tx, userName) {
   const roster = await getPlayerRoster(tx);
 
   if (roster.length < 4 && !roster.includes(userName)) {
-    tx.set("roster", [...roster, userName]);
+    const updatedRoster = [...roster, userName];
+    tx.set("roster", updatedRoster);
+
+    return setStartingPlayers(tx, updatedRoster);
   }
 }
 
@@ -158,13 +185,13 @@ const startPositionByPlayer = (tx, mazeYEnd, mazeXEnd, playerID) => {
       position = [1, 1];
       break;
     case 2:
-      position = [1, mazeXEnd - 1];
+      position = [mazeYEnd - 1, mazeXEnd - 1];
       break;
     case 3:
-      position = [mazeYEnd - 1, 1];
+      position = [1, mazeXEnd - 1];
       break;
     case 4:
-      position = [mazeYEnd - 1, mazeXEnd - 1];
+      position = [mazeYEnd - 1, 1];
       break;
     default:
       return false;
