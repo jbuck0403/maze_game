@@ -33,12 +33,13 @@ const Lobby = () => {
     orchestrationOptions
   );
 
-  const [re, setR] = useState();
   const [mazeTool, setMazeTool] = useState();
+  const [forceStartOptedIn, setForceStartOptedIn] = useState(0);
+  const [forceStart, setForceStart] = useState(false);
 
   useEffect(() => {
     if (!roomAssignment) {
-      setR(undefined);
+      r = undefined;
       return;
     }
     r = new Reflect({
@@ -50,11 +51,10 @@ const Lobby = () => {
     });
     r.mutate.addToPlayerRoster(userID);
 
-    setR(r);
     setMazeTool();
     return () => {
       void r?.close();
-      setR(undefined);
+      r = undefined;
     };
   }, [roomAssignment]);
 
@@ -70,46 +70,37 @@ const Lobby = () => {
   const roster = useSubscribe(r, (tx) => tx.get("roster"));
   const startingPlayers = useSubscribe(r, (tx) => tx.get("startingPlayers"));
   const forceStartDict = useSubscribe(r, (tx) => tx.get("forceStart"));
-  let forceStartOptedIn;
-  let forceStart = false;
 
   console.log(startingPlayers);
   console.log(roster);
-  if (
-    startingPlayers &&
-    (roster.length == 4 || (roster.length >= 2 && forceStartOptedIn >= 2))
-  ) {
-    forceStart = true;
-  }
 
   useEffect(() => {
-    if (forceStartOptedIn !== undefined) {
-      forceStartOptedIn = Object.keys(forceStartDict).reduce((acc, key) => {
-        if (forceStartDict[key]) {
-          acc += 1;
-        }
-        console.log(acc);
-        return acc;
-      }, 0);
+    if (
+      startingPlayers &&
+      (roster.length == 4 || (roster.length >= 2 && forceStartOptedIn >= 2))
+    ) {
+      setForceStart(true);
+    }
+  }, [forceStartOptedIn]);
+
+  useEffect(() => {
+    console.log(forceStartDict);
+    if (forceStartDict !== undefined) {
+      console.log(Object.keys(forceStartDict));
+      setForceStartOptedIn(
+        Object.keys(forceStartDict).reduce((acc, key) => {
+          if (forceStartDict[key]) {
+            acc += 1;
+          }
+          console.log(acc);
+          return acc;
+        }, 0)
+      );
     }
   }, [forceStartDict]);
 
   useEffect(() => {
-    return () => {
-      if (r) {
-        r.mutate.removeFromPlayerRoster(r.userID);
-        r.mutate.setStartingPlayers(
-          roster.filter((user) => {
-            return user !== r.userID;
-          })
-        );
-        r.close();
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener("unload", (event) => {
+    const onWindowClose = (event) => {
       event.preventDefault();
 
       r.mutate.removeFromPlayerRoster(r.userID);
@@ -119,7 +110,13 @@ const Lobby = () => {
         })
       );
       r.close();
-    });
+    };
+
+    window.addEventListener("unload", onWindowClose);
+
+    return () => {
+      window.removeEventListener("unload", onWindowClose);
+    };
   }, []);
 
   return (
