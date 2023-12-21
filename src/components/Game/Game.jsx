@@ -2,18 +2,11 @@
 import "./Game.css";
 
 //react imports
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useSubscribe } from "@rocicorp/reflect/react";
-
-//reflect imports
-// import { Reflect } from "@rocicorp/reflect/client";
-// import { mutators } from "../../../reflect/mutators";
-// import { useOrchestration } from "reflect-orchestrator";
-// import { orchestrationOptions } from "../../../reflect/orchestration-options";
 
 //component imports
 import MazeComponent from "../Maze/Maze";
-import Lobby from "../Lobby/Lobby";
 
 //custom game tool imports
 // import MazeTools from "../../mazeGeneration/mazeTools";
@@ -33,35 +26,7 @@ let movementTimeoutID;
 const userTool = new UserTools();
 const userID = userTool.getUserID();
 
-//variables
-//reflect room variables
-// const gameID = 20;
-// const server = "http://localhost:8080";
-
-// create a new reflect room for multiplayer to sync maze and players
-// export const r = new Reflect({
-//   server: "http://localhost:8080",
-//   roomID: gameID,
-//   userID: userID,
-//   mutators,
-// });
-
-// const mazeTool = new MazeTools(r);
-
-//instantiate the maze tool
-
-// const r = new Reflect({
-//   server: "http://localhost:8080",
-//   roomID: gameID,
-//   userID: userID,
-//   mutators,
-// });
-// const mazeTool = new MazeTools(r);
-
 function Game({ r, mazeTool, startingPlayers }) {
-  // const [r, setR] = useState(null);
-  // const [mazeTool, setMazeTool] = useState(null);
-
   // Add event listener when the component mounts
   useEffect(() => {
     function handleCharacterMovement() {
@@ -105,7 +70,6 @@ function Game({ r, mazeTool, startingPlayers }) {
           });
           //queue up continued movement for if key is held down
           keyDown.push(key);
-          // handleCharacterMovement(keyDown);
         }
       }
     }
@@ -135,20 +99,6 @@ function Game({ r, mazeTool, startingPlayers }) {
         r.mutate.removeUsersBarricades(playerNum);
       }
     }
-
-    // const reflect = new Reflect({
-    //   server: "http://localhost:8080",
-    //   roomID: gameID,
-    //   userID: userID,
-    //   mutators,
-    // });
-    // const mt = new MazeTools(reflect);
-
-    // setR(reflect);
-    // setMazeTool(mt);
-
-    //init the maze and add player avatars
-    // r.mutate.addToPlayerRoster(r.userID);
 
     r.mutate.initMaze(startingPlayers);
 

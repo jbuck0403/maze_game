@@ -38,6 +38,7 @@ export const mutators = {
   removeUsersBarricades,
   getPlayerRoster,
   addToPlayerRoster,
+  removeFromPlayerRoster,
   getStartingPlayers,
   forceStartOptIn,
   ...createOrchestrationMutators(orchestrationOptions),
@@ -160,6 +161,15 @@ async function addToPlayerRoster(tx, userName) {
 
     return setStartingPlayers(tx, updatedRoster);
   }
+}
+
+async function removeFromPlayerRoster(tx, userName) {
+  const roster = await getPlayerRoster(tx);
+  const updatedRoster = roster.filter((user) => {
+    return user !== userName;
+  });
+
+  tx.set("roster", updatedRoster);
 }
 
 async function getPlayerPosition(tx, playerNum) {

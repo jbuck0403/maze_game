@@ -16,6 +16,7 @@ import MazeTools from "../../mazeGeneration/mazeTools";
 import UserTools from "../../users/getUserID";
 
 const userTool = new UserTools();
+let r;
 
 // find the userid via firebase or cookies, in that order
 const userID = userTool.getUserID();
@@ -32,7 +33,7 @@ const Lobby = () => {
     orchestrationOptions
   );
 
-  const [r, setR] = useState();
+  const [re, setR] = useState();
   const [mazeTool, setMazeTool] = useState();
 
   useEffect(() => {
@@ -40,19 +41,19 @@ const Lobby = () => {
       setR(undefined);
       return;
     }
-    const reflect = new Reflect({
+    r = new Reflect({
       server: server,
       roomID: roomAssignment.roomID,
       userID: userID,
       auth: userID,
       mutators,
     });
-    reflect.mutate.addToPlayerRoster(userID);
+    r.mutate.addToPlayerRoster(userID);
 
-    setR(reflect);
+    setR(r);
     setMazeTool();
     return () => {
-      void reflect?.close();
+      void r?.close();
       setR(undefined);
     };
   }, [roomAssignment]);
@@ -69,16 +70,57 @@ const Lobby = () => {
   const roster = useSubscribe(r, (tx) => tx.get("roster"));
   const startingPlayers = useSubscribe(r, (tx) => tx.get("startingPlayers"));
   const forceStartDict = useSubscribe(r, (tx) => tx.get("forceStart"));
+  let forceStartOptedIn;
   let forceStart = false;
 
   console.log(startingPlayers);
-  if (startingPlayers && startingPlayers.length == 2) {
+  console.log(roster);
+  if (
+    startingPlayers &&
+    (roster.length == 4 || (roster.length >= 2 && forceStartOptedIn >= 2))
+  ) {
     forceStart = true;
   }
 
   useEffect(() => {
-    console.log(forceStartDict);
+    if (forceStartOptedIn !== undefined) {
+      forceStartOptedIn = Object.keys(forceStartDict).reduce((acc, key) => {
+        if (forceStartDict[key]) {
+          acc += 1;
+        }
+        console.log(acc);
+        return acc;
+      }, 0);
+    }
   }, [forceStartDict]);
+
+  useEffect(() => {
+    return () => {
+      if (r) {
+        r.mutate.removeFromPlayerRoster(r.userID);
+        r.mutate.setStartingPlayers(
+          roster.filter((user) => {
+            return user !== r.userID;
+          })
+        );
+        r.close();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener("unload", (event) => {
+      event.preventDefault();
+
+      r.mutate.removeFromPlayerRoster(r.userID);
+      r.mutate.setStartingPlayers(
+        roster.filter((user) => {
+          return user !== r.userID;
+        })
+      );
+      r.close();
+    });
+  }, []);
 
   return (
     <>
@@ -89,7 +131,12 @@ const Lobby = () => {
               return <div key={`${player}${idx}`}>{player}</div>;
             })}
           </div>
-          <button onClick={() => handleForceStart()}>Force Start</button>
+          {roster.length >= 2 && (
+            <>
+              <button onClick={() => handleForceStart()}>Force Start</button>
+              <div>{`${forceStartOptedIn}/${roster.length}`}</div>
+            </>
+          )}
         </>
       )}
       {forceStart && (
