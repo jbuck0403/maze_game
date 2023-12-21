@@ -99,10 +99,10 @@ const Lobby = () => {
     }
   }, [forceStartDict]);
 
-  useEffect(() => {
-    const onWindowClose = (event) => {
-      event.preventDefault();
+  const onWindowClose = (event) => {
+    event.preventDefault();
 
+    if (!forceStart) {
       r.mutate.removeFromPlayerRoster(r.userID);
       r.mutate.setStartingPlayers(
         roster.filter((user) => {
@@ -110,14 +110,20 @@ const Lobby = () => {
         })
       );
       r.close();
-    };
+    }
+  };
 
+  useEffect(() => {
     window.addEventListener("unload", onWindowClose);
 
     return () => {
       window.removeEventListener("unload", onWindowClose);
     };
   }, []);
+
+  useEffect(() => {
+    window.removeEventListener("unload", onWindowClose);
+  }, [forceStart]);
 
   return (
     <>
