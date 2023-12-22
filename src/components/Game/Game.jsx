@@ -27,6 +27,7 @@ let movementTimeoutID;
 // const userID = userTool.getUserID();
 
 function Game({ r, mazeTool, startingPlayers }) {
+  // console.log(r);
   // Add event listener when the component mounts
   useEffect(() => {
     function handleCharacterMovement() {

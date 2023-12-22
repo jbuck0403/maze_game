@@ -52,11 +52,11 @@ const Lobby = () => {
       auth: userID,
       mutators,
     });
+    r.mutate.getRandomRoomAffix();
     r.mutate.addToPlayerRoster(userID);
 
     setMazeTool();
     return () => {
-      void r?.close();
       r = undefined;
     };
   }, [roomAssignment]);
@@ -149,7 +149,9 @@ const Lobby = () => {
     <>
       {!forceStart && roster && (
         <>
-          <div>
+          <div>Waiting for Match...</div>
+          {/* force start code to handle up to 4 players */}
+          {/* <div>
             {roster.map((player, idx) => {
               return <div key={`${player}${idx}`}>{player}</div>;
             })}
@@ -159,7 +161,7 @@ const Lobby = () => {
               <button onClick={() => handleForceStart()}>Force Start</button>
               <div>{`${forceStartOptedIn}/${roster.length}`}</div>
             </>
-          )}
+          )} */}
         </>
       )}
       {forceStart && gameRoom && (

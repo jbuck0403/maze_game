@@ -22,6 +22,7 @@ import { emptySpace, wall } from "../src/mazeGeneration/mazeGenerator";
 // import { createOrchestrationMutators } from "reflect-orchestrator";
 import { createOrchestrationMutators } from "@rocicorp/reflect-orchestrator";
 import { orchestrationOptions } from "./orchestration-options";
+import { nanoid } from "nanoid";
 
 const mazeSize = 8;
 const mazeMoveTool = new MazeMovement();
@@ -40,11 +41,30 @@ export const mutators = {
   addToPlayerRoster,
   removeFromPlayerRoster,
   getStartingPlayers,
+  resetForceStart,
   forceStartOptIn,
+  getRandomRoomAffix,
+  setRandomRoomAffix,
+  clearRandomRoomAffix,
   ...createOrchestrationMutators(orchestrationOptions),
 };
 
-// const emptySpace = 0;
+async function resetForceStart(tx) {
+  tx.set("forceStart", undefined);
+}
+
+async function getRandomRoomAffix(tx) {
+  return (await tx.get("roomAffix")) ?? setRandomRoomAffix(tx);
+}
+
+async function setRandomRoomAffix(tx) {
+  const affix = nanoid(5);
+  tx.set("roomAffix", affix);
+}
+
+async function clearRandomRoomAffix(tx) {
+  tx.set("roomAffix", undefined);
+}
 
 async function forceStartOptIn(tx, userID) {
   const initForceStart = () => {
