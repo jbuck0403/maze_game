@@ -14,9 +14,11 @@ import Game from "../Game/Game";
 //tool imports
 import MazeTools from "../../mazeGeneration/mazeTools";
 import UserTools from "../../users/getUserID";
+import { nanoid } from "nanoid";
 
 const userTool = new UserTools();
 let r;
+let playersInGame = [];
 
 // find the userid via firebase or cookies, in that order
 const userID = userTool.getUserID();
@@ -36,6 +38,7 @@ const Lobby = () => {
   const [mazeTool, setMazeTool] = useState();
   const [forceStartOptedIn, setForceStartOptedIn] = useState(0);
   const [forceStart, setForceStart] = useState(false);
+  const [gameRoom, setGameRoom] = useState();
 
   useEffect(() => {
     if (!roomAssignment) {
@@ -71,28 +74,24 @@ const Lobby = () => {
   const startingPlayers = useSubscribe(r, (tx) => tx.get("startingPlayers"));
   const forceStartDict = useSubscribe(r, (tx) => tx.get("forceStart"));
 
-  console.log(startingPlayers);
-  console.log(roster);
-
   useEffect(() => {
     if (
       startingPlayers &&
-      (roster.length == 4 || (roster.length >= 2 && forceStartOptedIn >= 2))
+      (roster.length == orchestrationOptions.maxUsersPerRoom ||
+        (roster.length >= 2 && forceStartOptedIn >= 2))
     ) {
       setForceStart(true);
     }
-  }, [forceStartOptedIn]);
+  }, [forceStartOptedIn, roster]);
 
   useEffect(() => {
-    console.log(forceStartDict);
     if (forceStartDict !== undefined) {
-      console.log(Object.keys(forceStartDict));
       setForceStartOptedIn(
         Object.keys(forceStartDict).reduce((acc, key) => {
           if (forceStartDict[key]) {
             acc += 1;
           }
-          console.log(acc);
+
           return acc;
         }, 0)
       );
@@ -123,7 +122,28 @@ const Lobby = () => {
 
   useEffect(() => {
     window.removeEventListener("unload", onWindowClose);
+
+    if (roomAssignment) {
+      setGameRoom(
+        new Reflect({
+          server: server,
+          roomID: `game_${roomAssignment.roomID}`,
+          userID: userID,
+          auth: userID,
+          mutators,
+        })
+      );
+      playersInGame = startingPlayers;
+      r.mutate.removeFromPlayerRoster(userID);
+      r.close();
+    }
   }, [forceStart]);
+
+  useEffect(() => {
+    if (gameRoom) {
+      gameRoom.mutate.addToPlayerRoster(userID);
+    }
+  }, [gameRoom]);
 
   return (
     <>
@@ -142,8 +162,12 @@ const Lobby = () => {
           )}
         </>
       )}
-      {forceStart && (
-        <Game r={r} mazeTool={mazeTool} startingPlayers={startingPlayers} />
+      {forceStart && gameRoom && (
+        <Game
+          r={gameRoom}
+          mazeTool={mazeTool}
+          startingPlayers={playersInGame}
+        />
       )}
     </>
   );

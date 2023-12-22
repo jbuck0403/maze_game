@@ -10,7 +10,7 @@ import MazeComponent from "../Maze/Maze";
 
 //custom game tool imports
 // import MazeTools from "../../mazeGeneration/mazeTools";
-import UserTools from "../../users/getUserID";
+// import UserTools from "../../users/getUserID";
 
 //game variables
 const inputLimit = 10;
@@ -23,8 +23,8 @@ let keyDown = [];
 let movementTimeoutID;
 
 //find the userid via firebase or cookies, in that order
-const userTool = new UserTools();
-const userID = userTool.getUserID();
+// const userTool = new UserTools();
+// const userID = userTool.getUserID();
 
 function Game({ r, mazeTool, startingPlayers }) {
   // Add event listener when the component mounts
@@ -116,12 +116,13 @@ function Game({ r, mazeTool, startingPlayers }) {
       window.removeEventListener("keyup", movementKeyUpHandler);
       clearTimeout(movementTimeoutID);
     };
-  }, []); // Empty dependency array means this effect runs once when the component mounts}
+  }, []);
 
   // keep the maze up to date on each change
   const maze = useSubscribe(r, (tx) => tx.get("maze"), [[]]);
   const roster = useSubscribe(r, (tx) => tx.get("roster"), []);
   playerNum = roster.findIndex((player) => player === r.userID) + 1;
+  console.log(roster);
 
   // maintain a record of all player positions
   const playerPositions = startingPlayers.map((player) => {
@@ -135,6 +136,6 @@ function Game({ r, mazeTool, startingPlayers }) {
     });
   }, [playerPositions]);
 
-  return <>{mazeTool && <MazeComponent maze={maze} />}</>;
+  return <>{mazeTool && roster && <MazeComponent maze={maze} />}</>;
 }
 export default Game;
