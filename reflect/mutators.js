@@ -46,6 +46,7 @@ export const mutators = {
   getRandomRoomAffix,
   setRandomRoomAffix,
   clearRandomRoomAffix,
+  destroyWalls,
   ...createOrchestrationMutators(orchestrationOptions),
 };
 
@@ -87,6 +88,42 @@ const createMazeCopy = async (tx) => {
   return maze.map((row) => row.slice());
 };
 
+async function destroyWalls(tx, playerNum) {
+  const checkDestroyable = (row, col) => {
+    const mazeRowWidth = mazeCopy[0].length - 1;
+    const mazeColLength = mazeCopy.length - 1;
+    if (row == 0 || row == mazeRowWidth || col == 0 || col == mazeColLength) {
+      return false;
+    } else if (mazeCopy[row][col] != wall) {
+      return false;
+    } else return true;
+  };
+  const removeWallFromMazeCopy = (row, col) => {
+    if (checkDestroyable(row, col)) {
+      mazeCopy[row][col] = emptySpace;
+    }
+  };
+  // create a shallow copy of the maze array
+  const mazeCopy = await createMazeCopy(tx);
+  // get the current users current position
+  const [playerRow, playerCol] = await getPlayerPosition(tx, playerNum);
+  const coordsToCheck = [
+    [-1, -1],
+    [-1, 0],
+    [-1, 1],
+    [0, -1],
+    [0, 1],
+    [1, -1],
+    [1, 0],
+    [1, 1],
+  ];
+  coordsToCheck.forEach(([row, col]) => {
+    removeWallFromMazeCopy(playerRow + row, playerCol + col);
+  });
+
+  updateMaze(tx, mazeCopy);
+}
+
 async function removeUsersBarricades(tx, playerNum) {
   // get the current barricades placed by the current user
   const currentBarricades = await getbarricadePosition(tx, playerNum);
@@ -125,7 +162,7 @@ async function setBarricade(tx, barricadeData) {
     // get the current barricades placed by the current user
     const currentBarricades = await getbarricadePosition(tx, playerNum);
     // if the current user has more than 2 barricades on the maze
-    if (currentBarricades.length >= 3) {
+    if (currentBarricades.length >= 2) {
       // store the coordinates for the barricade about to be removed
       const barricadeToRemove = currentBarricades[0];
       // remove barricades in fifo order

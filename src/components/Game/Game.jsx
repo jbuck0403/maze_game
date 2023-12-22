@@ -16,11 +16,15 @@ import MazeComponent from "../Maze/Maze";
 const inputLimit = 10;
 const timeThreshold = 1000;
 const refreshRate = timeThreshold / inputLimit;
+const wallBreakInterval = timeThreshold * 10;
+const wallBreakKey = "q";
+const destroyBarricadesKey = " ";
 let playerNum = -1;
 let lastInputTime = 0;
 let moveDirection;
 let keyDown = [];
 let movementTimeoutID;
+let lastWallBreakTime = 0;
 
 //find the userid via firebase or cookies, in that order
 // const userTool = new UserTools();
@@ -96,8 +100,20 @@ function Game({ r, mazeTool, startingPlayers }) {
 
     function removeBarricadeKeyHandler(event) {
       const { key } = event;
-      if (key === " ") {
+      if (key === destroyBarricadesKey) {
         r.mutate.removeUsersBarricades(playerNum);
+      }
+    }
+
+    function destroyWallsHandler(event) {
+      const { key } = event;
+      const currentTime = Date.now();
+      if (
+        key === wallBreakKey &&
+        currentTime - lastWallBreakTime > wallBreakInterval
+      ) {
+        r.mutate.destroyWalls(playerNum);
+        lastWallBreakTime = currentTime;
       }
     }
 
@@ -107,6 +123,7 @@ function Game({ r, mazeTool, startingPlayers }) {
     window.addEventListener("keydown", barricadeKeyHandler);
     window.addEventListener("keydown", removeBarricadeKeyHandler);
     window.addEventListener("keyup", movementKeyUpHandler);
+    window.addEventListener("keydown", destroyWallsHandler);
     handleCharacterMovement(keyDown);
 
     // Clean up the event listener when the component unmounts
