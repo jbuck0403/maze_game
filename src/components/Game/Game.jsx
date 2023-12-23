@@ -31,6 +31,7 @@ let lastWallBreakTime = 0;
 // const userID = userTool.getUserID();
 
 function Game({ r, mazeTool, startingPlayers }) {
+  console.log(startingPlayers, "!!!", mazeTool)
   // console.log(r);
   // Add event listener when the component mounts
   useEffect(() => {
@@ -146,6 +147,7 @@ function Game({ r, mazeTool, startingPlayers }) {
   const playerPositions = startingPlayers.map((player) => {
     return useSubscribe(r, (tx) => tx.get(`position${player}`), [0, 0]);
   });
+  
 
   useEffect(() => {
     // show player colors

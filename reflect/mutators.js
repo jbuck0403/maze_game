@@ -42,13 +42,13 @@ export const mutators = {
   addToPlayerRoster,
   removeFromPlayerRoster,
   getStartingPlayers,
+  setStartingPlayers,
   resetForceStart,
+  initForceStartDict,
   forceStartOptIn,
-  getRandomRoomAffix,
-  setRandomRoomAffix,
-  clearRandomRoomAffix,
   destroyWalls,
   spawnItem,
+  test,
   ...createOrchestrationMutators(orchestrationOptions),
 };
 
@@ -85,17 +85,14 @@ async function resetForceStart(tx) {
   tx.set("forceStart", undefined);
 }
 
-async function getRandomRoomAffix(tx) {
-  return (await tx.get("roomAffix")) ?? setRandomRoomAffix(tx);
-}
+async function initForceStartDict(tx) {
+  const roster = await getPlayerRoster(tx)
+  const forceStartDict = {};
+    roster.forEach((user) => {
+      forceStartDict[user] = false;
+    });
 
-async function setRandomRoomAffix(tx) {
-  const affix = nanoid(5);
-  tx.set("roomAffix", affix);
-}
-
-async function clearRandomRoomAffix(tx) {
-  tx.set("roomAffix", undefined);
+    tx.set("forceStart", forceStartDict)
 }
 
 async function forceStartOptIn(tx, userID) {
@@ -209,7 +206,7 @@ async function setBarricade(tx, barricadeData) {
   }
 }
 
-async function setStartingPlayers(tx, roster) {
+async function setStartingPlayers(tx) {
   const generateStartingPlayers = () => {
     const startingPlayers = [];
     for (let i = 1; i <= numPlayers; i++) {
@@ -218,12 +215,13 @@ async function setStartingPlayers(tx, roster) {
     return startingPlayers;
   };
 
+  const roster = await getPlayerRoster(tx);
+  console.log("mutators roster", roster)
   const numPlayers = roster.length;
   const startingPlayers = generateStartingPlayers();
+  console.log("mutators startingPlayers", startingPlayers)
 
-  await tx.set("startingPlayers", startingPlayers);
-
-  return startingPlayers;
+  tx.set("startingPlayers", startingPlayers);
 }
 
 async function getStartingPlayers(tx) {
@@ -252,12 +250,17 @@ async function addToPlayerRoster(tx, userName) {
 }
 
 async function removeFromPlayerRoster(tx, userName) {
+  console.log(`removing ${userName} from roster`)
   const roster = await getPlayerRoster(tx);
   const updatedRoster = roster.filter((user) => {
     return user !== userName;
   });
   console.log(updatedRoster)
   tx.set("roster", updatedRoster);
+}
+
+function test() {
+  console.log("test")
 }
 
 async function getPlayerPosition(tx, playerNum) {

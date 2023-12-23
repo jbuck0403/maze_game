@@ -74,10 +74,18 @@ const Lobby = () => {
   const startingPlayers = useSubscribe(r, (tx) => tx.get("startingPlayers"));
   const forceStartDict = useSubscribe(r, (tx) => tx.get("forceStart"));
 
+  console.log(startingPlayers);
+  useEffect(() => {
+    if (r) {
+      r.mutate.initForceStartDict();
+      r.mutate.setStartingPlayers();
+    }
+  }, [roster]);
+
   useEffect(() => {
     if (
       startingPlayers &&
-      (roster.length === orchestrationOptions.maxUsersPerRoom ||
+      (roster.length === orchestrationOptions.maxPerRoom ||
         (roster.length >= 2 && forceStartOptedIn >= 2))
     ) {
       if (roomAssignment.roomIsLocked === false) {
@@ -103,28 +111,29 @@ const Lobby = () => {
 
   const onWindowClose = (event) => {
     event.preventDefault();
-
-    if (roomAssignment && !roomAssignment.roomisLocked) {
-      r.mutate.removeFromPlayerRoster(r.userID);
-      r.mutate.setStartingPlayers(
-        roster.filter((user) => {
-          return user !== r.userID;
-        })
-      );
-      r.close();
-    }
+    r.mutate.test();
+    // if (roomAssignment && !roomAssignment.roomIsLocked) {
+    r.mutate.removeFromPlayerRoster(r.userID);
+    // r.mutate.setStartingPlayers()
+    r.close();
+    // }
   };
-  
+
   useEffect(() => {
+    console.log("adding event listener");
     window.addEventListener("unload", onWindowClose);
 
     return () => {
+      console.log("removing event listener from return");
       window.removeEventListener("unload", onWindowClose);
     };
-  }, []);
+  }, [r]);
 
   useEffect(() => {
-    window.removeEventListener("unload", onWindowClose);
+    if (forceStart) {
+      console.log("removing event listener via forceStart", forceStart);
+      window.removeEventListener("unload", onWindowClose);
+    }
 
     // if (roomAssignment) {
     //   setGameRoom(
@@ -150,7 +159,8 @@ const Lobby = () => {
 
   // console.log(forceStart, roomAssignment.roomIsLocked)
 
-  console.log(roster)
+  // console.log(roster, startingPlayers, forceStartDict, mazeTool)
+  console.log(roomAssignment, roomAssignment?.roomIsLocked);
 
   return (
     <>
@@ -159,25 +169,24 @@ const Lobby = () => {
           {roster.length == 1 && <h1>Waiting for Match...</h1>}
           {/* force start code to handle up to 4 players */}
           {roster.length >= 2 && (
-          <>
-            <div>
-              {roster.map((player, idx) => {
-                return <div key={`${player}${idx}`}>{player}</div>;
-              })}
-            </div>
-            <button onClick={() => handleForceStart()}>Force Start</button>
-            <div>{`${forceStartOptedIn}/${roster.length}`}</div>
-          </>
+            <>
+              <div>
+                {roster.map((player, idx) => {
+                  return <div key={`${player}${idx}`}>{player}</div>;
+                })}
+              </div>
+              <button onClick={() => handleForceStart()}>Force Start</button>
+              <div>{`${forceStartOptedIn}/${roster.length}`}</div>
+            </>
           )}
         </>
       )}
-      {roomAssignment && roomAssignment.roomIsLocked && (
-        <Game
-          r={r}
-          mazeTool={mazeTool}
-          startingPlayers={startingPlayers}
-        />
-      )}
+      {roomAssignment &&
+        roomAssignment.roomIsLocked &&
+        startingPlayers &&
+        mazeTool && (
+          <Game r={r} mazeTool={mazeTool} startingPlayers={startingPlayers} />
+        )}
     </>
   );
 };
