@@ -15,11 +15,11 @@ import Game from "../Game/Game";
 //tool imports
 import MazeTools from "../../mazeGeneration/mazeTools";
 import UserTools from "../../users/getUserID";
-import { nanoid } from "nanoid";
+// import { nanoid } from "nanoid";
 
 const userTool = new UserTools();
 let r;
-let playersInGame = [];
+// let playersInGame = [];jik
 
 // find the userid via firebase or cookies, in that order
 const userID = userTool.getUserID();
@@ -39,7 +39,7 @@ const Lobby = () => {
   const [mazeTool, setMazeTool] = useState();
   const [forceStartOptedIn, setForceStartOptedIn] = useState(0);
   const [forceStart, setForceStart] = useState(false);
-  const [gameRoom, setGameRoom] = useState();
+  // const [gameRoom, setGameRoom] = useState();
 
   useEffect(() => {
     if (!roomAssignment) {
@@ -53,7 +53,6 @@ const Lobby = () => {
       auth: userID,
       mutators,
     });
-    r.mutate.getRandomRoomAffix();
     r.mutate.addToPlayerRoster(userID);
 
     setMazeTool();
@@ -81,7 +80,10 @@ const Lobby = () => {
       (roster.length === orchestrationOptions.maxUsersPerRoom ||
         (roster.length >= 2 && forceStartOptedIn >= 2))
     ) {
-      setForceStart(true);
+      if (roomAssignment.roomIsLocked === false) {
+        setForceStart(true);
+        roomAssignment.lockRoom();
+      }
     }
   }, [forceStartOptedIn, roster]);
 
@@ -102,7 +104,7 @@ const Lobby = () => {
   const onWindowClose = (event) => {
     event.preventDefault();
 
-    if (!forceStart) {
+    if (roomAssignment && !roomAssignment.roomisLocked) {
       r.mutate.removeFromPlayerRoster(r.userID);
       r.mutate.setStartingPlayers(
         roster.filter((user) => {
@@ -112,7 +114,7 @@ const Lobby = () => {
       r.close();
     }
   };
-
+  
   useEffect(() => {
     window.addEventListener("unload", onWindowClose);
 
@@ -124,52 +126,56 @@ const Lobby = () => {
   useEffect(() => {
     window.removeEventListener("unload", onWindowClose);
 
-    if (roomAssignment) {
-      setGameRoom(
-        new Reflect({
-          server: server,
-          roomID: `game_${roomAssignment.roomID}`,
-          userID: userID,
-          auth: userID,
-          mutators,
-        })
-      );
-      playersInGame = startingPlayers;
-      r.mutate.removeFromPlayerRoster(userID);
-      r.close();
-    }
+    // if (roomAssignment) {
+    //   setGameRoom(
+    //     new Reflect({
+    //       server: server,
+    //       roomID: `game_${roomAssignment.roomID}`,
+    //       userID: userID,
+    //       auth: userID,
+    //       mutators,
+    //     })
+    //   );
+    //   playersInGame = startingPlayers;
+    //   // r.mutate.removeFromPlayerRoster(userID);
+    //   r.close();
+    // }
   }, [forceStart]);
 
-  useEffect(() => {
-    if (gameRoom) {
-      gameRoom.mutate.addToPlayerRoster(userID);
-    }
-  }, [gameRoom]);
+  // useEffect(() => {
+  //   if (gameRoom) {
+  //     gameRoom.mutate.addToPlayerRoster(userID);
+  //   }
+  // }, [gameRoom]);
+
+  // console.log(forceStart, roomAssignment.roomIsLocked)
+
+  console.log(roster)
 
   return (
     <>
-      {!forceStart && roster && (
+      {roomAssignment && !roomAssignment.roomIsLocked && roster && (
         <>
-          <h1>Waiting for Match...</h1>
+          {roster.length == 1 && <h1>Waiting for Match...</h1>}
           {/* force start code to handle up to 4 players */}
-          {/* <div>
-            {roster.map((player, idx) => {
-              return <div key={`${player}${idx}`}>{player}</div>;
-            })}
-          </div>
           {roster.length >= 2 && (
-            <>
-              <button onClick={() => handleForceStart()}>Force Start</button>
-              <div>{`${forceStartOptedIn}/${roster.length}`}</div>
-            </>
-          )} */}
+          <>
+            <div>
+              {roster.map((player, idx) => {
+                return <div key={`${player}${idx}`}>{player}</div>;
+              })}
+            </div>
+            <button onClick={() => handleForceStart()}>Force Start</button>
+            <div>{`${forceStartOptedIn}/${roster.length}`}</div>
+          </>
+          )}
         </>
       )}
-      {forceStart && gameRoom && (
+      {roomAssignment && roomAssignment.roomIsLocked && (
         <Game
-          r={gameRoom}
+          r={r}
           mazeTool={mazeTool}
-          startingPlayers={playersInGame}
+          startingPlayers={startingPlayers}
         />
       )}
     </>

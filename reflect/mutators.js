@@ -256,7 +256,7 @@ async function removeFromPlayerRoster(tx, userName) {
   const updatedRoster = roster.filter((user) => {
     return user !== userName;
   });
-
+  console.log(updatedRoster)
   tx.set("roster", updatedRoster);
 }
 
