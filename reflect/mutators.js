@@ -47,8 +47,38 @@ export const mutators = {
   setRandomRoomAffix,
   clearRandomRoomAffix,
   destroyWalls,
+  spawnItem,
   ...createOrchestrationMutators(orchestrationOptions),
 };
+
+async function spawnItem(itemToSpawn, numToSpawn, coords = false) {
+  const mazeCopy = await createMazeCopy(); // create a copy of the current state of the maze
+
+  const findRandomEmptySpace = () => {
+    const returnRandomSpace = () => {
+      return [
+        Math.floor(Math.random() * highestY),
+        Math.floor(Math.random() * highestX),
+      ];
+    };
+    const [highestY, highestX] = [maze.length - 1, maze[0].length - 1];
+    while (true) {
+      let [row, col] = returnRandomSpace();
+      if (maze[row][col] == emptySpace) return [row, col];
+    }
+  };
+
+  const addItemToMaze = async (row, col) => {
+    mazeCopy[row][col] = `${itemToSpawn}`;
+
+    updateMaze(mazeCopy);
+  };
+
+  for (let idx = 0; idx <= numToSpawn; idx++) {
+    const [row, col] = coords ? coords : findRandomEmptySpace();
+    addItemToMaze(row, col);
+  }
+}
 
 async function resetForceStart(tx) {
   tx.set("forceStart", undefined);

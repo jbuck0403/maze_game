@@ -77,7 +77,7 @@ const Lobby = () => {
   useEffect(() => {
     if (
       startingPlayers &&
-      (roster.length == orchestrationOptions.maxUsersPerRoom ||
+      (roster.length === orchestrationOptions.maxUsersPerRoom ||
         (roster.length >= 2 && forceStartOptedIn >= 2))
     ) {
       setForceStart(true);
@@ -149,7 +149,7 @@ const Lobby = () => {
     <>
       {!forceStart && roster && (
         <>
-          <div>Waiting for Match...</div>
+          <h1>Waiting for Match...</h1>
           {/* force start code to handle up to 4 players */}
           {/* <div>
             {roster.map((player, idx) => {
