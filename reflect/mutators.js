@@ -20,9 +20,10 @@ import { createMazeFromBlocks } from "../src/mazeGeneration/mazeGenerator";
 import MazeMovement from "../src/mazeGeneration/mazeMovement";
 import { emptySpace, wall } from "../src/mazeGeneration/mazeGenerator";
 // import { createOrchestrationMutators } from "reflect-orchestrator";
-import { createOrchestrationMutators } from "@rocicorp/reflect-orchestrator";
+// import { createOrchestrationMutators } from "@rocicorp/reflect-orchestrator";
 import { orchestrationOptions } from "./orchestration-options";
 import { nanoid } from "nanoid";
+import { createOrchestrationMutators } from "reflect-orchestrator";
 
 const mazeSize = 8;
 const mazeMoveTool = new MazeMovement();
