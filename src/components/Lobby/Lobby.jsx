@@ -16,7 +16,9 @@ import Game from "../Game/Game";
 //tool imports
 import MazeTools from "../../mazeGeneration/mazeTools";
 import UserTools from "../../users/getUserID";
-// import { nanoid } from "nanoid";
+import { useNavigate } from "react-router-dom";
+import { nanoid } from "nanoid";
+import CookieTools from "../../cookies/cookies";
 
 const userTool = new UserTools();
 let r;
@@ -27,6 +29,9 @@ const userID = userTool.getUserID();
 const server = "http://localhost:8080";
 
 const Lobby = () => {
+  // const userID = nanoid();
+  const navigate = useNavigate();
+  console.log(userID);
   const roomAssignment = useOrchestration(
     {
       server: server,
@@ -73,7 +78,7 @@ const Lobby = () => {
     r,
     (tx) => tx.get("gameInProgress") ?? false
   );
-  const startingPlayers = useSubscribe(r, (tx) => tx.get("startingPlayers"));
+  // const startingPlayers = useSubscribe(r, (tx) => tx.get("startingPlayers"));
   const [forceStartOptedIn, setForceStartOptedIn] = useState(0);
 
   const roster = useSubscribe(r, (tx) => tx.get("roster"));
@@ -98,26 +103,26 @@ const Lobby = () => {
   );
 
   useEffect(() => {
-    if (!gameInProgress) {
-      if (
-        r &&
-        presentUsers &&
-        !presentUsers.includes(undefined) &&
-        presentUsers.length > 0
-      ) {
-        console.log(presentUsers);
-        r.mutate.initRoster(presentUsers);
-      }
+    // if (!gameInProgress) {
+    if (
+      r &&
+      presentUsers &&
+      !presentUsers.includes(undefined) &&
+      presentUsers.length > 0
+    ) {
+      console.log(presentUsers);
+      r.mutate.initRoster(presentUsers);
     }
+    // }
   }, [presentUsers]);
 
   useEffect(() => {
-    if (!gameInProgress) {
-      if (r) {
-        r.mutate.initForceStartDict();
-        r.mutate.setStartingPlayers();
-      }
+    // if (!gameInProgress) {
+    if (r) {
+      r.mutate.initForceStartDict();
+      r.mutate.setStartingPlayers();
     }
+    // }
   }, [roster]);
 
   useEffect(() => {
@@ -135,30 +140,59 @@ const Lobby = () => {
   }, [forceStartOptedIn, roster]);
 
   useEffect(() => {
-    if (!gameInProgress) {
-      if (forceStartDict !== undefined) {
-        setForceStartOptedIn(
-          Object.keys(forceStartDict).reduce((acc, key) => {
-            if (forceStartDict[key]) {
-              acc += 1;
-            }
+    // if (!gameInProgress) {
+    if (forceStartDict !== undefined) {
+      setForceStartOptedIn(
+        Object.keys(forceStartDict).reduce((acc, key) => {
+          if (forceStartDict[key]) {
+            acc += 1;
+          }
 
-            return acc;
-          }, 0)
-        );
-      }
+          return acc;
+        }, 0)
+      );
+      // }
     }
   }, [forceStartDict]);
 
   console.log(
+    presentUsers,
     roomAssignment,
     gameInProgress,
     roster,
     startingPlayers,
     roomAssignment?.roomIsLocked
   );
+
+  const leavingGameRoom = () => {
+    r.mutate.removeFromPlayerRoster(r.userID);
+    userTool.clearUserIDCookie();
+    r.close();
+  };
+
+  useEffect(() => {
+    window.addEventListener("unload", () => {
+      leavingGameRoom();
+      // r.mutate.stopGame();
+      // r.close();
+    });
+
+    window.addEventListener("beforeunload", (e) => {
+      e.preventDefault();
+      e.returnValue = "";
+    });
+  }, []);
+
   return (
     <>
+      <button
+        onClick={() => {
+          leavingGameRoom();
+          navigate("/");
+        }}
+      >
+        Home
+      </button>
       {!gameInProgress && !roomAssignment?.roomIsLocked && roster && (
         <>
           {roster.length == 1 && <h1>Waiting for Match...</h1>}

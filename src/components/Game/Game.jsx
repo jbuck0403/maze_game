@@ -31,7 +31,7 @@ let lastWallBreakTime = 0;
 // const userID = userTool.getUserID();
 
 function Game({ r, mazeTool, startingPlayers }) {
-  console.log(startingPlayers, "!!!", mazeTool);
+  const startingPlayers = useSubscribe(r, (tx) => tx.get("startingPlayers"));
   // console.log(r);
   // Add event listener when the component mounts
   useEffect(() => {

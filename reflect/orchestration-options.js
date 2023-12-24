@@ -1,5 +1,5 @@
 export const orchestrationOptions = {
   maxPerRoom: 4,
   assignBy: "user",
-  roomAssignmentTimeoutMs: 15,
+  // roomAssignmentTimeoutMs: 10000,
 };

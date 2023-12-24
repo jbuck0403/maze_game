@@ -54,6 +54,7 @@ export const mutators = {
   initRoster,
   clientList,
   startGame,
+  stopGame,
   ...createOrchestrationMutators(orchestrationOptions),
 };
 
@@ -61,8 +62,11 @@ async function startGame(tx) {
   tx.set("gameInProgress", true);
 }
 
+async function stopGame(tx) {
+  tx.set("gameInProgress", false);
+}
+
 async function initRoster(tx, presentUsers) {
-  console.log(presentUsers);
   tx.set("roster", presentUsers);
 }
 
@@ -277,12 +281,12 @@ async function addToPlayerRoster(tx, userName) {
 }
 
 async function removeFromPlayerRoster(tx, userName) {
-  // console.log(`removing ${userName} from roster`)
+  console.log(`removing ${userName} from roster`);
   const roster = await getPlayerRoster(tx);
   const updatedRoster = roster.filter((user) => {
     return user !== userName;
   });
-  // console.log(updatedRoster)
+  console.log(updatedRoster);
   tx.set("roster", updatedRoster);
 }
 
