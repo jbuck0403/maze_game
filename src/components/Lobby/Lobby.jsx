@@ -1,10 +1,11 @@
 //reflect imports
 import { Reflect } from "@rocicorp/reflect/client";
-import { useSubscribe } from "@rocicorp/reflect/react";
+import { useSubscribe, usePresence } from "@rocicorp/reflect/react";
 // import { useOrchestration } from "@rocicorp/reflect-orchestrator";
 import { useOrchestration } from "reflect-orchestrator";
 import { orchestrationOptions } from "../../../reflect/orchestration-options";
 import { mutators } from "../../../reflect/mutators";
+import { listClients } from "../../../reflect/mutators";
 
 //react imports
 import { useState, useEffect } from "react";
@@ -53,7 +54,8 @@ const Lobby = () => {
       auth: userID,
       mutators,
     });
-    r.mutate.addToPlayerRoster(userID);
+    // r.mutate.addToPlayerRoster(userID);
+    r.mutate.initClient();
 
     setMazeTool();
     return () => {
@@ -73,8 +75,33 @@ const Lobby = () => {
   const roster = useSubscribe(r, (tx) => tx.get("roster"));
   const startingPlayers = useSubscribe(r, (tx) => tx.get("startingPlayers"));
   const forceStartDict = useSubscribe(r, (tx) => tx.get("forceStart"));
+  const presentClientIDs = usePresence(r);
+  const presentUsers = useSubscribe(
+    r,
+    async (tx) => {
+      const clients = await listClients(tx);
+      const filteredUserIDs = clients
+        .filter((c) => presentClientIDs.indexOf(c.id) > -1)
+        .map((c) => {
+          if (c.userID !== null) {
+            return c.userID;
+          }
+        });
+      const userIDSet = new Set(filteredUserIDs);
+      return [...userIDSet];
+    },
+    [],
+    [presentClientIDs]
+  );
 
-  console.log(startingPlayers);
+  console.log(presentUsers);
+  useEffect(() => {
+    if (r && presentUsers && presentUsers.length > 0) {
+      r.mutate.initRoster(presentUsers);
+    }
+  }, [presentUsers]);
+
+  // console.log(startingPlayers);
   useEffect(() => {
     if (r) {
       r.mutate.initForceStartDict();
@@ -109,47 +136,46 @@ const Lobby = () => {
     }
   }, [forceStartDict]);
 
-  const onWindowClose = (event) => {
-    event.preventDefault();
-    r.mutate.test();
-    // if (roomAssignment && !roomAssignment.roomIsLocked) {
-    r.mutate.removeFromPlayerRoster(r.userID);
-    // r.mutate.setStartingPlayers()
-    r.close();
-    // }
-  };
+  // const onWindowClose = (event) => {
+  //   // event.preventDefault();
+  //   r.mutate.test();
+  //   // if (roomAssignment && !roomAssignment.roomIsLocked) {
+  //   r.mutate.removeFromPlayerRoster(r.userID);
+  //   // r.mutate.setStartingPlayers()
+  //   r.close();
+  //   // }
+  // };
 
-  useEffect(() => {
-    console.log("adding event listener");
-    window.addEventListener("unload", onWindowClose);
+  // useEffect(() => {
+  //   // console.log("adding event listener");
+  //   window.addEventListener("unload", onWindowClose);
 
-    return () => {
-      console.log("removing event listener from return");
-      window.removeEventListener("unload", onWindowClose);
-    };
-  }, [r]);
+  //   // return () => {
+  //   //   // onWindowClose();
+  //   //   window.removeEventListener("unload", onWindowClose);
+  //   // };
+  // });
 
-  useEffect(() => {
-    if (forceStart) {
-      console.log("removing event listener via forceStart", forceStart);
-      window.removeEventListener("unload", onWindowClose);
-    }
+  // useEffect(() => {
+  //   if (forceStart) {
+  //     window.removeEventListener("unload", onWindowClose);
+  //   }
 
-    // if (roomAssignment) {
-    //   setGameRoom(
-    //     new Reflect({
-    //       server: server,
-    //       roomID: `game_${roomAssignment.roomID}`,
-    //       userID: userID,
-    //       auth: userID,
-    //       mutators,
-    //     })
-    //   );
-    //   playersInGame = startingPlayers;
-    //   // r.mutate.removeFromPlayerRoster(userID);
-    //   r.close();
-    // }
-  }, [forceStart]);
+  //   // if (roomAssignment) {
+  //   //   setGameRoom(
+  //   //     new Reflect({
+  //   //       server: server,
+  //   //       roomID: `game_${roomAssignment.roomID}`,
+  //   //       userID: userID,
+  //   //       auth: userID,
+  //   //       mutators,
+  //   //     })
+  //   //   );
+  //   //   playersInGame = startingPlayers;
+  //   //   // r.mutate.removeFromPlayerRoster(userID);
+  //   //   r.close();
+  //   // }
+  // }, [forceStart]);
 
   // useEffect(() => {
   //   if (gameRoom) {
@@ -160,7 +186,7 @@ const Lobby = () => {
   // console.log(forceStart, roomAssignment.roomIsLocked)
 
   // console.log(roster, startingPlayers, forceStartDict, mazeTool)
-  console.log(roomAssignment, roomAssignment?.roomIsLocked);
+  // console.log(roomAssignment, roomAssignment?.roomIsLocked);
 
   return (
     <>

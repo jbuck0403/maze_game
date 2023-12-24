@@ -24,6 +24,7 @@ import { emptySpace, wall } from "../src/mazeGeneration/mazeGenerator";
 import { orchestrationOptions } from "./orchestration-options";
 import { nanoid } from "nanoid";
 import { createOrchestrationMutators } from "reflect-orchestrator";
+import { generate } from "@rocicorp/rails";
 
 const mazeSize = 8;
 const mazeMoveTool = new MazeMovement();
@@ -49,8 +50,29 @@ export const mutators = {
   destroyWalls,
   spawnItem,
   test,
+  initClient,
+  initRoster,
+  clientList,
   ...createOrchestrationMutators(orchestrationOptions),
 };
+
+async function initRoster(tx, presentUsers) {
+  console.log(presentUsers);
+  tx.set("roster", presentUsers);
+}
+
+export const { init: initClientHelper, list: listClients } = generate("client");
+
+async function initClient(tx) {
+  await initClientHelper(tx, {
+    id: tx.clientID,
+    userID: tx.auth?.userID ?? null,
+  });
+}
+
+async function clientList(tx) {
+  return await listClients(tx);
+}
 
 async function spawnItem(itemToSpawn, numToSpawn, coords = false) {
   const mazeCopy = await createMazeCopy(); // create a copy of the current state of the maze
@@ -86,13 +108,13 @@ async function resetForceStart(tx) {
 }
 
 async function initForceStartDict(tx) {
-  const roster = await getPlayerRoster(tx)
+  const roster = await getPlayerRoster(tx);
   const forceStartDict = {};
-    roster.forEach((user) => {
-      forceStartDict[user] = false;
-    });
+  roster.forEach((user) => {
+    forceStartDict[user] = false;
+  });
 
-    tx.set("forceStart", forceStartDict)
+  tx.set("forceStart", forceStartDict);
 }
 
 async function forceStartOptIn(tx, userID) {
@@ -216,10 +238,10 @@ async function setStartingPlayers(tx) {
   };
 
   const roster = await getPlayerRoster(tx);
-  console.log("mutators roster", roster)
+  // console.log("mutators roster", roster);
   const numPlayers = roster.length;
   const startingPlayers = generateStartingPlayers();
-  console.log("mutators startingPlayers", startingPlayers)
+  // console.log("mutators startingPlayers", startingPlayers);
 
   tx.set("startingPlayers", startingPlayers);
 }
@@ -250,17 +272,17 @@ async function addToPlayerRoster(tx, userName) {
 }
 
 async function removeFromPlayerRoster(tx, userName) {
-  console.log(`removing ${userName} from roster`)
+  // console.log(`removing ${userName} from roster`)
   const roster = await getPlayerRoster(tx);
   const updatedRoster = roster.filter((user) => {
     return user !== userName;
   });
-  console.log(updatedRoster)
+  // console.log(updatedRoster)
   tx.set("roster", updatedRoster);
 }
 
 function test() {
-  console.log("test")
+  console.log("test");
 }
 
 async function getPlayerPosition(tx, playerNum) {
