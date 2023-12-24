@@ -7,6 +7,7 @@ import { useSubscribe } from "@rocicorp/reflect/react";
 
 //component imports
 import MazeComponent from "../Maze/Maze";
+import MazeTools from "../../mazeGeneration/mazeTools";
 
 //custom game tool imports
 // import MazeTools from "../../mazeGeneration/mazeTools";
@@ -26,13 +27,11 @@ let keyDown = [];
 let movementTimeoutID;
 let lastWallBreakTime = 0;
 
-//find the userid via firebase or cookies, in that order
-// const userTool = new UserTools();
-// const userID = userTool.getUserID();
+function Game({ r, startingPlayers }) {
+  console.log(r);
+  const mazeTool = new MazeTools(r);
+  console.log(startingPlayers);
 
-function Game({ r, mazeTool, startingPlayers }) {
-  const startingPlayers = useSubscribe(r, (tx) => tx.get("startingPlayers"));
-  // console.log(r);
   // Add event listener when the component mounts
   useEffect(() => {
     function handleCharacterMovement() {
@@ -49,7 +48,7 @@ function Game({ r, mazeTool, startingPlayers }) {
           else if (keyDown[0] === "d") moveDirection = "RIGHT";
 
           // if a key is being pressed
-          if (moveDirection) {
+          if (moveDirection && startingPlayers) {
             // process the key press into player movement
             r.mutate.updatePlayerPosition({
               direction: moveDirection,
@@ -67,7 +66,7 @@ function Game({ r, mazeTool, startingPlayers }) {
       const { key } = event;
 
       if (["w", "a", "s", "d"].includes(key)) {
-        if (!keyDown.includes(key)) {
+        if (!keyDown.includes(key) && startingPlayers) {
           //do initial movement immediately on key press
           r.mutate.updatePlayerPosition({
             direction: key,
@@ -143,19 +142,25 @@ function Game({ r, mazeTool, startingPlayers }) {
   playerNum = roster.findIndex((player) => player === r.userID) + 1;
   console.log(roster);
 
-  // maintain a record of all player positions
-  const playerPositions = startingPlayers.map((player) => {
-    return useSubscribe(r, (tx) => tx.get(`position${player}`), [0, 0]);
-  });
+  if (startingPlayers) {
+    // maintain a record of all player positions
+    const playerPositions = startingPlayers.map((player) => {
+      return useSubscribe(r, (tx) => tx.get(`position${player}`), [0, 0]);
+    });
 
-  useEffect(() => {
-    // show player colors
-    if (playerPositions) {
-      startingPlayers.forEach((player, idx) => {
-        mazeTool.highlightCell(playerPositions[idx], player);
-      });
-    }
-  }, [playerPositions]);
+    startingPlayers.forEach((player, idx) => {
+      mazeTool.highlightCell(playerPositions[idx], player);
+    });
+  }
+
+  // useEffect(() => {
+  //   // show player colors
+  //   if (playerPositions) {
+  //     startingPlayers.forEach((player, idx) => {
+  //       mazeTool.highlightCell(playerPositions[idx], player);
+  //     });
+  //   }
+  // }, [playerPositions]);
 
   return <>{mazeTool && roster && <MazeComponent maze={maze} />}</>;
 }

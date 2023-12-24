@@ -28,10 +28,17 @@ let r;
 const userID = userTool.getUserID();
 const server = "http://localhost:8080";
 
-const Lobby = () => {
+const Lobby = ({ setGameRoom, gameRoom, setStartingPlayers }) => {
   // const userID = nanoid();
   const navigate = useNavigate();
   console.log(userID);
+
+  useEffect(() => {
+    if (gameRoom) {
+      navigate("/game");
+    }
+  }, [gameRoom, navigate]);
+
   const roomAssignment = useOrchestration(
     {
       server: server,
@@ -42,7 +49,7 @@ const Lobby = () => {
     orchestrationOptions
   );
 
-  const [mazeTool, setMazeTool] = useState();
+  console.log(roomAssignment);
 
   useEffect(() => {
     if (!roomAssignment) {
@@ -57,30 +64,30 @@ const Lobby = () => {
       mutators,
     });
 
+    console.log(r);
     r.mutate.initClient();
 
-    setMazeTool();
     return () => {
       r = undefined;
     };
   }, [roomAssignment]);
 
-  useEffect(() => {
-    const mazeToolInit = new MazeTools(r);
-    setMazeTool(mazeToolInit);
-  }, [r]);
+  // useEffect(() => {
+  //   const mazeToolInit = new MazeTools(r);
+  //   setMazeTool(mazeToolInit);
+  // }, [r]);
 
   const handleForceStart = () => {
     r.mutate.forceStartOptIn(r.userID);
   };
 
-  const gameInProgress = useSubscribe(
-    r,
-    (tx) => tx.get("gameInProgress") ?? false
-  );
-  // const startingPlayers = useSubscribe(r, (tx) => tx.get("startingPlayers"));
+  // const gameInProgress = useSubscribe(
+  //   r,
+  //   (tx) => tx.get("gameInProgress") ?? false
+  // );
   const [forceStartOptedIn, setForceStartOptedIn] = useState(0);
 
+  const startingPlayers = useSubscribe(r, (tx) => tx.get("startingPlayers"));
   const roster = useSubscribe(r, (tx) => tx.get("roster"));
   const forceStartDict = useSubscribe(r, (tx) => tx.get("forceStart"));
   const presentClientIDs = usePresence(r);
@@ -102,72 +109,95 @@ const Lobby = () => {
     [presentClientIDs]
   );
 
+  console.log(presentClientIDs);
+
+  if (roomAssignment) {
+    console.log(roster, forceStartDict, presentClientIDs, presentUsers);
+  }
+
   useEffect(() => {
-    // if (!gameInProgress) {
-    if (
-      r &&
-      presentUsers &&
-      !presentUsers.includes(undefined) &&
-      presentUsers.length > 0
-    ) {
-      console.log(presentUsers);
-      r.mutate.initRoster(presentUsers);
+    if (roomAssignment) {
+      if (
+        r &&
+        presentUsers &&
+        !presentUsers.includes(undefined) &&
+        presentUsers.length > 0
+      ) {
+        console.log(presentUsers);
+        r.mutate.initRoster(presentUsers);
+      }
     }
-    // }
   }, [presentUsers]);
 
   useEffect(() => {
-    // if (!gameInProgress) {
-    if (r) {
-      r.mutate.initForceStartDict();
-      r.mutate.setStartingPlayers();
+    if (roomAssignment) {
+      if (r) {
+        r.mutate.initForceStartDict();
+        r.mutate.setStartingPlayers();
+      }
     }
-    // }
   }, [roster]);
 
   useEffect(() => {
-    if (
-      startingPlayers &&
-      (roster.length === orchestrationOptions.maxPerRoom ||
-        (roster.length >= 2 && forceStartOptedIn >= 2))
-    ) {
-      if (roomAssignment.roomIsLocked === false) {
-        console.log("locking room and starting game");
-        roomAssignment.lockRoom();
-        r.mutate.startGame();
+    if (roomAssignment) {
+      if (
+        startingPlayers &&
+        (roster.length === orchestrationOptions.maxPerRoom ||
+          (roster.length >= 2 && forceStartOptedIn >= 2))
+      ) {
+        if (roomAssignment.roomIsLocked === false) {
+          roomAssignment.lockRoom();
+          setGameRoom(r);
+          setStartingPlayers(startingPlayers);
+          // r.mutate.removeFromPlayerRoster(r.userID);
+          // const gameRoom = new Reflect({
+          //   server: server,
+          //   roomID: roster.join(""),
+          //   userID: userID,
+          //   auth: userID,
+          //   mutators,
+          // });
+          // console.log(gameRoom);
+          // gameRoom.mutate.setStartingPlayers(startingPlayers);
+          // gameRoom.mutate.addToPlayerRoster(r.userID);
+          // gameRoom.mutate.setGameRoom(gameRoom);
+          // setGameRoom(
+          //   new Reflect({
+          //     server: server,
+          //     roomID: `${roster.join("")}`,
+          //     userID: userID,
+          //     auth: userID,
+          //     mutators,
+          //   })
+          // );
+          // navigate("/game");
+          // r.close();
+          // r.mutate.startGame();
+        }
       }
     }
   }, [forceStartOptedIn, roster]);
 
   useEffect(() => {
-    // if (!gameInProgress) {
-    if (forceStartDict !== undefined) {
-      setForceStartOptedIn(
-        Object.keys(forceStartDict).reduce((acc, key) => {
-          if (forceStartDict[key]) {
-            acc += 1;
-          }
+    if (roomAssignment) {
+      if (forceStartDict !== undefined) {
+        setForceStartOptedIn(
+          Object.keys(forceStartDict).reduce((acc, key) => {
+            if (forceStartDict[key]) {
+              acc += 1;
+            }
 
-          return acc;
-        }, 0)
-      );
-      // }
+            return acc;
+          }, 0)
+        );
+      }
     }
   }, [forceStartDict]);
 
-  console.log(
-    presentUsers,
-    roomAssignment,
-    gameInProgress,
-    roster,
-    startingPlayers,
-    roomAssignment?.roomIsLocked
-  );
-
   const leavingGameRoom = () => {
-    r.mutate.removeFromPlayerRoster(r.userID);
+    // r.mutate.removeFromPlayerRoster(r.userID);
     userTool.clearUserIDCookie();
-    r.close();
+    // r.close();
   };
 
   useEffect(() => {
@@ -183,6 +213,10 @@ const Lobby = () => {
     });
   }, []);
 
+  if (roomAssignment) {
+    console.log(roster);
+  }
+
   return (
     <>
       <button
@@ -193,7 +227,7 @@ const Lobby = () => {
       >
         Home
       </button>
-      {!gameInProgress && !roomAssignment?.roomIsLocked && roster && (
+      {roster && (
         <>
           {roster.length == 1 && <h1>Waiting for Match...</h1>}
           {/* force start code to handle up to 4 players */}
@@ -210,15 +244,6 @@ const Lobby = () => {
           )}
         </>
       )}
-
-      <>
-        {gameInProgress &&
-          roomAssignment?.roomIsLocked &&
-          startingPlayers &&
-          mazeTool && (
-            <Game r={r} mazeTool={mazeTool} startingPlayers={startingPlayers} />
-          )}
-      </>
     </>
   );
 };

@@ -8,22 +8,30 @@ import Game from "./components/Game/Game";
 import { useNavigate } from "react-router-dom";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { nanoid } from "nanoid";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function App() {
   const [gameRoom, setGameRoom] = useState();
-
-  const getUserID = () => {
-    const userID = nanoid();
-    return userID;
-  };
+  const [startingPlayers, setStartingPlayers] = useState();
 
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/lobby" element={<Lobby setGameRoom={setGameRoom} />} />
-        <Route path="/game" element={<Game />} />
+        <Route
+          path="/lobby"
+          element={
+            <Lobby
+              setGameRoom={setGameRoom}
+              gameRoom={gameRoom}
+              setStartingPlayers={setStartingPlayers}
+            />
+          }
+        />
+        <Route
+          path="/game"
+          element={<Game r={gameRoom} startingPlayers={startingPlayers} />}
+        />
       </Routes>
     </Router>
   );
