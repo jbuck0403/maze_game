@@ -18,4 +18,8 @@ export default class CookieTools {
 
     return value;
   }
+
+  clearCookie(name) {
+    document.cookie = `${name}=DELETING;expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
+  }
 }

@@ -53,8 +53,13 @@ export const mutators = {
   initClient,
   initRoster,
   clientList,
+  startGame,
   ...createOrchestrationMutators(orchestrationOptions),
 };
+
+async function startGame(tx) {
+  tx.set("gameInProgress", true);
+}
 
 async function initRoster(tx, presentUsers) {
   console.log(presentUsers);

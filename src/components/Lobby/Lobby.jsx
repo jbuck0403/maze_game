@@ -20,7 +20,7 @@ import UserTools from "../../users/getUserID";
 
 const userTool = new UserTools();
 let r;
-// let playersInGame = [];jik
+// let playersInGame = [];
 
 // find the userid via firebase or cookies, in that order
 const userID = userTool.getUserID();
@@ -38,9 +38,6 @@ const Lobby = () => {
   );
 
   const [mazeTool, setMazeTool] = useState();
-  const [forceStartOptedIn, setForceStartOptedIn] = useState(0);
-  const [forceStart, setForceStart] = useState(false);
-  // const [gameRoom, setGameRoom] = useState();
 
   useEffect(() => {
     if (!roomAssignment) {
@@ -54,7 +51,7 @@ const Lobby = () => {
       auth: userID,
       mutators,
     });
-    // r.mutate.addToPlayerRoster(userID);
+
     r.mutate.initClient();
 
     setMazeTool();
@@ -72,8 +69,14 @@ const Lobby = () => {
     r.mutate.forceStartOptIn(r.userID);
   };
 
-  const roster = useSubscribe(r, (tx) => tx.get("roster"));
+  const gameInProgress = useSubscribe(
+    r,
+    (tx) => tx.get("gameInProgress") ?? false
+  );
   const startingPlayers = useSubscribe(r, (tx) => tx.get("startingPlayers"));
+  const [forceStartOptedIn, setForceStartOptedIn] = useState(0);
+
+  const roster = useSubscribe(r, (tx) => tx.get("roster"));
   const forceStartDict = useSubscribe(r, (tx) => tx.get("forceStart"));
   const presentClientIDs = usePresence(r);
   const presentUsers = useSubscribe(
@@ -83,7 +86,7 @@ const Lobby = () => {
       const filteredUserIDs = clients
         .filter((c) => presentClientIDs.indexOf(c.id) > -1)
         .map((c) => {
-          if (c.userID !== null) {
+          if (c.userID !== null && c.userID !== undefined) {
             return c.userID;
           }
         });
@@ -94,18 +97,26 @@ const Lobby = () => {
     [presentClientIDs]
   );
 
-  console.log(presentUsers);
   useEffect(() => {
-    if (r && presentUsers && presentUsers.length > 0) {
-      r.mutate.initRoster(presentUsers);
+    if (!gameInProgress) {
+      if (
+        r &&
+        presentUsers &&
+        !presentUsers.includes(undefined) &&
+        presentUsers.length > 0
+      ) {
+        console.log(presentUsers);
+        r.mutate.initRoster(presentUsers);
+      }
     }
   }, [presentUsers]);
 
-  // console.log(startingPlayers);
   useEffect(() => {
-    if (r) {
-      r.mutate.initForceStartDict();
-      r.mutate.setStartingPlayers();
+    if (!gameInProgress) {
+      if (r) {
+        r.mutate.initForceStartDict();
+        r.mutate.setStartingPlayers();
+      }
     }
   }, [roster]);
 
@@ -116,81 +127,39 @@ const Lobby = () => {
         (roster.length >= 2 && forceStartOptedIn >= 2))
     ) {
       if (roomAssignment.roomIsLocked === false) {
-        setForceStart(true);
+        console.log("locking room and starting game");
         roomAssignment.lockRoom();
+        r.mutate.startGame();
       }
     }
   }, [forceStartOptedIn, roster]);
 
   useEffect(() => {
-    if (forceStartDict !== undefined) {
-      setForceStartOptedIn(
-        Object.keys(forceStartDict).reduce((acc, key) => {
-          if (forceStartDict[key]) {
-            acc += 1;
-          }
+    if (!gameInProgress) {
+      if (forceStartDict !== undefined) {
+        setForceStartOptedIn(
+          Object.keys(forceStartDict).reduce((acc, key) => {
+            if (forceStartDict[key]) {
+              acc += 1;
+            }
 
-          return acc;
-        }, 0)
-      );
+            return acc;
+          }, 0)
+        );
+      }
     }
   }, [forceStartDict]);
 
-  // const onWindowClose = (event) => {
-  //   // event.preventDefault();
-  //   r.mutate.test();
-  //   // if (roomAssignment && !roomAssignment.roomIsLocked) {
-  //   r.mutate.removeFromPlayerRoster(r.userID);
-  //   // r.mutate.setStartingPlayers()
-  //   r.close();
-  //   // }
-  // };
-
-  // useEffect(() => {
-  //   // console.log("adding event listener");
-  //   window.addEventListener("unload", onWindowClose);
-
-  //   // return () => {
-  //   //   // onWindowClose();
-  //   //   window.removeEventListener("unload", onWindowClose);
-  //   // };
-  // });
-
-  // useEffect(() => {
-  //   if (forceStart) {
-  //     window.removeEventListener("unload", onWindowClose);
-  //   }
-
-  //   // if (roomAssignment) {
-  //   //   setGameRoom(
-  //   //     new Reflect({
-  //   //       server: server,
-  //   //       roomID: `game_${roomAssignment.roomID}`,
-  //   //       userID: userID,
-  //   //       auth: userID,
-  //   //       mutators,
-  //   //     })
-  //   //   );
-  //   //   playersInGame = startingPlayers;
-  //   //   // r.mutate.removeFromPlayerRoster(userID);
-  //   //   r.close();
-  //   // }
-  // }, [forceStart]);
-
-  // useEffect(() => {
-  //   if (gameRoom) {
-  //     gameRoom.mutate.addToPlayerRoster(userID);
-  //   }
-  // }, [gameRoom]);
-
-  // console.log(forceStart, roomAssignment.roomIsLocked)
-
-  // console.log(roster, startingPlayers, forceStartDict, mazeTool)
-  // console.log(roomAssignment, roomAssignment?.roomIsLocked);
-
+  console.log(
+    roomAssignment,
+    gameInProgress,
+    roster,
+    startingPlayers,
+    roomAssignment?.roomIsLocked
+  );
   return (
     <>
-      {roomAssignment && !roomAssignment.roomIsLocked && roster && (
+      {!gameInProgress && !roomAssignment?.roomIsLocked && roster && (
         <>
           {roster.length == 1 && <h1>Waiting for Match...</h1>}
           {/* force start code to handle up to 4 players */}
@@ -207,13 +176,17 @@ const Lobby = () => {
           )}
         </>
       )}
-      {roomAssignment &&
-        roomAssignment.roomIsLocked &&
-        startingPlayers &&
-        mazeTool && (
-          <Game r={r} mazeTool={mazeTool} startingPlayers={startingPlayers} />
-        )}
+
+      <>
+        {gameInProgress &&
+          roomAssignment?.roomIsLocked &&
+          startingPlayers &&
+          mazeTool && (
+            <Game r={r} mazeTool={mazeTool} startingPlayers={startingPlayers} />
+          )}
+      </>
     </>
   );
 };
+
 export default Lobby;

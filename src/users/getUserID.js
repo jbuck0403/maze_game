@@ -16,4 +16,8 @@ export default class UserTools {
 
     return userID;
   }
+
+  clearUserIDCookie() {
+    cookieTool.clearCookie("userID");
+  }
 }
