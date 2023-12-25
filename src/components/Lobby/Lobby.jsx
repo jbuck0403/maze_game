@@ -18,11 +18,6 @@ import { useNavigate } from "react-router-dom";
 import UserTools from "../../users/getUserID";
 
 const userTool = new UserTools();
-// let r;
-
-// find the userid via firebase or cookies, in that order
-// const userID = userTool.getUserID();
-// const server = "http://localhost:8080";
 
 const Lobby = ({
   setGameRoom,
@@ -30,6 +25,7 @@ const Lobby = ({
   setStartingPlayers,
   roomAssignment,
 }) => {
+  //protected route logic
   const navigate = useNavigate();
   const context = useContext(NavigationContext);
 
@@ -43,6 +39,7 @@ const Lobby = ({
     context.setHasVisitedLobby(true);
   });
 
+  //lobby logic
   const userID = userTool.getUserID();
 
   const [r, setR] = useState();

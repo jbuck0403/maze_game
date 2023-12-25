@@ -1,19 +1,23 @@
 //imports
 import "./App.css";
 
-// import UserTools from "./users/getUserID";
+//react imports
+import React from "react";
+import { useState } from "react";
+import { Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+//reflect imports
+import { useOrchestration } from "reflect-orchestrator";
+import { orchestrationOptions } from "../reflect/orchestration-options";
+
+//component imports
 import Lobby from "./components/Lobby/Lobby";
 import Home from "./components/Home/Home";
 import Game from "./components/Game/Game";
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { nanoid } from "nanoid";
-import { useState, useContext } from "react";
-import { orchestrationOptions } from "../reflect/orchestration-options";
-import { useOrchestration } from "reflect-orchestrator";
+
+//custom tool imports
 import UserTools from "./users/getUserID";
-import { usePresence } from "@rocicorp/reflect/react";
-import { Navigate } from "react-router-dom";
 
 const userTool = new UserTools();
 export const server = "http://localhost:8080";
@@ -25,6 +29,8 @@ export const NavigationContext = React.createContext({
   setHasVisitedLobby: () => {},
   resetNavigation: () => {},
   homeRoute: "/",
+  lobbyRoute: "/lobby",
+  gameRoute: "/game",
 });
 
 function App() {
@@ -72,7 +78,10 @@ function App() {
           <Route
             path="/lobby"
             element={
-              <ProtectedRoute condition={hasVisitedHome} redirectTo={"/"}>
+              <ProtectedRoute
+                condition={hasVisitedHome}
+                redirectTo={NavigationContext.homeRoute}
+              >
                 <Lobby
                   setGameRoom={setGameRoom}
                   setStartingPlayers={setStartingPlayers}
@@ -85,7 +94,10 @@ function App() {
           <Route
             path="/game"
             element={
-              <ProtectedRoute condition={hasVisitedLobby} redirectTo={"/"}>
+              <ProtectedRoute
+                condition={hasVisitedLobby}
+                redirectTo={NavigationContext.homeRoute}
+              >
                 <Game r={gameRoom} startingPlayers={startingPlayers} />
               </ProtectedRoute>
             }

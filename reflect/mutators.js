@@ -15,18 +15,21 @@
 // mutators defensively check the database when they run and do the appropriate
 // thing. The Reflect sync protocol ensures that the server-side result takes
 // precedence over the client-side optimistic result.
-// import ItemSpawner from "../src/itemSpawning/spawnItems";
-import { createMazeFromBlocks } from "../src/mazeGeneration/mazeGenerator";
-import MazeMovement from "../src/mazeGeneration/mazeMovement";
-import { emptySpace, wall } from "../src/mazeGeneration/mazeGenerator";
-// import { createOrchestrationMutators } from "reflect-orchestrator";
-// import { createOrchestrationMutators } from "@rocicorp/reflect-orchestrator";
-import { orchestrationOptions } from "./orchestration-options";
-import { nanoid } from "nanoid";
-import { createOrchestrationMutators } from "reflect-orchestrator";
-import { generate } from "@rocicorp/rails";
 
+//reflect imports
+import { generate } from "@rocicorp/rails";
+import { createOrchestrationMutators } from "reflect-orchestrator";
+import { orchestrationOptions } from "./orchestration-options";
+
+//maze imports
+import { createMazeFromBlocks } from "../src/mazeGeneration/mazeGenerator";
+import { emptySpace, wall } from "../src/mazeGeneration/mazeGenerator";
+import MazeMovement from "../src/mazeGeneration/mazeMovement";
+
+//maze generation variables
 const mazeSize = 8;
+
+//custom tools
 const mazeMoveTool = new MazeMovement();
 
 export const mutators = {
@@ -49,7 +52,6 @@ export const mutators = {
   forceStartOptIn,
   destroyWalls,
   spawnItem,
-  test,
   initClient,
   initRoster,
   clientList,
@@ -288,10 +290,6 @@ async function removeFromPlayerRoster(tx, userName) {
   });
   console.log(updatedRoster);
   tx.set("roster", updatedRoster);
-}
-
-function test() {
-  console.log("test");
 }
 
 async function getPlayerPosition(tx, playerNum) {

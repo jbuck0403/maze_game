@@ -26,15 +26,17 @@ let movementTimeoutID;
 let lastWallBreakTime = 0;
 
 function Game({ r, startingPlayers }) {
+  //protected route logic
   const navigate = useNavigate();
   const context = useContext(NavigationContext);
-  console.log(context.hasVisitedLobby);
+
   useEffect(() => {
     if (!context.hasVisitedLobby) {
       navigate(context.homeRoute);
     }
   });
 
+  //game logic
   const mazeTool = new MazeTools(r);
 
   // Add event listener when the component mounts
