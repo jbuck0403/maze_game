@@ -1,17 +1,15 @@
 //imports
 import "./Game.css";
+import { NavigationContext } from "../../App";
 
 //react imports
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { useSubscribe } from "@rocicorp/reflect/react";
+import { useNavigate } from "react-router-dom";
 
 //component imports
 import MazeComponent from "../Maze/Maze";
 import MazeTools from "../../mazeGeneration/mazeTools";
-
-//custom game tool imports
-// import MazeTools from "../../mazeGeneration/mazeTools";
-// import UserTools from "../../users/getUserID";
 
 //game variables
 const inputLimit = 10;
@@ -28,9 +26,16 @@ let movementTimeoutID;
 let lastWallBreakTime = 0;
 
 function Game({ r, startingPlayers }) {
-  console.log(r);
+  const navigate = useNavigate();
+  const context = useContext(NavigationContext);
+
+  useEffect(() => {
+    if (!context.hasVisitedLobby) {
+      navigate(context.homeRoute);
+    }
+  });
+
   const mazeTool = new MazeTools(r);
-  console.log(startingPlayers);
 
   // Add event listener when the component mounts
   useEffect(() => {

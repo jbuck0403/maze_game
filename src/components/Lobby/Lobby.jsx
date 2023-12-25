@@ -1,18 +1,21 @@
+//imports
+import "./Lobby.css";
+import { server } from "../../App";
+import { NavigationContext } from "../../App";
+
 //reflect imports
 import { Reflect } from "@rocicorp/reflect/client";
 import { useSubscribe, usePresence } from "@rocicorp/reflect/react";
-import { useOrchestration } from "reflect-orchestrator";
 import { orchestrationOptions } from "../../../reflect/orchestration-options";
 import { mutators } from "../../../reflect/mutators";
 import { listClients } from "../../../reflect/mutators";
 
 //react imports
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 
 //tool imports
 import UserTools from "../../users/getUserID";
-import { useNavigate } from "react-router-dom";
-import { server } from "../../App";
 
 const userTool = new UserTools();
 // let r;
@@ -28,6 +31,18 @@ const Lobby = ({
   roomAssignment,
 }) => {
   const navigate = useNavigate();
+  const context = useContext(NavigationContext);
+
+  useEffect(() => {
+    if (!context.hasVisitedHome) {
+      navigate(context.homeRoute);
+    }
+  }, [context, navigate]);
+
+  useEffect(() => {
+    context.setHasVisitedLobby();
+  });
+
   const userID = userTool.getUserID();
 
   const [r, setR] = useState();
@@ -38,21 +53,9 @@ const Lobby = ({
     }
   }, [gameRoom, navigate]);
 
-  // const roomAssignment = useOrchestration(
-  //   {
-  //     server: server,
-  //     roomID: "orchestrator",
-  //     userID: userID,
-  //     auth: userID,
-  //   },
-  //   orchestrationOptions
-  // );
-
-  // console.log("$$$", roomAssignment);
-
   useEffect(() => {
     if (!roomAssignment) {
-      r = undefined;
+      setR(undefined);
       return;
     }
     const room = new Reflect({
@@ -64,7 +67,6 @@ const Lobby = ({
     });
 
     setR(room);
-    // r.mutate.initClient();
 
     return () => {
       setR(undefined);
