@@ -28,7 +28,7 @@ let lastWallBreakTime = 0;
 function Game({ r, startingPlayers }) {
   const navigate = useNavigate();
   const context = useContext(NavigationContext);
-
+  console.log(context.hasVisitedLobby);
   useEffect(() => {
     if (!context.hasVisitedLobby) {
       navigate(context.homeRoute);

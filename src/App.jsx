@@ -47,6 +47,8 @@ function App() {
     orchestrationOptions
   );
 
+  console.log(roomAssignment);
+
   const [gameRoom, setGameRoom] = useState();
   const [startingPlayers, setStartingPlayers] = useState();
 

@@ -40,7 +40,7 @@ const Lobby = ({
   }, [context, navigate]);
 
   useEffect(() => {
-    context.setHasVisitedLobby();
+    context.setHasVisitedLobby(true);
   });
 
   const userID = userTool.getUserID();
@@ -134,6 +134,7 @@ const Lobby = ({
   }, [roster]);
 
   useEffect(() => {
+    console.log(roomAssignment, startingPlayers, roster);
     if (roomAssignment) {
       if (
         startingPlayers &&
@@ -141,6 +142,7 @@ const Lobby = ({
           (roster.length >= 2 && forceStartOptedIn >= 2))
       ) {
         if (roomAssignment.roomIsLocked === false) {
+          console.log("moving to game");
           roomAssignment.lockRoom();
           setGameRoom(r);
           setStartingPlayers(startingPlayers);

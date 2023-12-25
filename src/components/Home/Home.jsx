@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { NavigationContext } from "../../App";
 
 const Home = () => {
-  const { setHasVisitedHome, resetNavigation } = useContext(NavigationContext);
+  const { setHasVisitedHome, resetNavigation, hasVisitedHome } =
+    useContext(NavigationContext);
 
   useEffect(() => {
     resetNavigation();
