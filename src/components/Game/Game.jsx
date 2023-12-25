@@ -1,67 +1,41 @@
 //imports
 import "./Game.css";
+import { NavigationContext } from "../../App";
 
 //react imports
-import { useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { useSubscribe } from "@rocicorp/reflect/react";
-
-//reflect imports
-import { Reflect } from "@rocicorp/reflect/client";
-import { mutators } from "../../../reflect/mutators";
-import { useOrchestration } from "reflect-orchestrator";
-import { orchestrationOptions } from "../../../reflect/orchestration-options";
+import { useNavigate } from "react-router-dom";
 
 //component imports
 import MazeComponent from "../Maze/Maze";
-
-//custom game tool imports
 import MazeTools from "../../mazeGeneration/mazeTools";
-import UserTools from "../../users/getUserID";
 
 //game variables
 const inputLimit = 10;
 const timeThreshold = 1000;
 const refreshRate = timeThreshold / inputLimit;
-const startingPlayers = [1, 2, 3, 4];
+const wallBreakInterval = timeThreshold * 10;
+const wallBreakKey = "q";
+const destroyBarricadesKey = " ";
 let playerNum = -1;
 let lastInputTime = 0;
 let moveDirection;
 let keyDown = [];
 let movementTimeoutID;
+let lastWallBreakTime = 0;
 
-//find the userid via firebase or cookies, in that order
-const userTool = new UserTools();
-const userID = userTool.getUserID();
+function Game({ r, startingPlayers }) {
+  const navigate = useNavigate();
+  const context = useContext(NavigationContext);
+  console.log(context.hasVisitedLobby);
+  useEffect(() => {
+    if (!context.hasVisitedLobby) {
+      navigate(context.homeRoute);
+    }
+  });
 
-//variables
-//reflect room variables
-const gameID = 20;
-const server = "http://localhost:8080";
-
-// create a new reflect room for multiplayer to sync maze and players
-// export const r = new Reflect({
-//   server: "http://localhost:8080",
-//   roomID: gameID,
-//   userID: userID,
-//   mutators,
-// });
-
-// const mazeTool = new MazeTools(r);
-
-//instantiate the maze tool
-
-// const r = new Reflect({
-//   server: "http://localhost:8080",
-//   roomID: gameID,
-//   userID: userID,
-//   mutators,
-// });
-// const mazeTool = new MazeTools(r);
-
-function Game({ r, mazeTool }) {
-  console.log("mounted game", r.roomID);
-  // const [r, setR] = useState(null);
-  // const [mazeTool, setMazeTool] = useState(null);
+  const mazeTool = new MazeTools(r);
 
   // Add event listener when the component mounts
   useEffect(() => {
@@ -79,7 +53,7 @@ function Game({ r, mazeTool }) {
           else if (keyDown[0] === "d") moveDirection = "RIGHT";
 
           // if a key is being pressed
-          if (moveDirection) {
+          if (moveDirection && startingPlayers) {
             // process the key press into player movement
             r.mutate.updatePlayerPosition({
               direction: moveDirection,
@@ -97,7 +71,7 @@ function Game({ r, mazeTool }) {
       const { key } = event;
 
       if (["w", "a", "s", "d"].includes(key)) {
-        if (!keyDown.includes(key)) {
+        if (!keyDown.includes(key) && startingPlayers) {
           //do initial movement immediately on key press
           r.mutate.updatePlayerPosition({
             direction: key,
@@ -106,7 +80,6 @@ function Game({ r, mazeTool }) {
           });
           //queue up continued movement for if key is held down
           keyDown.push(key);
-          // handleCharacterMovement(keyDown);
         }
       }
     }
@@ -132,30 +105,30 @@ function Game({ r, mazeTool }) {
 
     function removeBarricadeKeyHandler(event) {
       const { key } = event;
-      if (key === " ") {
+      if (key === destroyBarricadesKey) {
         r.mutate.removeUsersBarricades(playerNum);
       }
     }
 
-    // const reflect = new Reflect({
-    //   server: "http://localhost:8080",
-    //   roomID: gameID,
-    //   userID: userID,
-    //   mutators,
-    // });
-    // const mt = new MazeTools(reflect);
+    function destroyWallsHandler(event) {
+      const { key } = event;
+      const currentTime = Date.now();
+      if (
+        key === wallBreakKey &&
+        currentTime - lastWallBreakTime > wallBreakInterval
+      ) {
+        r.mutate.destroyWalls(playerNum);
+        lastWallBreakTime = currentTime;
+      }
+    }
 
-    // setR(reflect);
-    // setMazeTool(mt);
-
-    //init the maze and add player avatars
     r.mutate.initMaze(startingPlayers);
-    r.mutate.addToPlayerRoster(r.userID);
 
     window.addEventListener("keydown", movementKeyDownHandler);
     window.addEventListener("keydown", barricadeKeyHandler);
     window.addEventListener("keydown", removeBarricadeKeyHandler);
     window.addEventListener("keyup", movementKeyUpHandler);
+    window.addEventListener("keydown", destroyWallsHandler);
     handleCharacterMovement(keyDown);
 
     // Clean up the event listener when the component unmounts
@@ -166,25 +139,34 @@ function Game({ r, mazeTool }) {
       window.removeEventListener("keyup", movementKeyUpHandler);
       clearTimeout(movementTimeoutID);
     };
-  }, []); // Empty dependency array means this effect runs once when the component mounts}
+  }, []);
 
   // keep the maze up to date on each change
   const maze = useSubscribe(r, (tx) => tx.get("maze"), [[]]);
   const roster = useSubscribe(r, (tx) => tx.get("roster"), []);
   playerNum = roster.findIndex((player) => player === r.userID) + 1;
+  console.log(roster);
 
-  // maintain a record of all player positions
-  const playerPositions = startingPlayers.map((player) => {
-    return useSubscribe(r, (tx) => tx.get(`position${player}`), [0, 0]);
-  });
+  if (startingPlayers) {
+    // maintain a record of all player positions
+    const playerPositions = startingPlayers.map((player) => {
+      return useSubscribe(r, (tx) => tx.get(`position${player}`), [0, 0]);
+    });
 
-  useEffect(() => {
-    // show player colors
     startingPlayers.forEach((player, idx) => {
       mazeTool.highlightCell(playerPositions[idx], player);
     });
-  }, [playerPositions]);
+  }
 
-  return <>{mazeTool && <MazeComponent maze={maze} />}</>;
+  // useEffect(() => {
+  //   // show player colors
+  //   if (playerPositions) {
+  //     startingPlayers.forEach((player, idx) => {
+  //       mazeTool.highlightCell(playerPositions[idx], player);
+  //     });
+  //   }
+  // }, [playerPositions]);
+
+  return <>{mazeTool && roster && <MazeComponent maze={maze} />}</>;
 }
 export default Game;

@@ -19,9 +19,9 @@ body {
 .cell {
   display: flex;
   border: 1px solid rgba(255, 255, 255, 0);
-  width: 1.8vh;
+  width: 1.74vh;
   min-width: 10px;
-  height: 1.8vh;
+  height: 1.74vh;
   min-height: 10px;
   text-align: center;
   align-items: center;

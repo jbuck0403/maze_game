@@ -1,71 +1,98 @@
 //imports
 import "./App.css";
 
+// import UserTools from "./users/getUserID";
+import Lobby from "./components/Lobby/Lobby";
+import Home from "./components/Home/Home";
 import Game from "./components/Game/Game";
-import UserTools from "./users/getUserID";
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { nanoid } from "nanoid";
+import { useState, useContext } from "react";
 import { orchestrationOptions } from "../reflect/orchestration-options";
 import { useOrchestration } from "reflect-orchestrator";
-import { mutators } from "../reflect/mutators";
-import { useState, useEffect } from "react";
-import MazeTools from "./mazeGeneration/mazeTools";
-import { Reflect } from "@rocicorp/reflect/client";
+import UserTools from "./users/getUserID";
+import { usePresence } from "@rocicorp/reflect/react";
+import { Navigate } from "react-router-dom";
 
-// find the userid via firebase or cookies, in that order
 const userTool = new UserTools();
-const userID = userTool.getUserID();
-const server = "http://localhost:8080";
+export const server = "http://localhost:8080";
 
-//variables
-//reflect room variables
-const gameID = 15;
-
-// // create a new reflect room for multiplayer to sync maze and players
-// export const r = new Reflect({
-//   server,
-//   roomID: gameID,
-//   userID: userID,
-//   mutators,
-// });
+export const NavigationContext = React.createContext({
+  hasVisitedHome: false,
+  setHasVisitedHome: () => {},
+  hasVisitedLobby: false,
+  setHasVisitedLobby: () => {},
+  resetNavigation: () => {},
+  homeRoute: "/",
+});
 
 function App() {
+  const [hasVisitedHome, setHasVisitedHome] = useState(false);
+  const [hasVisitedLobby, setHasVisitedLobby] = useState(false);
+
+  const resetNavigation = () => {
+    setHasVisitedHome(false);
+    setHasVisitedLobby(false);
+  };
+
+  const userID = userTool.getUserID();
   const roomAssignment = useOrchestration(
     {
       server: server,
       roomID: "orchestrator",
       userID: userID,
+      auth: userID,
     },
     orchestrationOptions
   );
 
-  console.log("$$$", roomAssignment);
+  console.log(roomAssignment);
 
-  const [r, setR] = useState();
-  const [mazeTool, setMazeTool] = useState();
-  useEffect(() => {
-    if (!roomAssignment) {
-      setR(undefined);
-      return;
-    }
-    const reflect = new Reflect({
-      server: server,
-      roomID: roomAssignment.roomID,
-      userID: userID,
-      mutators,
-    });
+  const [gameRoom, setGameRoom] = useState();
+  const [startingPlayers, setStartingPlayers] = useState();
 
-    setR(reflect);
-    setMazeTool();
-    return () => {
-      void reflect?.close();
-      setR(undefined);
-    };
-  }, [roomAssignment]);
+  function ProtectedRoute({ children, redirectTo, condition }) {
+    return condition ? children : <Navigate to={redirectTo} />;
+  }
 
-  useEffect(() => {
-    const mazeToolInit = new MazeTools(r);
-    setMazeTool(mazeToolInit);
-  }, [r]);
-
-  return <>{r && mazeTool && <Game r={r} mazeTool={mazeTool} />}</>;
+  return (
+    <NavigationContext.Provider
+      value={{
+        hasVisitedHome,
+        setHasVisitedHome,
+        hasVisitedLobby,
+        setHasVisitedLobby,
+        resetNavigation,
+      }}
+    >
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route
+            path="/lobby"
+            element={
+              <ProtectedRoute condition={hasVisitedHome} redirectTo={"/"}>
+                <Lobby
+                  setGameRoom={setGameRoom}
+                  setStartingPlayers={setStartingPlayers}
+                  gameRoom={gameRoom}
+                  roomAssignment={roomAssignment}
+                />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/game"
+            element={
+              <ProtectedRoute condition={hasVisitedLobby} redirectTo={"/"}>
+                <Game r={gameRoom} startingPlayers={startingPlayers} />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </Router>
+    </NavigationContext.Provider>
+  );
 }
 export default App;

@@ -11,9 +11,13 @@ export default class UserTools {
     const cookieUserName = cookieTool.getCookie("userID");
     const userID =
       cookieUserName === null
-        ? cookieTool.setCookie("userID", nanoid())
+        ? cookieTool.setCookie("userID", `#anon${nanoid()}`)
         : cookieUserName;
 
     return userID;
+  }
+
+  clearUserIDCookie() {
+    cookieTool.clearCookie("userID");
   }
 }

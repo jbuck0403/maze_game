@@ -19,8 +19,12 @@
 import { createMazeFromBlocks } from "../src/mazeGeneration/mazeGenerator";
 import MazeMovement from "../src/mazeGeneration/mazeMovement";
 import { emptySpace, wall } from "../src/mazeGeneration/mazeGenerator";
-import { createOrchestrationMutators } from "reflect-orchestrator";
+// import { createOrchestrationMutators } from "reflect-orchestrator";
+// import { createOrchestrationMutators } from "@rocicorp/reflect-orchestrator";
 import { orchestrationOptions } from "./orchestration-options";
+import { nanoid } from "nanoid";
+import { createOrchestrationMutators } from "reflect-orchestrator";
+import { generate } from "@rocicorp/rails";
 
 const mazeSize = 8;
 const mazeMoveTool = new MazeMovement();
@@ -37,15 +41,147 @@ export const mutators = {
   removeUsersBarricades,
   getPlayerRoster,
   addToPlayerRoster,
+  removeFromPlayerRoster,
+  getStartingPlayers,
+  setStartingPlayers,
+  resetForceStart,
+  initForceStartDict,
+  forceStartOptIn,
+  destroyWalls,
+  spawnItem,
+  test,
+  initClient,
+  initRoster,
+  clientList,
+  startGame,
+  stopGame,
   ...createOrchestrationMutators(orchestrationOptions),
 };
 
-// const emptySpace = 0;
+async function startGame(tx) {
+  tx.set("gameInProgress", true);
+}
+
+async function stopGame(tx) {
+  tx.set("gameInProgress", false);
+}
+
+async function initRoster(tx, presentUsers) {
+  tx.set("roster", presentUsers);
+}
+
+export const { init: initClientHelper, list: listClients } = generate("client");
+
+async function initClient(tx) {
+  await initClientHelper(tx, {
+    id: tx.clientID,
+    userID: tx.auth?.userID ?? null,
+  });
+}
+
+async function clientList(tx) {
+  return await listClients(tx);
+}
+
+async function spawnItem(itemToSpawn, numToSpawn, coords = false) {
+  const mazeCopy = await createMazeCopy(); // create a copy of the current state of the maze
+
+  const findRandomEmptySpace = () => {
+    const returnRandomSpace = () => {
+      return [
+        Math.floor(Math.random() * highestY),
+        Math.floor(Math.random() * highestX),
+      ];
+    };
+    const [highestY, highestX] = [maze.length - 1, maze[0].length - 1];
+    while (true) {
+      let [row, col] = returnRandomSpace();
+      if (maze[row][col] == emptySpace) return [row, col];
+    }
+  };
+
+  const addItemToMaze = async (row, col) => {
+    mazeCopy[row][col] = `${itemToSpawn}`;
+
+    updateMaze(mazeCopy);
+  };
+
+  for (let idx = 0; idx <= numToSpawn; idx++) {
+    const [row, col] = coords ? coords : findRandomEmptySpace();
+    addItemToMaze(row, col);
+  }
+}
+
+async function resetForceStart(tx) {
+  tx.set("forceStart", undefined);
+}
+
+async function initForceStartDict(tx) {
+  const roster = await getPlayerRoster(tx);
+  const forceStartDict = {};
+  roster.forEach((user) => {
+    forceStartDict[user] = false;
+  });
+
+  tx.set("forceStart", forceStartDict);
+}
+
+async function forceStartOptIn(tx, userID) {
+  const initForceStart = () => {
+    const forceStart = {};
+    roster.forEach((user) => {
+      forceStart[user] = false;
+    });
+
+    return forceStart;
+  };
+  const roster = await getPlayerRoster(tx);
+  const forceStart = (await tx.get("forceStart")) ?? initForceStart();
+  const updatedForceStart = { ...forceStart, [userID]: true };
+
+  tx.set("forceStart", updatedForceStart);
+}
 
 const createMazeCopy = async (tx) => {
   const maze = await getMaze(tx);
   return maze.map((row) => row.slice());
 };
+
+async function destroyWalls(tx, playerNum) {
+  const checkDestroyable = (row, col) => {
+    const mazeRowWidth = mazeCopy[0].length - 1;
+    const mazeColLength = mazeCopy.length - 1;
+    if (row == 0 || row == mazeRowWidth || col == 0 || col == mazeColLength) {
+      return false;
+    } else if (mazeCopy[row][col] != wall) {
+      return false;
+    } else return true;
+  };
+  const removeWallFromMazeCopy = (row, col) => {
+    if (checkDestroyable(row, col)) {
+      mazeCopy[row][col] = emptySpace;
+    }
+  };
+  // create a shallow copy of the maze array
+  const mazeCopy = await createMazeCopy(tx);
+  // get the current users current position
+  const [playerRow, playerCol] = await getPlayerPosition(tx, playerNum);
+  const coordsToCheck = [
+    [-1, -1],
+    [-1, 0],
+    [-1, 1],
+    [0, -1],
+    [0, 1],
+    [1, -1],
+    [1, 0],
+    [1, 1],
+  ];
+  coordsToCheck.forEach(([row, col]) => {
+    removeWallFromMazeCopy(playerRow + row, playerCol + col);
+  });
+
+  updateMaze(tx, mazeCopy);
+}
 
 async function removeUsersBarricades(tx, playerNum) {
   // get the current barricades placed by the current user
@@ -85,7 +221,7 @@ async function setBarricade(tx, barricadeData) {
     // get the current barricades placed by the current user
     const currentBarricades = await getbarricadePosition(tx, playerNum);
     // if the current user has more than 2 barricades on the maze
-    if (currentBarricades.length >= 3) {
+    if (currentBarricades.length >= 2) {
       // store the coordinates for the barricade about to be removed
       const barricadeToRemove = currentBarricades[0];
       // remove barricades in fifo order
@@ -101,6 +237,30 @@ async function setBarricade(tx, barricadeData) {
   }
 }
 
+async function setStartingPlayers(tx) {
+  const generateStartingPlayers = () => {
+    const startingPlayers = [];
+    for (let i = 1; i <= numPlayers; i++) {
+      startingPlayers.push(i);
+    }
+    return startingPlayers;
+  };
+
+  const roster = await getPlayerRoster(tx);
+  // console.log("mutators roster", roster);
+  const numPlayers = roster.length;
+  const startingPlayers = generateStartingPlayers();
+  // console.log("mutators startingPlayers", startingPlayers);
+
+  tx.set("startingPlayers", startingPlayers);
+}
+
+async function getStartingPlayers(tx) {
+  const startingPlayers = await tx.get("startingPlayers");
+
+  return startingPlayers;
+}
+
 async function getbarricadePosition(tx, playerNum) {
   return (await tx.get(`barricades${playerNum}`)) ?? [];
 }
@@ -113,8 +273,25 @@ async function addToPlayerRoster(tx, userName) {
   const roster = await getPlayerRoster(tx);
 
   if (roster.length < 4 && !roster.includes(userName)) {
-    tx.set("roster", [...roster, userName]);
+    const updatedRoster = [...roster, userName];
+    tx.set("roster", updatedRoster);
+
+    return setStartingPlayers(tx, updatedRoster);
   }
+}
+
+async function removeFromPlayerRoster(tx, userName) {
+  console.log(`removing ${userName} from roster`);
+  const roster = await getPlayerRoster(tx);
+  const updatedRoster = roster.filter((user) => {
+    return user !== userName;
+  });
+  console.log(updatedRoster);
+  tx.set("roster", updatedRoster);
+}
+
+function test() {
+  console.log("test");
 }
 
 async function getPlayerPosition(tx, playerNum) {
@@ -157,13 +334,13 @@ const startPositionByPlayer = (tx, mazeYEnd, mazeXEnd, playerID) => {
       position = [1, 1];
       break;
     case 2:
-      position = [1, mazeXEnd - 1];
+      position = [mazeYEnd - 1, mazeXEnd - 1];
       break;
     case 3:
-      position = [mazeYEnd - 1, 1];
+      position = [1, mazeXEnd - 1];
       break;
     case 4:
-      position = [mazeYEnd - 1, mazeXEnd - 1];
+      position = [mazeYEnd - 1, 1];
       break;
     default:
       return false;
