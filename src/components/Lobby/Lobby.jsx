@@ -1,7 +1,6 @@
 //reflect imports
 import { Reflect } from "@rocicorp/reflect/client";
 import { useSubscribe, usePresence } from "@rocicorp/reflect/react";
-// import { useOrchestration } from "@rocicorp/reflect-orchestrator";
 import { useOrchestration } from "reflect-orchestrator";
 import { orchestrationOptions } from "../../../reflect/orchestration-options";
 import { mutators } from "../../../reflect/mutators";
@@ -10,28 +9,28 @@ import { listClients } from "../../../reflect/mutators";
 //react imports
 import { useState, useEffect } from "react";
 
-//component imports
-import Game from "../Game/Game";
-
 //tool imports
-import MazeTools from "../../mazeGeneration/mazeTools";
 import UserTools from "../../users/getUserID";
 import { useNavigate } from "react-router-dom";
-import { nanoid } from "nanoid";
-import CookieTools from "../../cookies/cookies";
+import { server } from "../../App";
 
 const userTool = new UserTools();
-let r;
-// let playersInGame = [];
+// let r;
 
 // find the userid via firebase or cookies, in that order
-const userID = userTool.getUserID();
-const server = "http://localhost:8080";
+// const userID = userTool.getUserID();
+// const server = "http://localhost:8080";
 
-const Lobby = ({ setGameRoom, gameRoom, setStartingPlayers }) => {
-  // const userID = nanoid();
+const Lobby = ({
+  setGameRoom,
+  gameRoom,
+  setStartingPlayers,
+  roomAssignment,
+}) => {
   const navigate = useNavigate();
-  console.log(userID);
+  const userID = userTool.getUserID();
+
+  const [r, setR] = useState();
 
   useEffect(() => {
     if (gameRoom) {
@@ -39,24 +38,24 @@ const Lobby = ({ setGameRoom, gameRoom, setStartingPlayers }) => {
     }
   }, [gameRoom, navigate]);
 
-  const roomAssignment = useOrchestration(
-    {
-      server: server,
-      roomID: "orchestrator",
-      userID: userID,
-      auth: userID,
-    },
-    orchestrationOptions
-  );
+  // const roomAssignment = useOrchestration(
+  //   {
+  //     server: server,
+  //     roomID: "orchestrator",
+  //     userID: userID,
+  //     auth: userID,
+  //   },
+  //   orchestrationOptions
+  // );
 
-  console.log(roomAssignment);
+  // console.log("$$$", roomAssignment);
 
   useEffect(() => {
     if (!roomAssignment) {
       r = undefined;
       return;
     }
-    r = new Reflect({
+    const room = new Reflect({
       server: server,
       roomID: roomAssignment.roomID,
       userID: userID,
@@ -64,27 +63,24 @@ const Lobby = ({ setGameRoom, gameRoom, setStartingPlayers }) => {
       mutators,
     });
 
-    console.log(r);
-    r.mutate.initClient();
+    setR(room);
+    // r.mutate.initClient();
 
     return () => {
-      r = undefined;
+      setR(undefined);
     };
   }, [roomAssignment]);
 
-  // useEffect(() => {
-  //   const mazeToolInit = new MazeTools(r);
-  //   setMazeTool(mazeToolInit);
-  // }, [r]);
+  useEffect(() => {
+    if (r) {
+      r.mutate.initClient();
+    }
+  }, [r]);
 
   const handleForceStart = () => {
     r.mutate.forceStartOptIn(r.userID);
   };
 
-  // const gameInProgress = useSubscribe(
-  //   r,
-  //   (tx) => tx.get("gameInProgress") ?? false
-  // );
   const [forceStartOptedIn, setForceStartOptedIn] = useState(0);
 
   const startingPlayers = useSubscribe(r, (tx) => tx.get("startingPlayers"));
@@ -109,11 +105,9 @@ const Lobby = ({ setGameRoom, gameRoom, setStartingPlayers }) => {
     [presentClientIDs]
   );
 
-  console.log(presentClientIDs);
-
-  if (roomAssignment) {
-    console.log(roster, forceStartDict, presentClientIDs, presentUsers);
-  }
+  console.log(")))", presentClientIDs);
+  console.log("!!!", startingPlayers);
+  console.log("[[[", presentUsers);
 
   useEffect(() => {
     if (roomAssignment) {
@@ -123,7 +117,6 @@ const Lobby = ({ setGameRoom, gameRoom, setStartingPlayers }) => {
         !presentUsers.includes(undefined) &&
         presentUsers.length > 0
       ) {
-        console.log(presentUsers);
         r.mutate.initRoster(presentUsers);
       }
     }
@@ -149,30 +142,6 @@ const Lobby = ({ setGameRoom, gameRoom, setStartingPlayers }) => {
           roomAssignment.lockRoom();
           setGameRoom(r);
           setStartingPlayers(startingPlayers);
-          // r.mutate.removeFromPlayerRoster(r.userID);
-          // const gameRoom = new Reflect({
-          //   server: server,
-          //   roomID: roster.join(""),
-          //   userID: userID,
-          //   auth: userID,
-          //   mutators,
-          // });
-          // console.log(gameRoom);
-          // gameRoom.mutate.setStartingPlayers(startingPlayers);
-          // gameRoom.mutate.addToPlayerRoster(r.userID);
-          // gameRoom.mutate.setGameRoom(gameRoom);
-          // setGameRoom(
-          //   new Reflect({
-          //     server: server,
-          //     roomID: `${roster.join("")}`,
-          //     userID: userID,
-          //     auth: userID,
-          //     mutators,
-          //   })
-          // );
-          // navigate("/game");
-          // r.close();
-          // r.mutate.startGame();
         }
       }
     }
@@ -194,17 +163,15 @@ const Lobby = ({ setGameRoom, gameRoom, setStartingPlayers }) => {
     }
   }, [forceStartDict]);
 
-  const leavingGameRoom = () => {
-    // r.mutate.removeFromPlayerRoster(r.userID);
-    userTool.clearUserIDCookie();
-    // r.close();
+  const handleLeaveLobby = () => {
+    if (r) {
+      r.close();
+    }
   };
 
   useEffect(() => {
     window.addEventListener("unload", () => {
-      leavingGameRoom();
-      // r.mutate.stopGame();
-      // r.close();
+      handleLeaveLobby();
     });
 
     window.addEventListener("beforeunload", (e) => {
@@ -213,15 +180,11 @@ const Lobby = ({ setGameRoom, gameRoom, setStartingPlayers }) => {
     });
   }, []);
 
-  if (roomAssignment) {
-    console.log(roster);
-  }
-
   return (
     <>
       <button
         onClick={() => {
-          leavingGameRoom();
+          handleLeaveLobby();
           navigate("/");
         }}
       >
