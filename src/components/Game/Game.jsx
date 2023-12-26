@@ -147,27 +147,25 @@ function Game({ r, startingPlayers }) {
   const maze = useSubscribe(r, (tx) => tx.get("maze"), [[]]);
   const roster = useSubscribe(r, (tx) => tx.get("roster"), []);
   playerNum = roster.findIndex((player) => player === r.userID) + 1;
-  console.log(roster);
 
-  if (startingPlayers) {
-    // maintain a record of all player positions
-    const playerPositions = startingPlayers.map((player) => {
-      return useSubscribe(r, (tx) => tx.get(`position${player}`), [0, 0]);
-    });
+  // maintain a record of all player positions
+  const playerPositions = startingPlayers.map((player) => {
+    return useSubscribe(r, (tx) => tx.get(`position${player}`), [1, 1]);
+  });
 
-    startingPlayers.forEach((player, idx) => {
-      mazeTool.highlightCell(playerPositions[idx], player);
-    });
-  }
+  // console.log(playerPositions, startingPlayers);
+  // startingPlayers.forEach((player, idx) => {
+  //   mazeTool.highlightCell(playerPositions[idx], player);
+  // });
 
-  // useEffect(() => {
-  //   // show player colors
-  //   if (playerPositions) {
-  //     startingPlayers.forEach((player, idx) => {
-  //       mazeTool.highlightCell(playerPositions[idx], player);
-  //     });
-  //   }
-  // }, [playerPositions]);
+  useEffect(() => {
+    // show player colors
+    if (playerPositions) {
+      startingPlayers.forEach((player, idx) => {
+        mazeTool.highlightCell(playerPositions[idx], player);
+      });
+    }
+  }, [playerPositions]);
 
   return <>{mazeTool && roster && <MazeComponent maze={maze} />}</>;
 }
