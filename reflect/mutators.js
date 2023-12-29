@@ -415,6 +415,8 @@ async function updatePlayerPosition(tx, playerData) {
     setPrevCharacterPosition(tx, playerID, currentPosition);
   }
 
+  //call artifact collection fn
+
   setCharacterPosition(tx, playerID, newPosition);
 
   return updateMazeAfterMovement(tx, {
@@ -423,4 +425,41 @@ async function updatePlayerPosition(tx, playerData) {
     newPosition: newPosition,
     prevPosition: currentPosition,
   });
+}
+
+async function setCollectedArtifacts(tx, numCollected, playerNum = null) {
+  if (playerNum === null) {
+    tx.set("allCollectedArtifacts", numCollected);
+  } else {
+    tx.set(`${playerNum}CollectedArtifacts`, numCollected);
+  }
+}
+
+async function getCollectedArtifacts(tx, playerNum = null) {
+  if (playerNum === null) {
+    return (await tx.get("allCollectedArtifacts")) ?? 0;
+  } else {
+    return (await tx.get(`${playerNum}CollectedArtifacts`)) ?? 0;
+  }
+}
+
+async function collectArtifact(tx, playerNum) {
+  const playerCollected = await getCollectedArtifacts(tx, playerNum);
+  const totalCollected = await getCollectedArtifacts(tx);
+  setCollectedArtifacts(tx, playerCollected + 1, playerNum);
+  setCollectedArtifacts(tx, totalCollected + 1);
+}
+
+async function dropAllArtifacts(tx, playerNum) {
+  const playerCollected = await getCollectedArtifacts(tx, playerNum);
+  const totalCollected = await getCollectedArtifacts(tx);
+  setCollectedArtifacts(tx, 0, playerNum);
+  setCollectedArtifacts(tx, totalCollected - playerCollected);
+}
+
+async function dropOneArtifact(tx, playerNum) {
+  const playerCollected = await getCollectedArtifacts(tx, playerNum);
+  const totalCollected = await getCollectedArtifacts(tx);
+  setCollectedArtifacts(tx, playerCollected - 1, playerNum);
+  setCollectedArtifacts(tx, totalCollected - 1);
 }
