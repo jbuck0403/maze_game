@@ -32,6 +32,10 @@ body {
   background-color: rgba(255, 255, 255, 0.476);
 }
 
+.artifact {
+  background-color: purple;
+}
+
 .player {
   border-radius: 15px;
 }

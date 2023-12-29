@@ -29,6 +29,10 @@ const Lobby = ({
   const navigate = useNavigate();
   const context = useContext(NavigationContext);
 
+  if (roomAssignment.roomIsLocked) {
+    navigate(context.homeRoute);
+  }
+
   useEffect(() => {
     if (!context.hasVisitedHome) {
       navigate(context.homeRoute);
@@ -103,10 +107,6 @@ const Lobby = ({
     [],
     [presentClientIDs]
   );
-
-  console.log(")))", presentClientIDs);
-  console.log("!!!", startingPlayers);
-  console.log("[[[", presentUsers);
 
   useEffect(() => {
     if (roomAssignment) {

@@ -1,8 +1,16 @@
-import { passableSpace } from "./mazeGenerator";
+import { passableSpace, collectible } from "./mazeGenerator";
 
 export default class MazeMovement {
   checkObstacle = (maze, newPosition) => {
     if (passableSpace.includes(maze[newPosition[0]][newPosition[1]])) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  checkCollectible = (maze, newPosition) => {
+    if (collectible.includes(maze[newPosition[0]][newPosition[1]])) {
       return true;
     } else {
       return false;

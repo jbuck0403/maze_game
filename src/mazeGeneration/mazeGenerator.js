@@ -1,7 +1,10 @@
 //utilizes a modified tessellation algorithm for maze generation
 export const emptySpace = "0";
 export const wall = "x";
-export const passableSpace = [emptySpace];
+export const artifact = "a";
+export const collectible = [artifact];
+export const passableSpace = [emptySpace, ...collectible];
+export const allTiles = [emptySpace, wall, artifact];
 
 function createBlock(row, col, numBlocks) {
   let topPath = row == 0 ? false : true;

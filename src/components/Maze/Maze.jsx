@@ -1,10 +1,23 @@
 import "./Maze.css";
 
+import { emptySpace, wall, artifact } from "../../mazeGeneration/mazeGenerator";
+
 function MazeComponent({ maze }) {
+  const addClassName = (cell) => {
+    switch (cell) {
+      case wall:
+        return "wall";
+      case artifact:
+        return "artifact";
+      default:
+        return "";
+    }
+  };
   const displayCell = (cell, xIndex, yIndex) => (
     <td
       key={`${xIndex}|${yIndex}`}
-      className={`cell ${cell == "x" ? "wall" : ""}`}
+      // className={`cell ${cell == "x" ? "wall" : ""}`}
+      className={`cell ${addClassName(cell)}`}
       id={`_${xIndex}-${yIndex}`}
     ></td>
   );

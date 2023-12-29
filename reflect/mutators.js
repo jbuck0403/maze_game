@@ -22,7 +22,10 @@ import { createOrchestrationMutators } from "reflect-orchestrator";
 import { orchestrationOptions } from "./orchestration-options";
 
 //maze imports
-import { createMazeFromBlocks } from "../src/mazeGeneration/mazeGenerator";
+import {
+  artifact,
+  createMazeFromBlocks,
+} from "../src/mazeGeneration/mazeGenerator";
 import { emptySpace, wall } from "../src/mazeGeneration/mazeGenerator";
 import MazeMovement from "../src/mazeGeneration/mazeMovement";
 
@@ -85,8 +88,8 @@ async function clientList(tx) {
   return await listClients(tx);
 }
 
-async function spawnItem(itemToSpawn, numToSpawn, coords = false) {
-  const mazeCopy = await createMazeCopy(); // create a copy of the current state of the maze
+async function spawnItem(tx, itemToSpawn, numToSpawn = 1, coords = false) {
+  const mazeCopy = await createMazeCopy(tx); // create a copy of the current state of the maze
 
   const findRandomEmptySpace = () => {
     const returnRandomSpace = () => {
@@ -95,17 +98,17 @@ async function spawnItem(itemToSpawn, numToSpawn, coords = false) {
         Math.floor(Math.random() * highestX),
       ];
     };
-    const [highestY, highestX] = [maze.length - 1, maze[0].length - 1];
+    const [highestY, highestX] = [mazeCopy.length - 1, mazeCopy[0].length - 1];
     while (true) {
       let [row, col] = returnRandomSpace();
-      if (maze[row][col] == emptySpace) return [row, col];
+      if (mazeCopy[row][col] == emptySpace) return [row, col];
     }
   };
 
   const addItemToMaze = async (row, col) => {
     mazeCopy[row][col] = `${itemToSpawn}`;
 
-    updateMaze(mazeCopy);
+    updateMaze(tx, mazeCopy);
   };
 
   for (let idx = 0; idx <= numToSpawn; idx++) {
@@ -218,7 +221,10 @@ async function setBarricade(tx, barricadeData) {
     playerPosition
   );
 
-  if (newBarricade != playerPosition) {
+  if (
+    newBarricade != playerPosition &&
+    mazeCopy[newBarricade[0]][newBarricade[1]] !== artifact
+  ) {
     let updatedBarricades;
     // get the current barricades placed by the current user
     const currentBarricades = await getbarricadePosition(tx, playerNum);

@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 //component imports
 import MazeComponent from "../Maze/Maze";
 import MazeTools from "../../mazeGeneration/mazeTools";
+import { wall } from "../../mazeGeneration/mazeGenerator";
 
 //game variables
 const inputLimit = 10;
@@ -125,6 +126,7 @@ function Game({ r, startingPlayers }) {
     }
 
     r.mutate.initMaze(startingPlayers);
+    r.mutate.spawnItem("a", 5);
 
     window.addEventListener("keydown", movementKeyDownHandler);
     window.addEventListener("keydown", barricadeKeyHandler);
@@ -152,11 +154,6 @@ function Game({ r, startingPlayers }) {
   const playerPositions = startingPlayers.map((player) => {
     return useSubscribe(r, (tx) => tx.get(`position${player}`), [1, 1]);
   });
-
-  // console.log(playerPositions, startingPlayers);
-  // startingPlayers.forEach((player, idx) => {
-  //   mazeTool.highlightCell(playerPositions[idx], player);
-  // });
 
   useEffect(() => {
     // show player colors
