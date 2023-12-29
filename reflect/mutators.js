@@ -23,7 +23,7 @@ import { orchestrationOptions } from "./orchestration-options";
 
 //maze imports
 import {
-  artifact,
+  collectible,
   createMazeFromBlocks,
 } from "../src/mazeGeneration/mazeGenerator";
 import { emptySpace, wall } from "../src/mazeGeneration/mazeGenerator";
@@ -223,7 +223,7 @@ async function setBarricade(tx, barricadeData) {
 
   if (
     newBarricade != playerPosition &&
-    mazeCopy[newBarricade[0]][newBarricade[1]] !== artifact
+    !collectible.includes(mazeCopy[newBarricade[0]][newBarricade[1]])
   ) {
     let updatedBarricades;
     // get the current barricades placed by the current user
