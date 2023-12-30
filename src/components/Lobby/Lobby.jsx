@@ -52,7 +52,7 @@ const Lobby = ({
     if (gameRoom) {
       navigate("/game");
     }
-  }, [gameRoom, navigate]);
+  }, [gameRoom]);
 
   useEffect(() => {
     if (!roomAssignment) {

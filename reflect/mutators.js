@@ -62,7 +62,7 @@ export const mutators = {
   startGame,
   stopGame,
   addArtifactToMaze,
-  updateArtifactLocations,
+  dropArtifact,
   ...createOrchestrationMutators(orchestrationOptions),
 };
 
@@ -91,7 +91,8 @@ async function clientList(tx) {
   return await listClients(tx);
 }
 
-async function addArtifactToMaze(tx, numToSpawn = 1) {
+async function addArtifactToMaze(tx, maxArtifacts = 5) {
+  console.log("entering addArtifactToMaze fn");
   const verifyArtifactSpawnVariance = (spawnCoords, minDistance = 5) => {
     const determineDistance = (coords1, coords2) => {
       const rowDiff = coords2[0] - coords1[0];
@@ -118,10 +119,11 @@ async function addArtifactToMaze(tx, numToSpawn = 1) {
 
     return findClosestArtifactDistance() >= minDistance;
   };
-  const mazeCopy = await createMazeCopy(tx);
-  const currentArtifacts = (await tx.get("artifactLocations")) ?? [];
 
-  for (let i = 0; i < numToSpawn; i++) {
+  const mazeCopy = await createMazeCopy(tx);
+  const currentArtifacts = (await tx.get("artifactsInMaze")) ?? [];
+
+  if (currentArtifacts.length < 5) {
     let newCoords = findRandomEmptySpace(mazeCopy);
 
     while (
@@ -131,15 +133,17 @@ async function addArtifactToMaze(tx, numToSpawn = 1) {
       newCoords = findRandomEmptySpace(mazeCopy);
     }
 
-    spawnItem(tx, artifact, numToSpawn, newCoords);
-    updateArtifactLocations(tx, newCoords);
+    tx.set("artifactsInMaze", [...currentArtifacts, newCoords]);
+
+    mazeCopy[newCoords[0]][newCoords[1]] = artifact;
+    updateMaze(tx, mazeCopy);
   }
 }
 
-async function updateArtifactLocations(tx, newCoords) {
-  const currentArtifacts = (await tx.get("artifactLocations")) ?? [];
-  tx.set("artifactLocations", [...currentArtifacts, newCoords]);
-}
+// async function updateArtifactLocations(tx, newCoords) {
+//   const currentArtifacts = (await tx.get("artifactLocations")) ?? [];
+//   tx.set("artifactLocations", [...currentArtifacts, newCoords]);
+// }
 
 const findRandomEmptySpace = (mazeCopy) => {
   const returnRandomSpace = () => {
@@ -155,7 +159,7 @@ const findRandomEmptySpace = (mazeCopy) => {
   }
 };
 
-async function spawnItem(tx, itemToSpawn, numToSpawn = 1, coords = false) {
+async function spawnItem(tx, itemToSpawn, coords = false, numToSpawn = 1) {
   const mazeCopy = await createMazeCopy(tx); // create a copy of the current state of the maze
 
   const addItemToMaze = async (row, col) => {
@@ -450,6 +454,7 @@ async function updateMazeAfterMovement(tx, playerData) {
 
 async function updatePlayerPosition(tx, playerData) {
   const numCollectedArtifacts = (await tx.get("numCollectedArtifacts")) ?? 0;
+  const artifactsInMaze = (await tx.get("artifactsInMaze")) ?? [];
   const playerID = playerData.id;
   const playerCollectedArtifacts =
     (await tx.get(`player${playerID}Artifacts`)) ?? 0;
@@ -475,6 +480,10 @@ async function updatePlayerPosition(tx, playerData) {
     console.log("found artifact");
     tx.set("numCollectedArtifacts", numCollectedArtifacts + 1);
     tx.set(`player${playerID}Artifacts`, playerCollectedArtifacts + 1);
+    const filteredArtifacts = artifactsInMaze.filter((coord) => {
+      return coord[0] !== newPosition[0] && coord[1] !== newPosition[1];
+    });
+    tx.set("artifactsInMaze", filteredArtifacts);
   }
 
   setCharacterPosition(tx, playerID, newPosition);
@@ -486,3 +495,5 @@ async function updatePlayerPosition(tx, playerData) {
     prevPosition: currentPosition,
   });
 }
+
+async function dropArtifact(tx, playerNum) {}

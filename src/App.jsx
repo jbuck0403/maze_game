@@ -93,7 +93,9 @@ function App() {
             path="/game"
             element={
               <ProtectedRoute condition={hasVisitedLobby} redirectTo={"/"}>
-                <Game r={gameRoom} startingPlayers={startingPlayers} />
+                {gameRoom && (
+                  <Game r={gameRoom} startingPlayers={startingPlayers} />
+                )}
               </ProtectedRoute>
             }
           />
