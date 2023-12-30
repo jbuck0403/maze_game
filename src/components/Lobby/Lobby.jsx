@@ -29,30 +29,30 @@ const Lobby = ({
   const navigate = useNavigate();
   const context = useContext(NavigationContext);
 
-  if (roomAssignment.roomIsLocked) {
-    navigate(context.homeRoute);
-  }
+  // if (roomAssignment.roomIsLocked) {
+  //   navigate("/");
+  // }
 
   useEffect(() => {
     if (!context.hasVisitedHome) {
-      navigate(context.homeRoute);
+      navigate("/");
     }
-  }, [context, navigate]);
+  }, [context]);
 
   useEffect(() => {
     context.setHasVisitedLobby(true);
   });
-
-  //lobby logic
-  const userID = userTool.getUserID();
-
-  const [r, setR] = useState();
 
   useEffect(() => {
     if (gameRoom) {
       navigate("/game");
     }
   }, [gameRoom]);
+
+  //lobby logic
+  const userID = userTool.getUserID();
+
+  const [r, setR] = useState();
 
   useEffect(() => {
     if (!roomAssignment) {
@@ -86,8 +86,10 @@ const Lobby = ({
 
   const [forceStartOptedIn, setForceStartOptedIn] = useState(0);
 
-  const startingPlayers = useSubscribe(r, (tx) => tx.get("startingPlayers"));
+  // const startingPlayers = useSubscribe(r, (tx) => tx.get("startingPlayers"));
+  // console.log(startingPlayers);
   const roster = useSubscribe(r, (tx) => tx.get("roster"));
+  console.log(roster);
   const forceStartDict = useSubscribe(r, (tx) => tx.get("forceStart"));
   const presentClientIDs = usePresence(r);
   const presentUsers = useSubscribe(
@@ -125,24 +127,29 @@ const Lobby = ({
     if (roomAssignment) {
       if (r) {
         r.mutate.initForceStartDict();
-        r.mutate.setStartingPlayers();
+        // r.mutate.setStartingPlayers();
       }
     }
   }, [roster]);
 
   useEffect(() => {
-    console.log(roomAssignment, startingPlayers, roster);
-    if (roomAssignment) {
+    const generateStartingPlayers = () => {
+      const startingPlayersTemp = [];
+      for (let i = 1; i <= roster.length; i++) {
+        startingPlayersTemp.push(i);
+      }
+      return startingPlayersTemp;
+    };
+    if (roomAssignment && roster) {
       if (
-        startingPlayers &&
-        (roster.length === orchestrationOptions.maxPerRoom ||
-          (roster.length >= 2 && forceStartOptedIn >= 2))
+        roster.length === orchestrationOptions.maxPerRoom ||
+        (roster.length >= 2 && forceStartOptedIn >= 2)
       ) {
         if (roomAssignment.roomIsLocked === false) {
           console.log("moving to game");
           roomAssignment.lockRoom();
+          setStartingPlayers(generateStartingPlayers());
           setGameRoom(r);
-          setStartingPlayers(startingPlayers);
         }
       }
     }

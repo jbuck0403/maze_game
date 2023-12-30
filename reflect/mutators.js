@@ -496,4 +496,11 @@ async function updatePlayerPosition(tx, playerData) {
   });
 }
 
-async function dropArtifact(tx, playerNum) {}
+async function dropArtifact(tx, playerNum) {
+  const playerCollectedArtifacts =
+    (await tx.get(`player${playerNum}Artifacts`)) ?? 0;
+  const numCollectedArtifacts = (await tx.get("numCollectedArtifacts")) ?? 0;
+
+  tx.set("numCollectedArtifacts", numCollectedArtifacts - 1);
+  tx.set(`player${playerID}Artifacts`, playerCollectedArtifacts - 1);
+}

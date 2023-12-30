@@ -19,6 +19,7 @@ const timeThreshold = 1000;
 const refreshRate = timeThreshold / inputLimit;
 const wallBreakInterval = timeThreshold * 10;
 const naturalArtifactSpawnInterval = timeThreshold * 3;
+const artifactDecayInterval = timeThreshold * 10;
 const wallBreakKey = "q";
 const destroyBarricadesKey = " ";
 let playerNum = -1;
@@ -26,10 +27,10 @@ let lastInputTime = 0;
 let moveDirection;
 let keyDown = [];
 let movementTimeoutID;
-let naturalArtifactSpawnTimeoutID;
 let lastWallBreakTime = 0;
 let lastNaturalArtifactSpawnTime = 0;
 let numNaturalArtifactSpawns = 0;
+let artifactDecayTime = 0;
 
 function Game({ r, startingPlayers }) {
   //protected route logic
@@ -47,9 +48,20 @@ function Game({ r, startingPlayers }) {
 
   // Add event listener when the component mounts
   useEffect(() => {
-    function handleNaturalArtifactSpawning() {
-      console.log("entering spawning handler", numNaturalArtifactSpawns);
+    function handleArtifactDecay() {
+      const currentTime = Date.now();
 
+      if (currentTime - artifactDecayTime > artifactDecayInterval) {
+        if (playerCollectedArtifacts.length > 1) {
+          setTimeout(handleArtifactDecay, artifactDecayInterval);
+        }
+
+        r.mutate.dropArtifact(playerNum);
+        r.mutate.addArtifactToMaze();
+      }
+    }
+
+    function handleNaturalArtifactSpawning() {
       const currentTime = Date.now();
       if (
         numNaturalArtifactSpawns < 5 &&
@@ -95,8 +107,7 @@ function Game({ r, startingPlayers }) {
     function movementKeyDownHandler(event) {
       const { key } = event;
 
-      if (numNaturalArtifactSpawns === 0) {
-        handleNaturalArtifactSpawning();
+      if (movementTimeoutID === undefined) {
         handleCharacterMovement(keyDown);
       }
 
@@ -153,13 +164,13 @@ function Game({ r, startingPlayers }) {
     }
 
     r.mutate.initMaze(startingPlayers);
+    handleNaturalArtifactSpawning();
 
     window.addEventListener("keydown", movementKeyDownHandler);
     window.addEventListener("keydown", barricadeKeyHandler);
     window.addEventListener("keydown", removeBarricadeKeyHandler);
     window.addEventListener("keyup", movementKeyUpHandler);
     window.addEventListener("keydown", destroyWallsHandler);
-    // handleCharacterMovement(keyDown);
 
     // Clean up the event listener when the component unmounts
     return () => {
@@ -176,15 +187,19 @@ function Game({ r, startingPlayers }) {
   const roster = useSubscribe(r, (tx) => tx.get("roster"), []);
   playerNum = roster.findIndex((player) => player === r.userID) + 1;
 
+  const artifactSpawningTriggered = useSubscribe(
+    r,
+    (tx) => tx.get("artifactSpawningTriggered"),
+    false
+  );
+
+  console.log("1", artifactSpawningTriggered);
+
   const artifactsInMaze = useSubscribe(
     r,
     (tx) => tx.get("artifactsInMaze"),
-    []
+    undefined
   );
-
-  useEffect(() => {
-    console.log(artifactsInMaze);
-  }, [artifactsInMaze]);
 
   const numCollectedArtifacts = useSubscribe(
     r,
@@ -194,6 +209,16 @@ function Game({ r, startingPlayers }) {
   const playerCollectedArtifacts = startingPlayers.map((player) => {
     return useSubscribe(r, (tx) => tx.get(`player${player}Artifacts`), 0);
   });
+
+  // useEffect(() => {
+  //   console.log("in maze", artifactsInMaze);
+  // }, [artifactsInMaze]);
+  // useEffect(() => {
+  //   console.log("collected", numCollectedArtifacts);
+  // }, [numCollectedArtifacts]);
+  // useEffect(() => {
+  //   console.log("player collected", playerCollectedArtifacts);
+  // }, [playerCollectedArtifacts]);
 
   // maintain a record of all player positions
   const playerPositions = startingPlayers.map((player) => {
