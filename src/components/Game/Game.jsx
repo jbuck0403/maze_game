@@ -32,6 +32,7 @@ let lastNaturalArtifactSpawnTime = 0;
 let naturalArtifactSpawnTimeoutID;
 let numNaturalArtifactSpawns = 0;
 let artifactDecayTimeoutID;
+let numPlayerCollectedArtifacts;
 
 function Game({ r, startingPlayers }) {
   //protected route logic
@@ -47,17 +48,19 @@ function Game({ r, startingPlayers }) {
   //game logic
   const mazeTool = new MazeTools(r);
 
-  function handleArtifactDecay() {
-    r.mutate.dropArtifact(playerNum);
-    r.mutate.addArtifactToMaze();
+  // function handleArtifactDecay() {
+  //   r.mutate.dropArtifact(playerNum);
+  //   r.mutate.addArtifactToMaze();
+  //   numPlayerCollectedArtifacts -= 1;
 
-    if (playerCollectedArtifacts[playerNum - 1] > 1) {
-      artifactDecayTimeoutID = setTimeout(
-        handleArtifactDecay,
-        artifactDecayInterval
-      );
-    }
-  }
+  //   console.log(numPlayerCollectedArtifacts);
+  //   if (numPlayerCollectedArtifacts > 0) {
+  //     artifactDecayTimeoutID = setTimeout(
+  //       handleArtifactDecay,
+  //       artifactDecayInterval
+  //     );
+  //   }
+  // }
 
   function handleNaturalArtifactSpawning() {
     const currentTime = Date.now();
@@ -228,11 +231,26 @@ function Game({ r, startingPlayers }) {
   const playerCollectedArtifacts = startingPlayers.map((player) => {
     return useSubscribe(r, (tx) => tx.get(`player${player}Artifacts`), 0);
   });
+  console.log(playerCollectedArtifacts);
 
   useEffect(() => {
-    const currentArtifactCount = playerCollectedArtifacts[playerNum - 1];
-    if (currentArtifactCount > prevArtifactCount) {
-      setPrevArtifactCount(currentArtifactCount);
+    function handleArtifactDecay() {
+      r.mutate.dropArtifact(playerNum);
+      r.mutate.addArtifactToMaze();
+
+      console.log("current", numPlayerCollectedArtifacts);
+      if (numPlayerCollectedArtifacts > 1) {
+        artifactDecayTimeoutID = setTimeout(
+          handleArtifactDecay,
+          artifactDecayInterval
+        );
+      }
+    }
+    console.log("prev", prevArtifactCount);
+
+    setPrevArtifactCount(numPlayerCollectedArtifacts);
+    numPlayerCollectedArtifacts = playerCollectedArtifacts[playerNum - 1];
+    if (numPlayerCollectedArtifacts > prevArtifactCount) {
       clearTimeout(artifactDecayTimeoutID);
       artifactDecayTimeoutID = setTimeout(
         handleArtifactDecay,
