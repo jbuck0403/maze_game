@@ -2,7 +2,7 @@
 import "./App.css";
 
 //react imports
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
@@ -43,6 +43,7 @@ function App() {
   };
 
   const userID = userTool.getUserID();
+
   const roomAssignment = useOrchestration(
     {
       server: server,
@@ -52,8 +53,6 @@ function App() {
     },
     orchestrationOptions
   );
-
-  console.log(roomAssignment);
 
   const [gameRoom, setGameRoom] = useState();
   const [startingPlayers, setStartingPlayers] = useState();
@@ -78,26 +77,22 @@ function App() {
           <Route
             path="/lobby"
             element={
-              <ProtectedRoute
-                condition={hasVisitedHome}
-                redirectTo={NavigationContext.homeRoute}
-              >
-                <Lobby
-                  setGameRoom={setGameRoom}
-                  setStartingPlayers={setStartingPlayers}
-                  gameRoom={gameRoom}
-                  roomAssignment={roomAssignment}
-                />
+              <ProtectedRoute condition={hasVisitedHome} redirectTo={"/"}>
+                {roomAssignment && (
+                  <Lobby
+                    setGameRoom={setGameRoom}
+                    setStartingPlayers={setStartingPlayers}
+                    gameRoom={gameRoom}
+                    roomAssignment={roomAssignment}
+                  />
+                )}
               </ProtectedRoute>
             }
           />
           <Route
             path="/game"
             element={
-              <ProtectedRoute
-                condition={hasVisitedLobby}
-                redirectTo={NavigationContext.homeRoute}
-              >
+              <ProtectedRoute condition={hasVisitedLobby} redirectTo={"/"}>
                 <Game r={gameRoom} startingPlayers={startingPlayers} />
               </ProtectedRoute>
             }

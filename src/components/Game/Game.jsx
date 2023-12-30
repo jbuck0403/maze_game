@@ -3,14 +3,15 @@ import "./Game.css";
 import { NavigationContext } from "../../App";
 
 //react imports
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useSubscribe } from "@rocicorp/reflect/react";
 import { useNavigate } from "react-router-dom";
 
 //component imports
 import MazeComponent from "../Maze/Maze";
 import MazeTools from "../../mazeGeneration/mazeTools";
-import { wall } from "../../mazeGeneration/mazeGenerator";
+import { artifact, wall } from "../../mazeGeneration/mazeGenerator";
+import MazeMovement from "../../mazeGeneration/mazeMovement";
 
 //game variables
 const inputLimit = 10;
@@ -35,7 +36,7 @@ function Game({ r, startingPlayers }) {
     if (!context.hasVisitedLobby) {
       navigate(context.homeRoute);
     }
-  });
+  }, []);
 
   //game logic
   const mazeTool = new MazeTools(r);
@@ -74,6 +75,7 @@ function Game({ r, startingPlayers }) {
       const { key } = event;
 
       if (["w", "a", "s", "d"].includes(key)) {
+        // r.mutate.addArtifactToMaze();
         if (!keyDown.includes(key) && startingPlayers) {
           //do initial movement immediately on key press
           r.mutate.updatePlayerPosition({
@@ -127,6 +129,7 @@ function Game({ r, startingPlayers }) {
 
     r.mutate.initMaze(startingPlayers);
     r.mutate.spawnItem("a", 5);
+    // r.mutate.addArtifactToMaze();
 
     window.addEventListener("keydown", movementKeyDownHandler);
     window.addEventListener("keydown", barricadeKeyHandler);
@@ -145,15 +148,34 @@ function Game({ r, startingPlayers }) {
     };
   }, []);
 
+  // //state variables
+  // const [playerCollectedArtifacts, setPlayerCollectedArtifacts] = useState(0);
+
   // keep the maze up to date on each change
   const maze = useSubscribe(r, (tx) => tx.get("maze"), [[]]);
   const roster = useSubscribe(r, (tx) => tx.get("roster"), []);
   playerNum = roster.findIndex((player) => player === r.userID) + 1;
 
+  const numCollectedArtifacts = useSubscribe(
+    r,
+    (tx) => tx.get("numCollectedArtifacts"),
+    0
+  );
+  const playerCollectedArtifacts = startingPlayers.map((player) => {
+    return useSubscribe(r, (tx) => tx.get(`player${player}Artifacts`), 0);
+  });
+
   // maintain a record of all player positions
   const playerPositions = startingPlayers.map((player) => {
     return useSubscribe(r, (tx) => tx.get(`position${player}`), [1, 1]);
   });
+
+  useEffect(() => {
+    console.log("total", numCollectedArtifacts);
+  }, [numCollectedArtifacts]);
+  useEffect(() => {
+    console.log("players", playerCollectedArtifacts);
+  }, [playerCollectedArtifacts]);
 
   useEffect(() => {
     // show player colors
