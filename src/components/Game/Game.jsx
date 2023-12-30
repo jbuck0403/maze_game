@@ -48,20 +48,6 @@ function Game({ r, startingPlayers }) {
   //game logic
   const mazeTool = new MazeTools(r);
 
-  // function handleArtifactDecay() {
-  //   r.mutate.dropArtifact(playerNum);
-  //   r.mutate.addArtifactToMaze();
-  //   numPlayerCollectedArtifacts -= 1;
-
-  //   console.log(numPlayerCollectedArtifacts);
-  //   if (numPlayerCollectedArtifacts > 0) {
-  //     artifactDecayTimeoutID = setTimeout(
-  //       handleArtifactDecay,
-  //       artifactDecayInterval
-  //     );
-  //   }
-  // }
-
   function handleNaturalArtifactSpawning() {
     const currentTime = Date.now();
     if (
@@ -189,7 +175,6 @@ function Game({ r, startingPlayers }) {
     };
   }, []);
 
-  const [decayTimestamp, setDecayTimestamp] = useState();
   const [prevArtifactCount, setPrevArtifactCount] = useState(0);
 
   // keep the maze up to date on each change
@@ -258,27 +243,6 @@ function Game({ r, startingPlayers }) {
       );
     }
   }, [playerCollectedArtifacts]);
-
-  // useEffect(() => {
-  //   console.log(artifactDecayTime);
-  //   if (artifactDecayTime !== undefined) {
-  //     clearTimeout(artifactDecayTimeoutID);
-  //     artifactDecayTimeoutID = setTimeout(
-  //       handleArtifactDecay,
-  //       artifactDecayInterval
-  //     );
-  //   }
-  // }, [artifactDecayTime]);
-
-  // useEffect(() => {
-  //   console.log("in maze", artifactsInMaze);
-  // }, [artifactsInMaze]);
-  // useEffect(() => {
-  //   console.log("collected", numCollectedArtifacts);
-  // }, [numCollectedArtifacts]);
-  // useEffect(() => {
-  //   console.log("player collected", playerCollectedArtifacts);
-  // }, [playerCollectedArtifacts]);
 
   // maintain a record of all player positions
   const playerPositions = startingPlayers.map((player) => {
