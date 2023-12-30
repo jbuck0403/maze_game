@@ -18,7 +18,7 @@ const inputLimit = 10;
 const timeThreshold = 1000;
 const refreshRate = timeThreshold / inputLimit;
 const wallBreakInterval = timeThreshold * 10;
-const naturalArtifactSpawnInterval = timeThreshold * 3;
+const naturalArtifactSpawnInterval = timeThreshold * 1;
 const artifactDecayInterval = timeThreshold * 10;
 const wallBreakKey = "q";
 const destroyBarricadesKey = " ";
@@ -29,8 +29,9 @@ let keyDown = [];
 let movementTimeoutID;
 let lastWallBreakTime = 0;
 let lastNaturalArtifactSpawnTime = 0;
+let naturalArtifactSpawnTimeoutID;
 let numNaturalArtifactSpawns = 0;
-let artifactDecayTime = 0;
+let artifactDecayTimeoutID;
 
 function Game({ r, startingPlayers }) {
   //protected route logic
@@ -46,37 +47,40 @@ function Game({ r, startingPlayers }) {
   //game logic
   const mazeTool = new MazeTools(r);
 
+  function handleArtifactDecay() {
+    r.mutate.dropArtifact(playerNum);
+    r.mutate.addArtifactToMaze();
+
+    if (playerCollectedArtifacts[playerNum - 1] > 1) {
+      artifactDecayTimeoutID = setTimeout(
+        handleArtifactDecay,
+        artifactDecayInterval
+      );
+    }
+  }
+
+  function handleNaturalArtifactSpawning() {
+    const currentTime = Date.now();
+    if (
+      numNaturalArtifactSpawns < 5 &&
+      currentTime - lastNaturalArtifactSpawnTime > naturalArtifactSpawnInterval
+    ) {
+      console.log("spawning artifact");
+      r.mutate.addArtifactToMaze();
+      lastNaturalArtifactSpawnTime = currentTime;
+      numNaturalArtifactSpawns += 1;
+
+      naturalArtifactSpawnTimeoutID = setTimeout(
+        handleNaturalArtifactSpawning,
+        naturalArtifactSpawnInterval
+      );
+    }
+  }
+
   // Add event listener when the component mounts
   useEffect(() => {
-    function handleArtifactDecay() {
-      const currentTime = Date.now();
-
-      if (currentTime - artifactDecayTime > artifactDecayInterval) {
-        if (playerCollectedArtifacts.length > 1) {
-          setTimeout(handleArtifactDecay, artifactDecayInterval);
-        }
-
-        r.mutate.dropArtifact(playerNum);
-        r.mutate.addArtifactToMaze();
-      }
-    }
-
-    function handleNaturalArtifactSpawning() {
-      const currentTime = Date.now();
-      if (
-        numNaturalArtifactSpawns < 5 &&
-        currentTime - lastNaturalArtifactSpawnTime >
-          naturalArtifactSpawnInterval
-      ) {
-        console.log("spawning artifact");
-        r.mutate.addArtifactToMaze();
-        lastNaturalArtifactSpawnTime = currentTime;
-        numNaturalArtifactSpawns += 1;
-
-        setTimeout(handleNaturalArtifactSpawning, naturalArtifactSpawnInterval);
-      }
-    }
     function handleCharacterMovement() {
+      console.log("entering movement handler");
       if (keyDown.length > 0) {
         // if the player is currently holding a key
         const currentTime = Date.now();
@@ -164,7 +168,7 @@ function Game({ r, startingPlayers }) {
     }
 
     r.mutate.initMaze(startingPlayers);
-    handleNaturalArtifactSpawning();
+    // handleNaturalArtifactSpawning();
 
     window.addEventListener("keydown", movementKeyDownHandler);
     window.addEventListener("keydown", barricadeKeyHandler);
@@ -182,6 +186,9 @@ function Game({ r, startingPlayers }) {
     };
   }, []);
 
+  const [decayTimestamp, setDecayTimestamp] = useState();
+  const [prevArtifactCount, setPrevArtifactCount] = useState(0);
+
   // keep the maze up to date on each change
   const maze = useSubscribe(r, (tx) => tx.get("maze"), [[]]);
   const roster = useSubscribe(r, (tx) => tx.get("roster"), []);
@@ -193,7 +200,13 @@ function Game({ r, startingPlayers }) {
     false
   );
 
-  console.log("1", artifactSpawningTriggered);
+  useEffect(() => {
+    console.log(artifactSpawningTriggered);
+    if (!artifactSpawningTriggered) {
+      handleNaturalArtifactSpawning();
+      r.mutate.initArtifacts();
+    }
+  }, [artifactSpawningTriggered]);
 
   const artifactsInMaze = useSubscribe(
     r,
@@ -206,9 +219,38 @@ function Game({ r, startingPlayers }) {
     (tx) => tx.get("numCollectedArtifacts"),
     0
   );
+
+  useEffect(() => {
+    if (artifactsInMaze && artifactsInMaze.length === 5) {
+      clearTimeout(naturalArtifactSpawnTimeoutID);
+    }
+  }, [artifactsInMaze]);
   const playerCollectedArtifacts = startingPlayers.map((player) => {
     return useSubscribe(r, (tx) => tx.get(`player${player}Artifacts`), 0);
   });
+
+  useEffect(() => {
+    const currentArtifactCount = playerCollectedArtifacts[playerNum - 1];
+    if (currentArtifactCount > prevArtifactCount) {
+      setPrevArtifactCount(currentArtifactCount);
+      clearTimeout(artifactDecayTimeoutID);
+      artifactDecayTimeoutID = setTimeout(
+        handleArtifactDecay,
+        artifactDecayInterval
+      );
+    }
+  }, [playerCollectedArtifacts]);
+
+  // useEffect(() => {
+  //   console.log(artifactDecayTime);
+  //   if (artifactDecayTime !== undefined) {
+  //     clearTimeout(artifactDecayTimeoutID);
+  //     artifactDecayTimeoutID = setTimeout(
+  //       handleArtifactDecay,
+  //       artifactDecayInterval
+  //     );
+  //   }
+  // }, [artifactDecayTime]);
 
   // useEffect(() => {
   //   console.log("in maze", artifactsInMaze);

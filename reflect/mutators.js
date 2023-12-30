@@ -63,6 +63,7 @@ export const mutators = {
   stopGame,
   addArtifactToMaze,
   dropArtifact,
+  initArtifacts,
   ...createOrchestrationMutators(orchestrationOptions),
 };
 
@@ -502,5 +503,9 @@ async function dropArtifact(tx, playerNum) {
   const numCollectedArtifacts = (await tx.get("numCollectedArtifacts")) ?? 0;
 
   tx.set("numCollectedArtifacts", numCollectedArtifacts - 1);
-  tx.set(`player${playerID}Artifacts`, playerCollectedArtifacts - 1);
+  tx.set(`player${playerNum}Artifacts`, playerCollectedArtifacts - 1);
+}
+
+async function initArtifacts(tx) {
+  tx.set("artifactSpawningTriggered", true);
 }
