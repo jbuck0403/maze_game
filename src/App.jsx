@@ -16,6 +16,7 @@ import Lobby from "./components/Lobby/Lobby";
 import Home from "./components/Home/Home";
 import Game from "./components/Game/Game";
 import HowToPlay from "./components/HowToPlay/HowToPlay";
+import OverflowStyleComponent from "./components/OverflowStyle/OverflowStyle";
 
 //custom tool imports
 import UserTools from "./users/getUserID";
@@ -73,6 +74,7 @@ function App() {
       }}
     >
       <Router>
+        {/* <OverflowStyleComponent> */}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/HowToPlay" element={<HowToPlay />} />
@@ -102,6 +104,7 @@ function App() {
             }
           />
         </Routes>
+        {/* </OverflowStyleComponent> */}
       </Router>
     </NavigationContext.Provider>
   );

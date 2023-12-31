@@ -1,9 +1,18 @@
+import { useEffect } from "react";
 import "./HowToPlay.css";
 
 import { useNavigate } from "react-router-dom";
 
 const HowToPlay = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.body.style.overflow = "auto";
+
+    return () => {
+      document.body.style.overflow = "hidden";
+    };
+  }, []);
 
   return (
     <>
