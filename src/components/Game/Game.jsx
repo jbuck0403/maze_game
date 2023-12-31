@@ -69,7 +69,6 @@ function Game({ r, startingPlayers }) {
   // Add event listener when the component mounts
   useEffect(() => {
     function handleCharacterMovement() {
-      console.log("entering movement handler");
       if (keyDown.length > 0) {
         // if the player is currently holding a key
         const currentTime = Date.now();
@@ -176,6 +175,7 @@ function Game({ r, startingPlayers }) {
   }, []);
 
   const [prevArtifactCount, setPrevArtifactCount] = useState(0);
+  const [winner, setWinner] = useState();
 
   // keep the maze up to date on each change
   const maze = useSubscribe(r, (tx) => tx.get("maze"), [[]]);
@@ -209,14 +209,32 @@ function Game({ r, startingPlayers }) {
   );
 
   useEffect(() => {
+    if (numCollectedArtifacts === 5) {
+      const winner = playerCollectedArtifactsAll.indexOf(5) + 1;
+
+      if (winner > -1) {
+        setWinner(winner);
+        r.close();
+      }
+    }
+  }, [numCollectedArtifacts]);
+
+  useEffect(() => {
     if (artifactsInMaze && artifactsInMaze.length === 5) {
       clearTimeout(naturalArtifactSpawnTimeoutID);
     }
   }, [artifactsInMaze]);
-  const playerCollectedArtifacts = startingPlayers.map((player) => {
+
+  const playerCollectedArtifactsAll = startingPlayers.map((player) => {
     return useSubscribe(r, (tx) => tx.get(`player${player}Artifacts`), 0);
   });
-  console.log(playerCollectedArtifacts);
+
+  // const playerCollectedArtifacts = useSubscribe(
+  //   r,
+  //   (tx) => tx.get(`player${playerNum}Artifacts`),
+  //   0
+  // );
+  // console.log(playerCollectedArtifacts);
 
   useEffect(() => {
     function handleArtifactDecay() {
@@ -234,7 +252,7 @@ function Game({ r, startingPlayers }) {
     console.log("prev", prevArtifactCount);
 
     setPrevArtifactCount(numPlayerCollectedArtifacts);
-    numPlayerCollectedArtifacts = playerCollectedArtifacts[playerNum - 1];
+    numPlayerCollectedArtifacts = playerCollectedArtifactsAll[playerNum - 1];
     if (numPlayerCollectedArtifacts > prevArtifactCount) {
       clearTimeout(artifactDecayTimeoutID);
       artifactDecayTimeoutID = setTimeout(
@@ -242,7 +260,7 @@ function Game({ r, startingPlayers }) {
         artifactDecayInterval
       );
     }
-  }, [playerCollectedArtifacts]);
+  }, [playerCollectedArtifactsAll]);
 
   // maintain a record of all player positions
   const playerPositions = startingPlayers.map((player) => {
@@ -258,6 +276,29 @@ function Game({ r, startingPlayers }) {
     }
   }, [playerPositions]);
 
-  return <>{mazeTool && roster && <MazeComponent maze={maze} />}</>;
+  const homeBtnHandler = () => {
+    context.resetNavigation();
+    navigate("/");
+    location.reload();
+  };
+
+  return (
+    <>
+      {winner && (
+        <div>
+          <div>{`Player ${winner} wins!`}</div>
+          <button onClick={homeBtnHandler} className="back-to-home-btn">
+            Home
+          </button>
+        </div>
+      )}
+      {mazeTool && roster && playerCollectedArtifactsAll && (
+        <MazeComponent
+          maze={maze}
+          playerCollectedArtifactsAll={playerCollectedArtifactsAll}
+        />
+      )}
+    </>
+  );
 }
 export default Game;

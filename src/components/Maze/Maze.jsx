@@ -2,7 +2,7 @@ import "./Maze.css";
 
 import { emptySpace, wall, artifact } from "../../mazeGeneration/mazeGenerator";
 
-function MazeComponent({ maze }) {
+function MazeComponent({ maze, playerCollectedArtifactsAll }) {
   const addClassName = (cell) => {
     switch (cell) {
       case wall:
@@ -29,9 +29,43 @@ function MazeComponent({ maze }) {
   );
 
   return (
-    <table className="maze">
-      <tbody>{maze.map((row, yIndex) => displayRow(row, yIndex))}</tbody>
-    </table>
+    <>
+      <div className="maze-game-container">
+        <div className="score-column">
+          <div className="score-container">
+            <div className="score-title">{`Player 1`}</div>
+            <div className="score">{`${playerCollectedArtifactsAll[0]}`}</div>
+          </div>
+          <div className="score-container">
+            {playerCollectedArtifactsAll &&
+              playerCollectedArtifactsAll.length == 4 && (
+                <>
+                  <div className="score-title">{`Player 4`}</div>
+                  <div className="score">{`${playerCollectedArtifactsAll[3]}`}</div>
+                </>
+              )}
+          </div>
+        </div>
+        <table className="maze">
+          <tbody>{maze.map((row, yIndex) => displayRow(row, yIndex))}</tbody>
+        </table>
+        <div className="score-column">
+          <div className="score-container">
+            {playerCollectedArtifactsAll &&
+              playerCollectedArtifactsAll.length >= 3 && (
+                <>
+                  <div className="score-title">{`Player 3`}</div>
+                  <div className="score">{`${playerCollectedArtifactsAll[2]}`}</div>
+                </>
+              )}
+          </div>
+          <div className="score-container">
+            <div className="score-title">{`Player 2`}</div>
+            <div className="score">{`${playerCollectedArtifactsAll[1]}`}</div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 
