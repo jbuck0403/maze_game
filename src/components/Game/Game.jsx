@@ -258,6 +258,18 @@ function Game({ r, startingPlayers }) {
     }
   }, [playerPositions]);
 
-  return <>{mazeTool && roster && <MazeComponent maze={maze} />}</>;
+  return (
+    <>
+      <button
+        onClick={() => {
+          r.close();
+          window.location.href = "/";
+        }}
+      >
+        Home
+      </button>
+      {mazeTool && roster && <MazeComponent maze={maze} />}
+    </>
+  );
 }
 export default Game;

@@ -188,6 +188,8 @@ const Lobby = ({
     });
   }, []);
 
+  console.log(roomAssignment, roster);
+
   return (
     <>
       <button
