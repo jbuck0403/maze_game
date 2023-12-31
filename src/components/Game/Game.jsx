@@ -21,7 +21,9 @@ const wallBreakInterval = timeThreshold * 10;
 const naturalArtifactSpawnInterval = timeThreshold * 1;
 const artifactDecayInterval = timeThreshold * 10;
 const wallBreakKey = "q";
+const attackPlayerKey = "e";
 const destroyBarricadesKey = " ";
+const winCountdownInterval = timeThreshold * 8;
 let playerNum = -1;
 let lastInputTime = 0;
 let moveDirection;
@@ -33,6 +35,7 @@ let naturalArtifactSpawnTimeoutID;
 let numNaturalArtifactSpawns = 0;
 let artifactDecayTimeoutID;
 let numPlayerCollectedArtifacts;
+let winCountdownTimeoutID;
 
 function Game({ r, startingPlayers }) {
   //protected route logic
@@ -137,6 +140,23 @@ function Game({ r, startingPlayers }) {
       }
     }
 
+    async function attackPlayerHandler(event) {
+      const { key } = event;
+      if (key === attackPlayerKey) {
+        const killedPlayers = await r.mutate.attackPlayer({
+          playerNum: playerNum,
+          startingPlayers: startingPlayers,
+        });
+        console.log("killedPlayers", killedPlayers);
+        if (killedPlayers) {
+          killedPlayers.forEach((player) => {
+            r.mutate.dropArtifact(player);
+            r.mutate.addArtifactToMaze();
+          });
+        }
+      }
+    }
+
     function removeBarricadeKeyHandler(event) {
       const { key } = event;
       if (key === destroyBarricadesKey) {
@@ -164,6 +184,7 @@ function Game({ r, startingPlayers }) {
     window.addEventListener("keydown", removeBarricadeKeyHandler);
     window.addEventListener("keyup", movementKeyUpHandler);
     window.addEventListener("keydown", destroyWallsHandler);
+    window.addEventListener("keydown", attackPlayerHandler);
 
     // Clean up the event listener when the component unmounts
     return () => {
@@ -171,6 +192,8 @@ function Game({ r, startingPlayers }) {
       window.removeEventListener("keydown", barricadeKeyHandler);
       window.removeEventListener("keydown", removeBarricadeKeyHandler);
       window.removeEventListener("keyup", movementKeyUpHandler);
+      window.removeEventListener("keydown", destroyWallsHandler);
+      window.removeEventListener("keydown", attackPlayerHandler);
       clearTimeout(movementTimeoutID);
     };
   }, []);
@@ -182,6 +205,7 @@ function Game({ r, startingPlayers }) {
   const maze = useSubscribe(r, (tx) => tx.get("maze"), [[]]);
   const roster = useSubscribe(r, (tx) => tx.get("roster"), []);
   playerNum = roster.findIndex((player) => player === r.userID) + 1;
+  const gameOver = useSubscribe(r, (tx) => tx.get("winner"), false);
 
   const artifactSpawningTriggered = useSubscribe(
     r,
@@ -210,12 +234,18 @@ function Game({ r, startingPlayers }) {
   );
 
   useEffect(() => {
+    if (gameOver) {
+      r.close();
+    }
+  }, [gameOver]);
+
+  useEffect(() => {
     if (numCollectedArtifacts === 5) {
       const winner = playerCollectedArtifactsAll.indexOf(5) + 1;
 
       if (winner > -1) {
+        r.mutate.declareWinner();
         setWinner(winner);
-        r.close();
       }
     }
   }, [numCollectedArtifacts]);
@@ -228,14 +258,19 @@ function Game({ r, startingPlayers }) {
   const playerCollectedArtifactsAll = startingPlayers.map((player) => {
     return useSubscribe(r, (tx) => tx.get(`player${player}Artifacts`), 0);
   });
-  console.log(playerCollectedArtifactsAll);
 
   useEffect(() => {
+    function winCountdown() {
+      const winningPlayer = playerCollectedArtifactsAll.includes(3)
+        ? playerCollectedArtifactsAll.indexOf(3) + 1
+        : playerCollectedArtifactsAll.indexOf(4) + 1;
+      setWinner(winningPlayer);
+      r.mutate.declareWinner();
+    }
     function handleArtifactDecay() {
       r.mutate.dropArtifact(playerNum);
       r.mutate.addArtifactToMaze();
 
-      console.log("current", numPlayerCollectedArtifacts);
       if (numPlayerCollectedArtifacts > 1) {
         artifactDecayTimeoutID = setTimeout(
           handleArtifactDecay,
@@ -243,7 +278,18 @@ function Game({ r, startingPlayers }) {
         );
       }
     }
-    console.log("prev", prevArtifactCount);
+
+    if (playerCollectedArtifactsAll[playerNum - 1] < 3) {
+      clearTimeout(winCountdownTimeoutID);
+    }
+
+    if (
+      (playerCollectedArtifactsAll.includes(3) ||
+        playerCollectedArtifactsAll.includes(4)) &&
+      winCountdownTimeoutID === undefined
+    ) {
+      winCountdownTimeoutID = setTimeout(winCountdown, winCountdownInterval);
+    }
 
     setPrevArtifactCount(numPlayerCollectedArtifacts);
     numPlayerCollectedArtifacts = playerCollectedArtifactsAll[playerNum - 1];
@@ -276,7 +322,7 @@ function Game({ r, startingPlayers }) {
 
   return (
     <>
-      {winner && (
+      {gameOver && (
         <div>
           <div>{`Player ${winner} wins!`}</div>
           <button onClick={homeBtnHandler} className="back-to-home-btn">

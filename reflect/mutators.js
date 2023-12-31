@@ -64,6 +64,8 @@ export const mutators = {
   addArtifactToMaze,
   dropArtifact,
   initArtifacts,
+  declareWinner,
+  attackPlayer,
   ...createOrchestrationMutators(orchestrationOptions),
 };
 
@@ -463,7 +465,7 @@ async function updatePlayerPosition(tx, playerData) {
   const currentPlayers = playerData.currentPlayers;
   const maze =
     (await tx.get("maze")) ?? populateMaze(tx, currentPlayers, mazeSize);
-
+  console.log("my artifacts", playerCollectedArtifacts);
   const currentPosition =
     (await tx.get(`position${playerID}`)) ??
     startPositionByPlayer(tx, maze.length - 1, maze[0].length - 1, playerID);
@@ -497,6 +499,71 @@ async function updatePlayerPosition(tx, playerData) {
   });
 }
 
+async function attackPlayer(tx, playerData) {
+  const killPlayer = (enemyNum, enemyPosition) => {
+    //remove one artifact
+    const enemyArtifacts = otherPlayersArtifacts[enemyNum - 1];
+
+    const newPosition = findRandomEmptySpace(mazeCopy);
+
+    //move player to random empty spot in maze
+    setCharacterPosition(tx, enemyNum, newPosition);
+
+    mazeCopy[enemyPosition[0]][enemyPosition[1]] = emptySpace;
+    mazeCopy[newPosition[0]][newPosition[1]] = enemyNum;
+
+    if (enemyArtifacts >= 2) {
+      return enemyNum;
+    } else return false;
+  };
+
+  const playerNum = playerData.playerNum;
+  const currentPlayers = playerData.startingPlayers;
+
+  // create a shallow copy of the maze array
+  const mazeCopy = await createMazeCopy(tx);
+  // get the current users current position
+  const [playerRow, playerCol] = await getPlayerPosition(tx, playerNum);
+  const otherPlayersPromises = currentPlayers.map((player) => {
+    return getPlayerPosition(tx, player);
+  });
+  const otherPlayersArtifactsPromises = currentPlayers.map((player) => {
+    return tx.get(`player${player}Artifacts`) ?? 0;
+  });
+  const otherPlayers = await Promise.all(otherPlayersPromises);
+  const otherPlayersArtifacts = await Promise.all(
+    otherPlayersArtifactsPromises
+  );
+
+  const coordsToCheck = [
+    [-1, -1],
+    [-1, 0],
+    [-1, 1],
+    [0, -1],
+    [0, 1],
+    [1, -1],
+    [1, 0],
+    [1, 1],
+  ];
+  const playersKilled = [];
+  coordsToCheck.forEach(([row, col]) => {
+    otherPlayers.forEach((enemy, idx) => {
+      if (idx === playerNum - 1) return;
+      else if (enemy[0] === playerRow + row && enemy[1] === playerCol + col) {
+        const killedPlayer = killPlayer(currentPlayers[idx], [
+          enemy[0],
+          enemy[1],
+        ]);
+        if (killedPlayer) {
+          playersKilled.push(killedPlayer);
+        }
+      }
+    });
+  });
+  updateMaze(tx, mazeCopy);
+  return playersKilled;
+}
+
 async function dropArtifact(tx, playerNum) {
   const playerCollectedArtifacts =
     (await tx.get(`player${playerNum}Artifacts`)) ?? 0;
@@ -508,4 +575,8 @@ async function dropArtifact(tx, playerNum) {
 
 async function initArtifacts(tx) {
   tx.set("artifactSpawningTriggered", true);
+}
+
+async function declareWinner(tx) {
+  tx.set("winner", true);
 }

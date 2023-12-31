@@ -34,14 +34,14 @@ function MazeComponent({ maze, playerCollectedArtifactsAll }) {
         <div className="score-column">
           <div className="score-container">
             <div className="score-title">{`Player 1`}</div>
-            <div className="score">{`${playerCollectedArtifactsAll[0]}`}</div>
+            <div className="score player1-score">{`${playerCollectedArtifactsAll[0]}`}</div>
           </div>
           <div className="score-container">
             {playerCollectedArtifactsAll &&
               playerCollectedArtifactsAll.length == 4 && (
                 <>
                   <div className="score-title">{`Player 4`}</div>
-                  <div className="score">{`${playerCollectedArtifactsAll[3]}`}</div>
+                  <div className="score player4-score">{`${playerCollectedArtifactsAll[3]}`}</div>
                 </>
               )}
           </div>
@@ -55,13 +55,13 @@ function MazeComponent({ maze, playerCollectedArtifactsAll }) {
               playerCollectedArtifactsAll.length >= 3 && (
                 <>
                   <div className="score-title">{`Player 3`}</div>
-                  <div className="score">{`${playerCollectedArtifactsAll[2]}`}</div>
+                  <div className="score player3-score">{`${playerCollectedArtifactsAll[2]}`}</div>
                 </>
               )}
           </div>
           <div className="score-container">
             <div className="score-title">{`Player 2`}</div>
-            <div className="score">{`${playerCollectedArtifactsAll[1]}`}</div>
+            <div className="score player2-score">{`${playerCollectedArtifactsAll[1]}`}</div>
           </div>
         </div>
       </div>

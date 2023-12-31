@@ -62,6 +62,22 @@ body {
   background-color: yellow;
 }
 
+.player1-score {
+  color: red;
+}
+
+.player2-score {
+  color: blue;
+}
+
+.player3-score {
+  color: green;
+}
+
+.player4-score {
+  color: yellow;
+}
+
 .t {
   background-color: white;
 }
@@ -84,4 +100,7 @@ body {
 
 .score {
   font-size: 3vw;
+  text-shadow: 0.02em 0 white, 0 0.02em white, -0.02em 0 white, 0 -0.02em white,
+    -0.02em -0.02em white, -0.02em 0.02em white, 0.02em -0.02em white,
+    0.02em 0.02em white;
 }
