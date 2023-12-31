@@ -176,6 +176,7 @@ function Game({ r, startingPlayers }) {
   }, []);
 
   const [prevArtifactCount, setPrevArtifactCount] = useState(0);
+  const [winner, setWinner] = useState();
 
   // keep the maze up to date on each change
   const maze = useSubscribe(r, (tx) => tx.get("maze"), [[]]);
@@ -209,14 +210,25 @@ function Game({ r, startingPlayers }) {
   );
 
   useEffect(() => {
+    if (numCollectedArtifacts === 5) {
+      const winner = playerCollectedArtifactsAll.indexOf(5) + 1;
+
+      if (winner > -1) {
+        setWinner(winner);
+        r.close();
+      }
+    }
+  }, [numCollectedArtifacts]);
+
+  useEffect(() => {
     if (artifactsInMaze && artifactsInMaze.length === 5) {
       clearTimeout(naturalArtifactSpawnTimeoutID);
     }
   }, [artifactsInMaze]);
-  const playerCollectedArtifacts = startingPlayers.map((player) => {
+  const playerCollectedArtifactsAll = startingPlayers.map((player) => {
     return useSubscribe(r, (tx) => tx.get(`player${player}Artifacts`), 0);
   });
-  console.log(playerCollectedArtifacts);
+  console.log(playerCollectedArtifactsAll);
 
   useEffect(() => {
     function handleArtifactDecay() {
@@ -234,7 +246,7 @@ function Game({ r, startingPlayers }) {
     console.log("prev", prevArtifactCount);
 
     setPrevArtifactCount(numPlayerCollectedArtifacts);
-    numPlayerCollectedArtifacts = playerCollectedArtifacts[playerNum - 1];
+    numPlayerCollectedArtifacts = playerCollectedArtifactsAll[playerNum - 1];
     if (numPlayerCollectedArtifacts > prevArtifactCount) {
       clearTimeout(artifactDecayTimeoutID);
       artifactDecayTimeoutID = setTimeout(
@@ -242,7 +254,7 @@ function Game({ r, startingPlayers }) {
         artifactDecayInterval
       );
     }
-  }, [playerCollectedArtifacts]);
+  }, [playerCollectedArtifactsAll]);
 
   // maintain a record of all player positions
   const playerPositions = startingPlayers.map((player) => {
@@ -258,17 +270,26 @@ function Game({ r, startingPlayers }) {
     }
   }, [playerPositions]);
 
+  const homeBtnHandler = () => {
+    window.location.href = "/";
+  };
+
   return (
     <>
-      <button
-        onClick={() => {
-          r.close();
-          window.location.href = "/";
-        }}
-      >
-        Home
-      </button>
-      {mazeTool && roster && <MazeComponent maze={maze} />}
+      {winner && (
+        <div>
+          <div>{`Player ${winner} wins!`}</div>
+          <button onClick={homeBtnHandler} className="back-to-home-btn">
+            Home
+          </button>
+        </div>
+      )}
+      {mazeTool && roster && playerCollectedArtifactsAll && (
+        <MazeComponent
+          maze={maze}
+          playerCollectedArtifactsAll={playerCollectedArtifactsAll}
+        />
+      )}
     </>
   );
 }

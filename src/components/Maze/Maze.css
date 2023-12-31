@@ -28,6 +28,12 @@ body {
   justify-content: center;
 }
 
+.score-column {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
 .wall {
   background-color: rgba(255, 255, 255, 0.476);
 }
@@ -58,4 +64,24 @@ body {
 
 .t {
   background-color: white;
+}
+
+.maze-game-container {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.score-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.score-title {
+  width: 10vw;
+  font-size: 1vw;
+}
+
+.score {
+  font-size: 3vw;
 }
