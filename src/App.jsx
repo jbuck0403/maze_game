@@ -15,6 +15,7 @@ import { orchestrationOptions } from "../reflect/orchestration-options";
 import Lobby from "./components/Lobby/Lobby";
 import Home from "./components/Home/Home";
 import Game from "./components/Game/Game";
+import HowToPlay from "./components/HowToPlay/HowToPlay";
 
 //custom tool imports
 import UserTools from "./users/getUserID";
@@ -74,6 +75,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/HowToPlay" element={<HowToPlay />} />
           <Route
             path="/lobby"
             element={

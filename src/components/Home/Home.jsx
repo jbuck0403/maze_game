@@ -16,6 +16,17 @@ const Home = () => {
 
   const navigate = useNavigate();
 
-  return <button onClick={() => navigate("/lobby")}>Play</button>;
+  return (
+    <>
+      <div className="nav-button-container">
+        <button className="nav-button" onClick={() => navigate("/lobby")}>
+          Play
+        </button>
+        <button className="nav-button" onClick={() => navigate("/HowToPlay")}>
+          How to Play
+        </button>
+      </div>
+    </>
+  );
 };
 export default Home;

@@ -1,0 +1,62 @@
+.how-to-container {
+  text-decoration: none;
+}
+
+.control-title {
+  font-size: 40px;
+  margin-top: 2vh;
+}
+
+.control-title::before {
+  content: "- ";
+}
+
+.control-title::after {
+  content: " -";
+}
+
+.title {
+  /* margin-top: 30px; */
+  font-size: 50px;
+  margin: 20px;
+}
+
+.content {
+  font-size: 23px;
+  text-align: center;
+}
+
+.win-condition-explanation-container {
+  font-size: 3vh;
+  margin-top: 2vh;
+}
+
+.win-condition-explanation {
+  text-align: left;
+}
+
+.explanation-list {
+  list-style-position: inside;
+}
+
+.sub-title {
+  font-size: 2.5vh;
+  margin-top: 2vh;
+}
+
+.purple-square {
+  width: 4vh;
+  height: 4vh;
+  background-color: purple;
+  align-items: center;
+}
+
+.objective-container {
+  display: flex;
+  align-items: center;
+}
+
+.objective-wrapper {
+  display: flex;
+  justify-content: center;
+}

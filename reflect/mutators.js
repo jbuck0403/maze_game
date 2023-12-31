@@ -504,15 +504,15 @@ async function attackPlayer(tx, playerData) {
     //remove one artifact
     const enemyArtifacts = otherPlayersArtifacts[enemyNum - 1];
 
-    const newPosition = findRandomEmptySpace(mazeCopy);
-
-    //move player to random empty spot in maze
-    setCharacterPosition(tx, enemyNum, newPosition);
-
-    mazeCopy[enemyPosition[0]][enemyPosition[1]] = emptySpace;
-    mazeCopy[newPosition[0]][newPosition[1]] = enemyNum;
-
     if (enemyArtifacts >= 2) {
+      const newPosition = findRandomEmptySpace(mazeCopy);
+
+      //move player to random empty spot in maze
+      setCharacterPosition(tx, enemyNum, newPosition);
+
+      mazeCopy[enemyPosition[0]][enemyPosition[1]] = emptySpace;
+      mazeCopy[newPosition[0]][newPosition[1]] = enemyNum;
+
       return enemyNum;
     } else return false;
   };
