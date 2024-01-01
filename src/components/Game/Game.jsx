@@ -44,6 +44,13 @@ const handleAttemptToLeavePage = (e) => {
 };
 
 function Game({ r, startingPlayers }) {
+  console.log(
+    "timeouts",
+    winCountdownTimeoutID,
+    artifactDecayTimeoutID,
+    movementTimeoutID
+  );
+
   //protected route logic
   const navigate = useNavigate();
   const context = useContext(NavigationContext);
@@ -352,6 +359,17 @@ function Game({ r, startingPlayers }) {
   const homeBtnHandler = () => {
     window.location.href = "/";
   };
+
+  console.log(
+    "subscriptions",
+    maze,
+    roster,
+    gameOver,
+    artifactsInMaze,
+    numCollectedArtifacts,
+    playerCollectedArtifactsAll,
+    playerPositions
+  );
 
   return (
     <>
