@@ -376,8 +376,15 @@ const generateStartingArtifacts = (maze, numArtifactsToSpawn = 5) => {
       return diff;
     };
     const findClosestDistance = () => {
+      const players = [
+        [1, 1],
+        [maze.length - 1, maze[0].length - 1],
+        [1, maze.length - 1],
+        [maze[0].length - 1, 1],
+      ];
+      const pointsToCheck = [...players, ...currentArtifacts];
       let currentDistance;
-      currentArtifacts.forEach((coords) => {
+      pointsToCheck.forEach((coords) => {
         if (currentDistance === undefined) {
           currentDistance = determineDistance(coords, spawnCoords);
         } else {
@@ -398,7 +405,6 @@ const generateStartingArtifacts = (maze, numArtifactsToSpawn = 5) => {
     let center = [Math.floor(maze.length / 2), Math.floor(maze[0].length / 2)];
 
     let [centerRow, centerCol] = center;
-    console.log("CENTER", center);
 
     const coordsToCheck = [
       [0, 0],
