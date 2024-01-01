@@ -36,6 +36,14 @@ export const NavigationContext = React.createContext({
 });
 
 function App() {
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
+
   const [hasVisitedHome, setHasVisitedHome] = useState(false);
   const [hasVisitedLobby, setHasVisitedLobby] = useState(false);
 

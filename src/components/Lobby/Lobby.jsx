@@ -21,6 +21,8 @@ const userTool = new UserTools();
 const countdownTime = 1000;
 const timeToStart = 5;
 
+let setGameStartCountdownID;
+
 const Lobby = ({
   setGameRoom,
   gameRoom,
@@ -47,21 +49,33 @@ const Lobby = ({
   const [r, setR] = useState();
   const [gameStartCountdown, setGameStartCountdown] = useState();
 
+  // useEffect(() => {
+  //   if (gameRoom && gameStartCountdown >= 0) {
+  //     if (gameStartCountdown === undefined) {
+  //       setGameStartCountdown(timeToStart);
+  //     }
+  //     if (gameStartCountdown > 0) {
+  //       setTimeout(
+  //         () =>
+  //           (setGameStartCountdownID = setGameStartCountdown(
+  //             (prev) => prev - 1
+  //           )),
+  //         countdownTime
+  //       );
+  //     } else if (gameStartCountdown === 0) {
+  //       clearTimeout(setGameStartCountdownID);
+  //       setGameStartCountdown(-1);
+  //       navigate("/game");
+  //     }
+  //   }
+  // }, [gameRoom, gameStartCountdown]);
+
+  //NEED TO REMOVE ONCE ABOVE CODE IS UNCOMMENTED
   useEffect(() => {
     if (gameRoom) {
-      if (gameStartCountdown === undefined) {
-        setGameStartCountdown(timeToStart);
-      }
-      if (gameStartCountdown > 0) {
-        setTimeout(
-          () => setGameStartCountdown((prev) => prev - 1),
-          countdownTime
-        );
-      } else if (gameStartCountdown === 0) {
-        navigate("/game");
-      }
+      navigate("/game");
     }
-  }, [gameRoom, gameStartCountdown]);
+  }, [gameRoom]);
 
   useEffect(() => {
     if (!roomAssignment) {
@@ -182,10 +196,10 @@ const Lobby = ({
     }
   };
 
-  const handleAttemptToLeavePage = (e) => {
-    e.preventDefault();
-    e.returnValue = "";
-  };
+  // const handleAttemptToLeavePage = (e) => {
+  //   e.preventDefault();
+  //   e.returnValue = "";
+  // };
 
   useEffect(() => {
     window.addEventListener("unload", () => {
@@ -200,85 +214,85 @@ const Lobby = ({
     };
   }, []);
 
-  console.log(roomAssignment, roster);
-
-  return (
-    <>
-      {gameStartCountdown === undefined && (
-        <button
-          className="nav-button smaller"
-          onClick={() => {
-            handleLeaveLobby();
-            navigate("/");
-          }}
-        >
-          Home
-        </button>
-      )}
-      {gameStartCountdown === undefined ? (
-        <>
-          {roster && (
-            <>
-              {roster.length === 1 && <h1>Waiting for Match...</h1>}
-              {roster.length >= 2 && (
-                <>
-                  <div className="lobby-players-container">
-                    <div className="user">Players in Lobby</div>
-                    <div className="user">{`${roster.length} / 4`}</div>
-                  </div>
-                  <button
-                    className="nav-button force-start-button"
-                    onClick={() => handleForceStart()}
-                  >
-                    Force Start
-                  </button>
-                  <div>{`${forceStartOptedIn} / ${roster.length}`}</div>
-                </>
-              )}
-            </>
-          )}
-        </>
-      ) : (
-        // Content to display when gameStartCountdown is not undefined
-        <div className="user">Game starting in {gameStartCountdown} ...</div>
-      )}
-    </>
-  );
+  // console.log(roomAssignment, roster);
 
   // return (
   //   <>
-  //     <button
-  //       className="nav-button smaller"
-  //       onClick={() => {
-  //         handleLeaveLobby();
-  //         navigate("/");
-  //       }}
-  //     >
-  //       Home
-  //     </button>
-  //     {roster && (
+  //     {gameStartCountdown === undefined && (
+  //       <button
+  //         className="nav-button smaller"
+  //         onClick={() => {
+  //           handleLeaveLobby();
+  //           navigate("/");
+  //         }}
+  //       >
+  //         Home
+  //       </button>
+  //     )}
+  //     {gameStartCountdown === undefined ? (
   //       <>
-  //         {roster.length == 1 && <h1>Waiting for Match...</h1>}
-  //         {/* force start code to handle up to 4 players */}
-  //         {roster.length >= 2 && (
+  //         {roster && (
   //           <>
-  //             <div className="lobby-players-container">
-  //               <div className="user">Players in Lobby</div>
-  //               <div className="user">{`${roster.length} / 4`}</div>
-  //             </div>
-  //             <button
-  //               className="nav-button force-start-button"
-  //               onClick={() => handleForceStart()}
-  //             >
-  //               Force Start
-  //             </button>
-  //             <div>{`${forceStartOptedIn} / ${roster.length}`}</div>
+  //             {roster.length === 1 && <h1>Waiting for Match...</h1>}
+  //             {roster.length >= 2 && (
+  //               <>
+  //                 <div className="lobby-players-container">
+  //                   <div className="user">Players in Lobby</div>
+  //                   <div className="user">{`${roster.length} / 4`}</div>
+  //                 </div>
+  //                 <button
+  //                   className="nav-button force-start-button"
+  //                   onClick={() => handleForceStart()}
+  //                 >
+  //                   Force Start
+  //                 </button>
+  //                 <div>{`${forceStartOptedIn} / ${roster.length}`}</div>
+  //               </>
+  //             )}
   //           </>
   //         )}
   //       </>
+  //     ) : (
+  //       // Content to display when gameStartCountdown is not undefined
+  //       <div className="user">Game starting in {gameStartCountdown} ...</div>
   //     )}
   //   </>
   // );
+
+  return (
+    <>
+      <button
+        className="nav-button smaller"
+        onClick={() => {
+          handleLeaveLobby();
+          navigate("/");
+        }}
+      >
+        Home
+      </button>
+      {roster && (
+        <>
+          {roster.length == 1 && <h1>Waiting for Match...</h1>}
+          {/* force start code to handle up to 4 players */}
+          {roster.length >= 2 && (
+            <>
+              <div className="lobby-players-container">
+                <div className="user">Players in Lobby</div>
+                <div className="user">{`${roster.length} / 4`}</div>
+              </div>
+              <button
+                className="nav-button force-start-button"
+                onClick={() => handleForceStart()}
+              >
+                Force Start
+              </button>
+              <div>{`${forceStartOptedIn} / ${roster.length}`}</div>
+            </>
+          )}
+        </>
+      )}
+    </>
+  );
 };
 
 export default Lobby;

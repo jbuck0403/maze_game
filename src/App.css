@@ -4,8 +4,14 @@
   padding: 2rem;
   text-align: center;
 
+  /* overflow: hidden; */
   /* font-family: 'Poppins', sans-serif; */
 }
+
+/* body,
+html {
+  overflow: hidden;
+} */
 
 .nav-button {
   margin-top: 20px;
