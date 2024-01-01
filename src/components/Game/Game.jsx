@@ -23,7 +23,7 @@ const artifactDecayInterval = timeThreshold * 20;
 const wallBreakKey = "q";
 const attackPlayerKey = "e";
 const destroyBarricadesKey = " ";
-const timeToReturnHome = 15;
+// const timeToReturnHome = 15;
 const winCountdownInterval = timeThreshold * 15;
 let playerNum = -1;
 let lastInputTime = 0;
@@ -38,18 +38,18 @@ let artifactDecayTimeoutID;
 let numPlayerCollectedArtifacts;
 let winCountdownTimeoutID;
 
-const handleAttemptToLeavePage = (e) => {
-  e.preventDefault();
-  e.returnValue = "";
-};
+// const handleAttemptToLeavePage = (e) => {
+//   e.preventDefault();
+//   e.returnValue = "";
+// };
 
 function Game({ r, startingPlayers }) {
-  console.log(
-    "timeouts",
-    winCountdownTimeoutID,
-    artifactDecayTimeoutID,
-    movementTimeoutID
-  );
+  // console.log(
+  //   "timeouts",
+  //   winCountdownTimeoutID,
+  //   artifactDecayTimeoutID,
+  //   movementTimeoutID
+  // );
 
   //protected route logic
   const navigate = useNavigate();
@@ -192,7 +192,7 @@ function Game({ r, startingPlayers }) {
     r.mutate.initMaze(startingPlayers);
     // handleNaturalArtifactSpawning();
 
-    window.addEventListener("beforeunload", handleAttemptToLeavePage);
+    // window.addEventListener("beforeunload", handleAttemptToLeavePage);
     window.addEventListener("keydown", movementKeyDownHandler);
     window.addEventListener("keydown", barricadeKeyHandler);
     window.addEventListener("keydown", removeBarricadeKeyHandler);
@@ -202,7 +202,7 @@ function Game({ r, startingPlayers }) {
 
     // Clean up the event listener when the component unmounts
     return () => {
-      window.removeEventListener("beforeunload", handleAttemptToLeavePage);
+      // window.removeEventListener("beforeunload", handleAttemptToLeavePage);
       window.removeEventListener("keydown", movementKeyDownHandler);
       window.removeEventListener("keydown", barricadeKeyHandler);
       window.removeEventListener("keydown", removeBarricadeKeyHandler);
@@ -215,7 +215,7 @@ function Game({ r, startingPlayers }) {
 
   const [prevArtifactCount, setPrevArtifactCount] = useState(0);
   const [winner, setWinner] = useState();
-  const [returningHomeCount, setReturningHomeCount] = useState();
+  // const [returningHomeCount, setReturningHomeCount] = useState();
 
   // keep the maze up to date on each change
   const maze = useSubscribe(r, (tx) => tx.get("maze"), [[]]);
@@ -230,7 +230,7 @@ function Game({ r, startingPlayers }) {
   );
 
   useEffect(() => {
-    console.log(artifactSpawningTriggered);
+    // console.log(artifactSpawningTriggered);
     if (!artifactSpawningTriggered) {
       handleNaturalArtifactSpawning();
       r.mutate.initArtifacts();
@@ -251,26 +251,26 @@ function Game({ r, startingPlayers }) {
 
   useEffect(() => {
     if (gameOver) {
-      window.removeEventListener("beforeunload", handleAttemptToLeavePage);
+      // window.removeEventListener("beforeunload", handleAttemptToLeavePage);
       r.close();
     }
   }, [gameOver]);
 
-  useEffect(() => {
-    if (gameOver) {
-      if (returningHomeCount === undefined) {
-        setReturningHomeCount(timeToReturnHome);
-      }
-      if (returningHomeCount > 0) {
-        setTimeout(
-          () => setReturningHomeCount((prev) => prev - 1),
-          timeThreshold
-        );
-      } else if (returningHomeCount === 0) {
-        homeBtnHandler();
-      }
-    }
-  }, [gameOver, returningHomeCount]);
+  // useEffect(() => {
+  //   if (gameOver) {
+  //     if (returningHomeCount === undefined) {
+  //       setReturningHomeCount(timeToReturnHome);
+  //     }
+  //     if (returningHomeCount > 0) {
+  //       setTimeout(
+  //         () => setReturningHomeCount((prev) => prev - 1),
+  //         timeThreshold
+  //       );
+  //     } else if (returningHomeCount === 0) {
+  //       homeBtnHandler();
+  //     }
+  //   }
+  // }, [gameOver, returningHomeCount]);
 
   useEffect(() => {
     if (numCollectedArtifacts === 5) {
@@ -360,22 +360,22 @@ function Game({ r, startingPlayers }) {
     window.location.href = "/";
   };
 
-  console.log(
-    "subscriptions",
-    maze,
-    roster,
-    gameOver,
-    artifactsInMaze,
-    numCollectedArtifacts,
-    playerCollectedArtifactsAll,
-    playerPositions
-  );
+  // console.log(
+  //   "subscriptions",
+  //   maze,
+  //   roster,
+  //   gameOver,
+  //   artifactsInMaze,
+  //   numCollectedArtifacts,
+  //   playerCollectedArtifactsAll,
+  //   playerPositions
+  // );
 
   return (
     <>
-      {returningHomeCount && (
+      {/* {returningHomeCount && (
         <div>{`Returning home in ${returningHomeCount}`}</div>
-      )}
+      )} */}
       {gameOver && (
         <div className="nav-button-container">
           <div
