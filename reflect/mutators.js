@@ -97,7 +97,6 @@ async function clientList(tx) {
 }
 
 async function addArtifactToMaze(tx) {
-  // console.log("entering addArtifactToMaze fn");
   const verifyArtifactSpawnVariance = (
     spawnCoords,
     minDistance = artifactSpawnVariation
@@ -550,6 +549,31 @@ async function updateMazeAfterMovement(tx, playerData) {
   return updatedMaze;
 }
 
+async function checkIfGatheredArtifact(
+  tx,
+  maze,
+  newPosition,
+  playerID,
+  playerCollectedArtifacts,
+  numCollectedArtifacts,
+  artifactsInMaze
+) {
+  // const numCollectedArtifacts = (await tx.get("numCollectedArtifacts")) ?? 0;
+  // const artifactsInMaze = (await tx.get("artifactsInMaze")) ?? [];
+  // const playerCollectedArtifacts =
+  //   (await tx.get(`player${playerID}Artifacts`)) ?? 0;
+
+  if (maze[newPosition[0]][newPosition[1]] === artifact) {
+    // console.log("found artifact");
+    tx.set("numCollectedArtifacts", numCollectedArtifacts + 1);
+    tx.set(`player${playerID}Artifacts`, playerCollectedArtifacts + 1);
+    const filteredArtifacts = artifactsInMaze.filter((coord) => {
+      return coord[0] !== newPosition[0] && coord[1] !== newPosition[1];
+    });
+    tx.set("artifactsInMaze", filteredArtifacts);
+  }
+}
+
 async function updatePlayerPosition(tx, playerData) {
   const numCollectedArtifacts = (await tx.get("numCollectedArtifacts")) ?? 0;
   const artifactsInMaze = (await tx.get("artifactsInMaze")) ?? [];
@@ -574,15 +598,24 @@ async function updatePlayerPosition(tx, playerData) {
     setPrevCharacterPosition(tx, playerID, currentPosition);
   }
 
-  if (maze[newPosition[0]][newPosition[1]] === artifact) {
-    // console.log("found artifact");
-    tx.set("numCollectedArtifacts", numCollectedArtifacts + 1);
-    tx.set(`player${playerID}Artifacts`, playerCollectedArtifacts + 1);
-    const filteredArtifacts = artifactsInMaze.filter((coord) => {
-      return coord[0] !== newPosition[0] && coord[1] !== newPosition[1];
-    });
-    tx.set("artifactsInMaze", filteredArtifacts);
-  }
+  checkIfGatheredArtifact(
+    tx,
+    maze,
+    newPosition,
+    playerID,
+    playerCollectedArtifacts,
+    numCollectedArtifacts,
+    artifactsInMaze
+  );
+  // if (maze[newPosition[0]][newPosition[1]] === artifact) {
+  //   // console.log("found artifact");
+  //   tx.set("numCollectedArtifacts", numCollectedArtifacts + 1);
+  //   tx.set(`player${playerID}Artifacts`, playerCollectedArtifacts + 1);
+  //   const filteredArtifacts = artifactsInMaze.filter((coord) => {
+  //     return coord[0] !== newPosition[0] && coord[1] !== newPosition[1];
+  //   });
+  //   tx.set("artifactsInMaze", filteredArtifacts);
+  // }
 
   setCharacterPosition(tx, playerID, newPosition);
 

@@ -10,8 +10,6 @@ import { useNavigate } from "react-router-dom";
 //component imports
 import MazeComponent from "../Maze/Maze";
 import MazeTools from "../../mazeGeneration/mazeTools";
-import { artifact, wall } from "../../mazeGeneration/mazeGenerator";
-import MazeMovement from "../../mazeGeneration/mazeMovement";
 
 //game variables
 const inputLimit = 10;
@@ -44,13 +42,6 @@ const handleAttemptToLeavePage = (e) => {
 };
 
 function Game({ r, startingPlayers }) {
-  // console.log(
-  //   "timeouts",
-  //   winCountdownTimeoutID,
-  //   artifactDecayTimeoutID,
-  //   movementTimeoutID
-  // );
-
   //protected route logic
   const navigate = useNavigate();
   const context = useContext(NavigationContext);
@@ -160,7 +151,7 @@ function Game({ r, startingPlayers }) {
           playerNum: playerNum,
           startingPlayers: startingPlayers,
         });
-        // console.log("killedPlayers", killedPlayers);
+        console.log("numPlayerArtifacts", playerCollectedArtifactsAll);
         if (killedPlayers) {
           killedPlayers.forEach((player) => {
             r.mutate.dropArtifact(player);
@@ -359,17 +350,6 @@ function Game({ r, startingPlayers }) {
   const homeBtnHandler = () => {
     window.location.href = "/";
   };
-
-  // console.log(
-  //   "subscriptions",
-  //   maze,
-  //   roster,
-  //   gameOver,
-  //   artifactsInMaze,
-  //   numCollectedArtifacts,
-  //   playerCollectedArtifactsAll,
-  //   playerPositions
-  // );
 
   return (
     <>
