@@ -193,6 +193,7 @@ const Lobby = ({
   return (
     <>
       <button
+        className="nav-button smaller"
         onClick={() => {
           handleLeaveLobby();
           navigate("/");
@@ -206,13 +207,29 @@ const Lobby = ({
           {/* force start code to handle up to 4 players */}
           {roster.length >= 2 && (
             <>
-              <div>
+              {/* <div>
                 {roster.map((player, idx) => {
-                  return <div key={`${player}${idx}`}>{player}</div>;
+                  return (
+                    <div
+                      className={`user ${
+                        player === userID ? "current-user" : ""
+                      }`}
+                      key={`${player}${idx}`}
+                    >{`Player ${idx + 1}`}</div>
+                  );
                 })}
+              </div> */}
+              <div className="lobby-players-container">
+                <div className="user">Players in Lobby</div>
+                <div className="user">{`${roster.length} / 4`}</div>
               </div>
-              <button onClick={() => handleForceStart()}>Force Start</button>
-              <div>{`${forceStartOptedIn}/${roster.length}`}</div>
+              <button
+                className="nav-button force-start-button"
+                onClick={() => handleForceStart()}
+              >
+                Force Start
+              </button>
+              <div>{`${forceStartOptedIn} / ${roster.length}`}</div>
             </>
           )}
         </>

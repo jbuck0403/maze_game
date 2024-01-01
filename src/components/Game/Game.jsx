@@ -57,7 +57,7 @@ function Game({ r, startingPlayers }) {
       numNaturalArtifactSpawns < 5 &&
       currentTime - lastNaturalArtifactSpawnTime > naturalArtifactSpawnInterval
     ) {
-      console.log("spawning artifact");
+      // console.log("spawning artifact");
       r.mutate.addArtifactToMaze();
       lastNaturalArtifactSpawnTime = currentTime;
       numNaturalArtifactSpawns += 1;
@@ -72,7 +72,7 @@ function Game({ r, startingPlayers }) {
   // Add event listener when the component mounts
   useEffect(() => {
     function handleCharacterMovement() {
-      console.log("entering movement handler");
+      // console.log("entering movement handler");
       if (keyDown.length > 0) {
         // if the player is currently holding a key
         const currentTime = Date.now();
@@ -147,7 +147,7 @@ function Game({ r, startingPlayers }) {
           playerNum: playerNum,
           startingPlayers: startingPlayers,
         });
-        console.log("killedPlayers", killedPlayers);
+        // console.log("killedPlayers", killedPlayers);
         if (killedPlayers) {
           killedPlayers.forEach((player) => {
             r.mutate.dropArtifact(player);
@@ -214,7 +214,7 @@ function Game({ r, startingPlayers }) {
   );
 
   useEffect(() => {
-    console.log(artifactSpawningTriggered);
+    // console.log(artifactSpawningTriggered);
     if (!artifactSpawningTriggered) {
       handleNaturalArtifactSpawning();
       r.mutate.initArtifacts();
@@ -235,6 +235,7 @@ function Game({ r, startingPlayers }) {
 
   useEffect(() => {
     if (gameOver) {
+      // console.log(winner);
       r.close();
     }
   }, [gameOver]);
@@ -261,9 +262,11 @@ function Game({ r, startingPlayers }) {
 
   useEffect(() => {
     function winCountdown() {
-      const winningPlayer = playerCollectedArtifactsAll.includes(3)
-        ? playerCollectedArtifactsAll.indexOf(3) + 1
-        : playerCollectedArtifactsAll.indexOf(4) + 1;
+      const winningPlayer =
+        playerCollectedArtifactsAll.includes(3) ||
+        playerCollectedArtifactsAll.includes(4)
+          ? playerCollectedArtifactsAll.indexOf(3) + 1
+          : playerCollectedArtifactsAll.indexOf(4) + 1;
       setWinner(winningPlayer);
       r.mutate.declareWinner();
     }
@@ -279,8 +282,14 @@ function Game({ r, startingPlayers }) {
       }
     }
 
-    if (playerCollectedArtifactsAll[playerNum - 1] < 3) {
+    console.log(winCountdownTimeoutID);
+    if (
+      winCountdownTimeoutID !== undefined &&
+      playerCollectedArtifactsAll[playerNum - 1] < 3
+    ) {
+      console.log("clearing win timeout");
       clearTimeout(winCountdownTimeoutID);
+      winCountdownTimeoutID = undefined;
     }
 
     if (
@@ -323,9 +332,9 @@ function Game({ r, startingPlayers }) {
   return (
     <>
       {gameOver && (
-        <div>
+        <div className="nav-button-container">
           <div>{`Player ${winner} wins!`}</div>
-          <button onClick={homeBtnHandler} className="back-to-home-btn">
+          <button onClick={homeBtnHandler} className="nav-button">
             Home
           </button>
         </div>

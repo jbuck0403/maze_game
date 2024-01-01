@@ -6,3 +6,23 @@
 
   /* font-family: 'Poppins', sans-serif; */
 }
+
+.nav-button {
+  margin-top: 20px;
+  font-size: 2vw;
+  /* outline: auto; */
+  border: solid 2px;
+}
+
+.nav-button:hover {
+  border-color: purple;
+  /* color: purple; */
+}
+
+.nav-button:active {
+  transform: translate(1%, 1%);
+}
+
+.smaller {
+  font-size: 0.8vw;
+}

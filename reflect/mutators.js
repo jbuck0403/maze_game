@@ -95,7 +95,7 @@ async function clientList(tx) {
 }
 
 async function addArtifactToMaze(tx, maxArtifacts = 5) {
-  console.log("entering addArtifactToMaze fn");
+  // console.log("entering addArtifactToMaze fn");
   const verifyArtifactSpawnVariance = (spawnCoords, minDistance = 5) => {
     const determineDistance = (coords1, coords2) => {
       const rowDiff = coords2[0] - coords1[0];
@@ -349,12 +349,12 @@ async function addToPlayerRoster(tx, userName) {
 }
 
 async function removeFromPlayerRoster(tx, userName) {
-  console.log(`removing ${userName} from roster`);
+  // console.log(`removing ${userName} from roster`);
   const roster = await getPlayerRoster(tx);
   const updatedRoster = roster.filter((user) => {
     return user !== userName;
   });
-  console.log(updatedRoster);
+  // console.log(updatedRoster);
   tx.set("roster", updatedRoster);
 }
 
@@ -465,7 +465,7 @@ async function updatePlayerPosition(tx, playerData) {
   const currentPlayers = playerData.currentPlayers;
   const maze =
     (await tx.get("maze")) ?? populateMaze(tx, currentPlayers, mazeSize);
-  console.log("my artifacts", playerCollectedArtifacts);
+  // console.log("my artifacts", playerCollectedArtifacts);
   const currentPosition =
     (await tx.get(`position${playerID}`)) ??
     startPositionByPlayer(tx, maze.length - 1, maze[0].length - 1, playerID);
@@ -480,7 +480,7 @@ async function updatePlayerPosition(tx, playerData) {
   }
 
   if (maze[newPosition[0]][newPosition[1]] === artifact) {
-    console.log("found artifact");
+    // console.log("found artifact");
     tx.set("numCollectedArtifacts", numCollectedArtifacts + 1);
     tx.set(`player${playerID}Artifacts`, playerCollectedArtifacts + 1);
     const filteredArtifacts = artifactsInMaze.filter((coord) => {

@@ -1,0 +1,25 @@
+.force-start-button {
+  font-size: 1vw;
+  margin-bottom: 2vh;
+}
+
+.current-user {
+  color: purple;
+}
+
+.user {
+  font-size: 2vw;
+  margin-bottom: 1vh;
+}
+
+.user:first-child {
+  margin-top: 5vh;
+}
+
+.user:last-child {
+  margin-bottom: 5vh;
+}
+
+.lobby-players-container {
+  margin-top: 5vh;
+}

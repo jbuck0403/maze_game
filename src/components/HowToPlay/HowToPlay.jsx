@@ -16,7 +16,9 @@ const HowToPlay = () => {
 
   return (
     <>
-      <button onClick={() => navigate("/")}>Home</button>
+      <button className="nav-button smaller" onClick={() => navigate("/")}>
+        Home
+      </button>
       <div className="how-to-container">
         <div className="title">Controls</div>
         <div>
@@ -68,7 +70,12 @@ const HowToPlay = () => {
         </div>
         <div className="win-condition-explanation-container">
           <div>
-            There are two ways to win in the maze:
+            <div>Collect artifacts to win in the maze</div>
+            <div>
+              Artifacts decay in your possession and are placed back on the map
+              after 20 seconds
+            </div>
+            <div>This timer resets upon collecting an artifact</div>
             <ul>
               <li className="win-condition-explanation">
                 Collect all 5 artifacts to win immediately
