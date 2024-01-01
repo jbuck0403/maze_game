@@ -23,6 +23,7 @@ const artifactDecayInterval = timeThreshold * 20;
 const wallBreakKey = "q";
 const attackPlayerKey = "e";
 const destroyBarricadesKey = " ";
+const timeToReturnHome = 15;
 const winCountdownInterval = timeThreshold * 15;
 let playerNum = -1;
 let lastInputTime = 0;
@@ -207,6 +208,7 @@ function Game({ r, startingPlayers }) {
 
   const [prevArtifactCount, setPrevArtifactCount] = useState(0);
   const [winner, setWinner] = useState();
+  const [returningHomeCount, setReturningHomeCount] = useState();
 
   // keep the maze up to date on each change
   const maze = useSubscribe(r, (tx) => tx.get("maze"), [[]]);
@@ -242,18 +244,33 @@ function Game({ r, startingPlayers }) {
 
   useEffect(() => {
     if (gameOver) {
-      r.close();
       window.removeEventListener("beforeunload", handleAttemptToLeavePage);
-      setTimeout(homeBtnHandler, timeThreshold * 15);
+      r.close();
     }
   }, [gameOver]);
+
+  useEffect(() => {
+    if (gameOver) {
+      if (returningHomeCount === undefined) {
+        setReturningHomeCount(timeToReturnHome);
+      }
+      if (returningHomeCount > 0) {
+        setTimeout(
+          () => setReturningHomeCount((prev) => prev - 1),
+          timeThreshold
+        );
+      } else if (returningHomeCount === 0) {
+        homeBtnHandler();
+      }
+    }
+  }, [gameOver, returningHomeCount]);
 
   useEffect(() => {
     if (numCollectedArtifacts === 5) {
       const winner = playerCollectedArtifactsAll.indexOf(5) + 1;
 
       if (winner > -1) {
-        r.mutate.declareWinner(gameOver);
+        r.mutate.declareWinner(winner);
         setWinner(winner);
       }
     }
@@ -290,7 +307,6 @@ function Game({ r, startingPlayers }) {
       }
     }
 
-    console.log(winCountdownTimeoutID);
     if (
       winCountdownTimeoutID !== undefined &&
       playerCollectedArtifactsAll[playerNum - 1] < 3
@@ -339,6 +355,9 @@ function Game({ r, startingPlayers }) {
 
   return (
     <>
+      {returningHomeCount && (
+        <div>{`Returning home in ${returningHomeCount}`}</div>
+      )}
       {gameOver && (
         <div className="nav-button-container">
           <div
