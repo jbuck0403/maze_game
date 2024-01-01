@@ -362,6 +362,79 @@ async function getPlayerPosition(tx, playerNum) {
   return (await tx.get(`position${playerNum}`)) ?? false;
 }
 
+const generateStartingArtifacts = (maze, numArtifactsToSpawn = 5) => {
+  const verifySpawnVariance = (
+    spawnCoords,
+    currentArtifacts,
+    minDistance = 15
+  ) => {
+    const determineDistance = (coords1, coords2) => {
+      const rowDiff = coords2[0] - coords1[0];
+      const colDiff = coords2[1] - coords1[1];
+      const diff = Math.abs(Math.sqrt(colDiff * colDiff + rowDiff * rowDiff));
+
+      return diff;
+    };
+    const findClosestDistance = () => {
+      let currentDistance;
+      currentArtifacts.forEach((coords) => {
+        if (currentDistance === undefined) {
+          currentDistance = determineDistance(coords, spawnCoords);
+        } else {
+          const newDistance = determineDistance(coords, spawnCoords);
+          if (newDistance < currentDistance) {
+            currentDistance = newDistance;
+          }
+        }
+      });
+
+      return currentDistance;
+    };
+
+    return findClosestDistance() >= minDistance;
+  };
+
+  const findEmptyCenterSpace = () => {
+    let center = [Math.floor(maze.length / 2), Math.floor(maze[0].length / 2)];
+
+    let [centerRow, centerCol] = center;
+    console.log("CENTER", center);
+
+    const coordsToCheck = [
+      [0, 0],
+      [0, 1],
+      [1, 0],
+      [1, 1],
+      [-1, 0],
+      [-1, 1],
+      [0, -1],
+      [1, -1],
+      [-1, -1],
+    ];
+
+    for (let [row, col] of coordsToCheck) {
+      const [newRow, newCol] = [centerRow + row, centerCol + col];
+      if (maze[newRow][newCol] === emptySpace) {
+        return [newRow, newCol];
+      }
+    }
+  };
+
+  const spawnLocations = [findEmptyCenterSpace()];
+
+  while (spawnLocations.length < numArtifactsToSpawn) {
+    const spawnCoords = findRandomEmptySpace(maze);
+    if (
+      spawnLocations.length === 0 ||
+      verifySpawnVariance(spawnCoords, spawnLocations)
+    ) {
+      spawnLocations.push(spawnCoords);
+    }
+  }
+
+  return spawnLocations;
+};
+
 function populateMaze(tx, currentPlayers, mazeSize) {
   const maze = createMazeFromBlocks(mazeSize);
 
@@ -375,6 +448,14 @@ function populateMaze(tx, currentPlayers, mazeSize) {
 
     maze[startingPosition[0]][startingPosition[1]] = playerID;
   });
+
+  const artifactSpawnLocations = generateStartingArtifacts(maze);
+
+  artifactSpawnLocations.forEach(([row, col]) => {
+    maze[row][col] = artifact;
+  });
+
+  tx.set("artifactsInMaze", artifactSpawnLocations);
 
   return maze;
 }
