@@ -32,6 +32,8 @@ import MazeMovement from "../src/mazeGeneration/mazeMovement";
 
 //maze generation variables
 const mazeSize = 8;
+const artifactsToSpawn = 5;
+const artifactSpawnVariation = 15;
 
 //custom tools
 const mazeMoveTool = new MazeMovement();
@@ -94,9 +96,12 @@ async function clientList(tx) {
   return await listClients(tx);
 }
 
-async function addArtifactToMaze(tx, maxArtifacts = 5) {
+async function addArtifactToMaze(tx) {
   // console.log("entering addArtifactToMaze fn");
-  const verifyArtifactSpawnVariance = (spawnCoords, minDistance = 5) => {
+  const verifyArtifactSpawnVariance = (
+    spawnCoords,
+    minDistance = artifactSpawnVariation
+  ) => {
     const determineDistance = (coords1, coords2) => {
       const rowDiff = coords2[0] - coords1[0];
       const colDiff = coords2[1] - coords1[1];
@@ -126,7 +131,7 @@ async function addArtifactToMaze(tx, maxArtifacts = 5) {
   const mazeCopy = await createMazeCopy(tx);
   const currentArtifacts = (await tx.get("artifactsInMaze")) ?? [];
 
-  if (currentArtifacts.length < 5) {
+  if (currentArtifacts.length < artifactsToSpawn) {
     let newCoords = findRandomEmptySpace(mazeCopy);
 
     while (
@@ -362,11 +367,14 @@ async function getPlayerPosition(tx, playerNum) {
   return (await tx.get(`position${playerNum}`)) ?? false;
 }
 
-const generateStartingArtifacts = (maze, numArtifactsToSpawn = 5) => {
+const generateStartingArtifacts = (
+  maze,
+  numArtifactsToSpawn = artifactsToSpawn
+) => {
   const verifySpawnVariance = (
     spawnCoords,
     currentArtifacts,
-    minDistance = 15
+    minDistance = artifactSpawnVariation
   ) => {
     const determineDistance = (coords1, coords2) => {
       const rowDiff = coords2[0] - coords1[0];
