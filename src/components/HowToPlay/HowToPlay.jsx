@@ -45,13 +45,17 @@ const HowToPlay = () => {
             <div>
               Destroys walls directly adjacent to the player
               <div>
+                <div>i.e. (N, NE, E, SE, S, SW, W, NW)</div>
+              </div>
+              <div>
                 <div>This ability has a 10 second cooldown</div>
               </div>
             </div>
           </div>
           <div className="control-title">e</div>
           <div className="content">
-            <div>Attacks players directly adjacent to the player</div>
+            <div>Attacks other players directly adjacent to you</div>
+            <div>i.e. (N, NE, E, SE, S, SW, W, NW)</div>
             <div>Only players with 2 or more artifacts can be attacked</div>
             <div className="sub-title">Attacking a player this way will:</div>
             <ol className="explanation-list">

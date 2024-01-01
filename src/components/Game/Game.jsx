@@ -37,6 +37,11 @@ let artifactDecayTimeoutID;
 let numPlayerCollectedArtifacts;
 let winCountdownTimeoutID;
 
+const handleAttemptToLeavePage = (e) => {
+  e.preventDefault();
+  e.returnValue = "";
+};
+
 function Game({ r, startingPlayers }) {
   //protected route logic
   const navigate = useNavigate();
@@ -179,6 +184,7 @@ function Game({ r, startingPlayers }) {
     r.mutate.initMaze(startingPlayers);
     // handleNaturalArtifactSpawning();
 
+    window.addEventListener("beforeunload", handleAttemptToLeavePage);
     window.addEventListener("keydown", movementKeyDownHandler);
     window.addEventListener("keydown", barricadeKeyHandler);
     window.addEventListener("keydown", removeBarricadeKeyHandler);
@@ -188,6 +194,7 @@ function Game({ r, startingPlayers }) {
 
     // Clean up the event listener when the component unmounts
     return () => {
+      window.removeEventListener("beforeunload", handleAttemptToLeavePage);
       window.removeEventListener("keydown", movementKeyDownHandler);
       window.removeEventListener("keydown", barricadeKeyHandler);
       window.removeEventListener("keydown", removeBarricadeKeyHandler);
@@ -214,7 +221,7 @@ function Game({ r, startingPlayers }) {
   );
 
   useEffect(() => {
-    // console.log(artifactSpawningTriggered);
+    console.log(artifactSpawningTriggered);
     if (!artifactSpawningTriggered) {
       handleNaturalArtifactSpawning();
       r.mutate.initArtifacts();
@@ -235,8 +242,9 @@ function Game({ r, startingPlayers }) {
 
   useEffect(() => {
     if (gameOver) {
-      // console.log(winner);
       r.close();
+      window.removeEventListener("beforeunload", handleAttemptToLeavePage);
+      setTimeout(homeBtnHandler, timeThreshold * 15);
     }
   }, [gameOver]);
 
@@ -245,7 +253,7 @@ function Game({ r, startingPlayers }) {
       const winner = playerCollectedArtifactsAll.indexOf(5) + 1;
 
       if (winner > -1) {
-        r.mutate.declareWinner();
+        r.mutate.declareWinner(gameOver);
         setWinner(winner);
       }
     }
@@ -268,7 +276,7 @@ function Game({ r, startingPlayers }) {
           ? playerCollectedArtifactsAll.indexOf(3) + 1
           : playerCollectedArtifactsAll.indexOf(4) + 1;
       setWinner(winningPlayer);
-      r.mutate.declareWinner();
+      r.mutate.declareWinner(winningPlayer);
     }
     function handleArtifactDecay() {
       r.mutate.dropArtifact(playerNum);
@@ -333,7 +341,9 @@ function Game({ r, startingPlayers }) {
     <>
       {gameOver && (
         <div className="nav-button-container">
-          <div>{`Player ${winner} wins!`}</div>
+          <div
+            className={`score player${gameOver}-score`}
+          >{`Player ${gameOver} wins!`}</div>
           <button onClick={homeBtnHandler} className="nav-button">
             Home
           </button>

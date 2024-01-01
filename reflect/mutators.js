@@ -577,6 +577,6 @@ async function initArtifacts(tx) {
   tx.set("artifactSpawningTriggered", true);
 }
 
-async function declareWinner(tx) {
-  tx.set("winner", true);
+async function declareWinner(tx, playerNum) {
+  tx.set("winner", playerNum);
 }

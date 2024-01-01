@@ -29,10 +29,6 @@ const Lobby = ({
   const navigate = useNavigate();
   const context = useContext(NavigationContext);
 
-  // if (roomAssignment.roomIsLocked) {
-  //   navigate("/");
-  // }
-
   useEffect(() => {
     if (!context.hasVisitedHome) {
       navigate("/");
@@ -86,10 +82,7 @@ const Lobby = ({
 
   const [forceStartOptedIn, setForceStartOptedIn] = useState(0);
 
-  // const startingPlayers = useSubscribe(r, (tx) => tx.get("startingPlayers"));
-  // console.log(startingPlayers);
   const roster = useSubscribe(r, (tx) => tx.get("roster"));
-  console.log(roster);
   const forceStartDict = useSubscribe(r, (tx) => tx.get("forceStart"));
   const presentClientIDs = usePresence(r);
   const presentUsers = useSubscribe(
@@ -127,7 +120,6 @@ const Lobby = ({
     if (roomAssignment) {
       if (r) {
         r.mutate.initForceStartDict();
-        // r.mutate.setStartingPlayers();
       }
     }
   }, [roster]);
@@ -177,15 +169,22 @@ const Lobby = ({
     }
   };
 
+  const handleAttemptToLeavePage = (e) => {
+    e.preventDefault();
+    e.returnValue = "";
+  };
+
   useEffect(() => {
     window.addEventListener("unload", () => {
       handleLeaveLobby();
     });
 
-    window.addEventListener("beforeunload", (e) => {
-      e.preventDefault();
-      e.returnValue = "";
-    });
+    // window.addEventListener("beforeunload", handleAttemptToLeavePage);
+
+    return () => {
+      window.removeEventListener("unload", handleLeaveLobby);
+      // window.removeEventListener("beforeunload", handleLeaveLobby);
+    };
   }, []);
 
   console.log(roomAssignment, roster);
@@ -207,18 +206,6 @@ const Lobby = ({
           {/* force start code to handle up to 4 players */}
           {roster.length >= 2 && (
             <>
-              {/* <div>
-                {roster.map((player, idx) => {
-                  return (
-                    <div
-                      className={`user ${
-                        player === userID ? "current-user" : ""
-                      }`}
-                      key={`${player}${idx}`}
-                    >{`Player ${idx + 1}`}</div>
-                  );
-                })}
-              </div> */}
               <div className="lobby-players-container">
                 <div className="user">Players in Lobby</div>
                 <div className="user">{`${roster.length} / 4`}</div>

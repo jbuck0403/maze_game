@@ -6,7 +6,6 @@ import { NavigationContext } from "../../App";
 import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import MazeComponent from "../Maze/Maze";
-import MazeTools from "../../mazeGeneration/mazeTools";
 import { createMazeFromBlocks } from "../../mazeGeneration/mazeGenerator";
 
 const Home = () => {
@@ -28,7 +27,12 @@ const Home = () => {
           <MazeComponent maze={maze} playerCollectedArtifactsAll={[]} />
         </div>
         <div className="nav-button-container">
-          <button className="nav-button" onClick={() => navigate("/lobby")}>
+          <button
+            className="nav-button"
+            onClick={() => {
+              navigate("/lobby");
+            }}
+          >
             Play
           </button>
           <button className="nav-button" onClick={() => navigate("/HowToPlay")}>

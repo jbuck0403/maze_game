@@ -76,7 +76,7 @@ function App() {
       <Router>
         {/* <OverflowStyleComponent> */}
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Home matchmaking={roomAssignment} />} />
           <Route path="/HowToPlay" element={<HowToPlay />} />
           <Route
             path="/lobby"
