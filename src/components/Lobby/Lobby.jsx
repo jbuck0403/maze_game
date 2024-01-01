@@ -18,10 +18,8 @@ import { useNavigate } from "react-router-dom";
 import UserTools from "../../users/getUserID";
 
 const userTool = new UserTools();
-const countdownTime = 1000;
-const timeToStart = 5;
-
-let setGameStartCountdownID;
+// const countdownTime = 1000;
+// const timeToStart = 5;
 
 const Lobby = ({
   setGameRoom,
@@ -47,30 +45,29 @@ const Lobby = ({
   const userID = userTool.getUserID();
 
   const [r, setR] = useState();
-  const [gameStartCountdown, setGameStartCountdown] = useState();
+  // const [gameStartCountdown, setGameStartCountdown] = useState();
+  // const [timeoutID, setTimeoutID] = useState();
 
   // useEffect(() => {
-  //   if (gameRoom && gameStartCountdown >= 0) {
+  //   if (gameRoom) {
   //     if (gameStartCountdown === undefined) {
   //       setGameStartCountdown(timeToStart);
-  //     }
-  //     if (gameStartCountdown > 0) {
-  //       setTimeout(
-  //         () =>
-  //           (setGameStartCountdownID = setGameStartCountdown(
-  //             (prev) => prev - 1
-  //           )),
-  //         countdownTime
+  //     } else if (gameStartCountdown > 0) {
+  //       setTimeoutID(
+  //         setTimeout(
+  //           () => setGameStartCountdown((prev) => prev - 1),
+  //           countdownTime
+  //         )
   //       );
   //     } else if (gameStartCountdown === 0) {
-  //       clearTimeout(setGameStartCountdownID);
+  //       clearTimeout(timeoutID);
   //       setGameStartCountdown(-1);
+  //       console.log("navigating");
   //       navigate("/game");
   //     }
   //   }
   // }, [gameRoom, gameStartCountdown]);
 
-  //NEED TO REMOVE ONCE ABOVE CODE IS UNCOMMENTED
   useEffect(() => {
     if (gameRoom) {
       navigate("/game");

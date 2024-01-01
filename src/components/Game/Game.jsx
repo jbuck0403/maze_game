@@ -374,7 +374,11 @@ function Game({ r, startingPlayers }) {
   return (
     <>
       {returningHomeCount && (
-        <div>{`Returning home in ${returningHomeCount}`}</div>
+        <div>
+          {returningHomeCount > 0
+            ? `Returning home in ${returningHomeCount}`
+            : "Redirecting..."}
+        </div>
       )}
       {gameOver && (
         <div className="nav-button-container">
