@@ -1,0 +1,22 @@
+:root {
+  --shadow-color: white;
+}
+
+.logo {
+  font-size: 1.7vw;
+  transform: translate(-5%, -5%);
+  color: purple;
+  text-shadow: 0.02em 0 var(--shadow-color), 0 0.02em var(--shadow-color),
+    -0.02em 0 var(--shadow-color), 0 -0.02em var(--shadow-color),
+    -0.02em -0.02em var(--shadow-color), -0.02em 0.02em var(--shadow-color),
+    0.02em -0.02em var(--shadow-color), 0.02em 0.02em var(--shadow-color);
+}
+
+.logo-background {
+  /* transform: translate(0%, 50%); */
+  background-color: black;
+  border: solid 3px white;
+  border-radius: 5px;
+  height: 35vh;
+  width: 60vw;
+}

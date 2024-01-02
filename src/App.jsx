@@ -16,7 +16,8 @@ import Lobby from "./components/Lobby/Lobby";
 import Home from "./components/Home/Home";
 import Game from "./components/Game/Game";
 import HowToPlay from "./components/HowToPlay/HowToPlay";
-import OverflowStyleComponent from "./components/OverflowStyle/OverflowStyle";
+import Login from "./components/Login/Login";
+import SignUp from "./components/Signup/SignUp";
 
 //custom tool imports
 import UserTools from "./users/getUserID";
@@ -46,6 +47,7 @@ function App() {
 
   const [hasVisitedHome, setHasVisitedHome] = useState(false);
   const [hasVisitedLobby, setHasVisitedLobby] = useState(false);
+  const [firebaseUser, setFirebaseUser] = useState();
 
   const resetNavigation = () => {
     setHasVisitedHome(false);
@@ -53,6 +55,11 @@ function App() {
   };
 
   const userID = userTool.getUserID();
+  console.log(userID);
+
+  // useEffect(() => {
+  //   console.log(userID);
+  // }, [userID]);
 
   const roomAssignment = useOrchestration(
     {
@@ -85,6 +92,11 @@ function App() {
         {/* <OverflowStyleComponent> */}
         <Routes>
           <Route path="/" element={<Home matchmaking={roomAssignment} />} />
+          <Route path="/login" element={<Login user={firebaseUser} />} />
+          <Route
+            path="/signup"
+            element={<SignUp setFirebaseUser={setFirebaseUser} />}
+          />
           <Route path="/HowToPlay" element={<HowToPlay />} />
           <Route
             path="/lobby"

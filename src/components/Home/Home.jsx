@@ -1,6 +1,7 @@
 //imports
 import "./Home.css";
 import { NavigationContext } from "../../App";
+import Logo from "./Logo";
 
 //react imports
 import { useContext, useEffect } from "react";
@@ -22,6 +23,9 @@ const Home = () => {
 
   return (
     <>
+      {/* <div className="logo-container">
+        <Logo />
+      </div> */}
       <div className="home-maze-container">
         <div className="home-maze">
           <MazeComponent maze={maze} playerCollectedArtifactsAll={[]} />

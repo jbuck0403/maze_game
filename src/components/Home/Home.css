@@ -32,3 +32,8 @@
   transform: translate(-50%, -50%);
   width: 18vw;
 }
+
+.logo-container {
+  position: absolute;
+  transform: translate(-50%, -0%);
+}
