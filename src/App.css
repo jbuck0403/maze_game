@@ -15,9 +15,10 @@ html {
 
 .nav-button {
   margin-top: 20px;
-  font-size: 2vw;
+  font-size: 50px;
   /* outline: auto; */
   border: solid 2px;
+  min-width: 150px;
 }
 
 .nav-button:hover {
@@ -30,5 +31,5 @@ html {
 }
 
 .smaller {
-  font-size: 0.8vw;
+  font-size: 20px;
 }

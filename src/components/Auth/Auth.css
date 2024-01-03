@@ -1,0 +1,55 @@
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.auth-input {
+  margin-bottom: 1vh;
+  height: 2vh;
+  min-height: 25px;
+  width: 25vw;
+  min-width: 300px;
+  max-width: 400px;
+  font-family: "DotGothic16", sans-serif;
+  font-size: 20px;
+  border: solid 2px;
+  padding: 10px;
+  border-radius: 5px;
+  letter-spacing: 2px;
+}
+
+.auth-input:first-child {
+  margin-top: 2.5vh;
+}
+
+.auth-form-submit-button {
+  max-width: 250px;
+  min-width: 150px;
+  width: 6vw;
+  height: 4vh;
+  font-size: 20px;
+  border: none;
+}
+
+.auth-form-submit-button:active,
+.auth-form-submit-button:hover {
+  border: none;
+  outline: none;
+  color: purple;
+}
+
+.auth-maze {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1; /* Ensures the maze is in the background */
+  pointer-events: none; /* Makes the maze uninteractive */
+  transform: translate(25%, 25%);
+}
+
+.auth-button {
+  max-width: 50px;
+}

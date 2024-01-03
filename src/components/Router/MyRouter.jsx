@@ -13,8 +13,8 @@ import Lobby from "../Lobby/Lobby";
 import Home from "../Home/Home";
 import Game from "../Game/Game";
 import HowToPlay from "../HowToPlay/HowToPlay";
-import Login from "../Login/Login";
-import SignUp from "../Signup/SignUp";
+import Login from "../Auth/Login/Login";
+import SignUp from "../Auth/Signup/SignUp";
 
 export const server = "http://localhost:8080";
 

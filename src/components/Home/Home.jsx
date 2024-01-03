@@ -58,31 +58,37 @@ const Home = ({ setUserID }) => {
         </div>
         <div className="nav-button-container">
           <button
-            className="nav-button"
+            className="nav-button play"
             onClick={() => {
               navigate("/lobby");
             }}
           >
             Play
           </button>
-          <button className="nav-button" onClick={() => navigate("/HowToPlay")}>
+          <button
+            className="nav-button smaller"
+            onClick={() => navigate("/HowToPlay")}
+          >
             How to Play
           </button>
           {firebaseUser ? (
             <>
-              <button className="nav-button" onClick={signOut}>
+              <button className="nav-button smaller" onClick={signOut}>
                 Sign Out
               </button>
             </>
           ) : (
             <>
               <button
-                className="nav-button"
+                className="nav-button smaller"
                 onClick={() => navigate("/signup")}
               >
                 Sign Up
               </button>
-              <button className="nav-button" onClick={() => navigate("/login")}>
+              <button
+                className="nav-button smaller"
+                onClick={() => navigate("/login")}
+              >
                 Sign In
               </button>
             </>
