@@ -4,7 +4,7 @@ import { auth } from "../../firebase";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-const Login = ({ user }) => {
+const Login = ({ user, setUserID }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState({ code: "", message: "" });
@@ -17,7 +17,7 @@ const Login = ({ user }) => {
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         // const user = userCredential.user;
-        console.log(userCredential.user?.displayName);
+        setUserID(userCredential.user?.displayName);
         navigate("/");
       })
       .catch((e) => setError({ ...error, message: e.message }));

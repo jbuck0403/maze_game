@@ -29,7 +29,7 @@ export const NavigationContext = React.createContext({
   gameRoute: "/game",
 });
 
-export function MyRouter({ userID }) {
+export function MyRouter({ userID, setUserID }) {
   const [hasVisitedHome, setHasVisitedHome] = useState(false);
   const [hasVisitedLobby, setHasVisitedLobby] = useState(false);
 
@@ -71,8 +71,11 @@ export function MyRouter({ userID }) {
       <Router>
         {/* <OverflowStyleComponent> */}
         <Routes>
-          <Route path="/" element={<Home matchmaking={roomAssignment} />} />
-          <Route path="/login" element={<Login user={firebaseUser} />} />
+          <Route path="/" element={<Home setUserID={setUserID} />} />
+          <Route
+            path="/login"
+            element={<Login user={firebaseUser} setUserID={setUserID} />}
+          />
           <Route
             path="/signup"
             element={<SignUp setFirebaseUser={setFirebaseUser} />}
