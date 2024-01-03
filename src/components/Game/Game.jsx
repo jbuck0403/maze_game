@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 //component imports
 import MazeComponent from "../Maze/Maze";
 import MazeTools from "../../mazeGeneration/mazeTools";
+import ScoreBoard from "../ScoreBoard/ScoreBoard";
 
 //game variables
 const inputLimit = 10;
@@ -352,7 +353,6 @@ function Game({ r, startingPlayers }) {
     window.location.href = "/";
   };
 
-  console.log(roster, startingPlayers);
   return (
     <>
       {returningHomeCount && (
@@ -364,9 +364,11 @@ function Game({ r, startingPlayers }) {
       )}
       {gameOver && (
         <div className="nav-button-container">
-          <div className={`score player${gameOver}-score`}>{`${
-            roster[gameOver - 1]
-          } wins!`}</div>
+          <div className={`score player${gameOver}-score`}>
+            {roster[gameOver - 1] === r.userID
+              ? "You win!"
+              : `${roster[gameOver - 1]} wins!`}
+          </div>
           <button onClick={homeBtnHandler} className="nav-button">
             Home
           </button>
@@ -377,11 +379,12 @@ function Game({ r, startingPlayers }) {
         startingPlayers &&
         playerCollectedArtifactsAll &&
         roster.length === startingPlayers.length && (
-          <MazeComponent
-            maze={maze}
+          <ScoreBoard
             playerCollectedArtifactsAll={playerCollectedArtifactsAll}
             roster={roster}
-          />
+          >
+            <MazeComponent maze={maze} />
+          </ScoreBoard>
         )}
     </>
   );

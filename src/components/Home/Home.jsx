@@ -28,7 +28,7 @@ const Home = () => {
       </div> */}
       <div className="home-maze-container">
         <div className="home-maze">
-          <MazeComponent maze={maze} playerCollectedArtifactsAll={[]} />
+          <MazeComponent maze={maze} />
         </div>
         <div className="nav-button-container">
           <button
