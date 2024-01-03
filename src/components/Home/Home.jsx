@@ -49,14 +49,14 @@ const Home = ({ setUserID }) => {
 
   return (
     <>
-      {/* <div className="logo-container">
-        <Logo />
-      </div> */}
       <div className="home-maze-container">
         <div className="home-maze">
           <MazeComponent maze={maze} />
         </div>
         <div className="nav-button-container">
+          <div className="logo-container">
+            <Logo />
+          </div>
           <button
             className="nav-button play"
             onClick={() => {
