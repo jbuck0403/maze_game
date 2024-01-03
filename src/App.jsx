@@ -34,6 +34,6 @@ function App() {
     fetchUserID();
   }, []);
 
-  return <>{userID && <MyRouter userID={userID} />};</>;
+  return <>{userID && <MyRouter userID={userID} />}</>;
 }
 export default App;
