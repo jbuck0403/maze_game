@@ -1,4 +1,10 @@
-const ScoreBoard = ({ children, roster, playerCollectedArtifactsAll }) => {
+const ScoreBoard = ({
+  children,
+  roster,
+  playerCollectedArtifactsAll,
+  gameOver,
+  userID,
+}) => {
   const getPlayerName = (idx) => {
     if (roster[idx].length < 5) {
       return roster[idx];
@@ -9,8 +15,24 @@ const ScoreBoard = ({ children, roster, playerCollectedArtifactsAll }) => {
     }
   };
 
+  const homeBtnHandler = () => {
+    window.location.href = "/";
+  };
+
   return (
     <>
+      {gameOver && (
+        <div className="nav-button-container">
+          <div className={`score player${gameOver}-score`}>
+            {roster[gameOver - 1] === userID
+              ? "You win!"
+              : `${getPlayerName(gameOver - 1)} wins!`}
+          </div>
+          <button onClick={homeBtnHandler} className="nav-button">
+            Home
+          </button>
+        </div>
+      )}
       <div className="maze-game-container">
         {roster && (
           <>

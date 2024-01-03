@@ -215,7 +215,6 @@ function Game({ r, startingPlayers }) {
   playerNum = roster.findIndex((player) => player === r.userID) + 1;
   const gameOver = useSubscribe(r, (tx) => tx.get("winner"), false);
 
-  console.log(roster);
   const artifactSpawningTriggered = useSubscribe(
     r,
     (tx) => tx.get("artifactSpawningTriggered"),
@@ -362,18 +361,6 @@ function Game({ r, startingPlayers }) {
             : "Redirecting..."}
         </div>
       )}
-      {gameOver && (
-        <div className="nav-button-container">
-          <div className={`score player${gameOver}-score`}>
-            {roster[gameOver - 1] === r.userID
-              ? "You win!"
-              : `${roster[gameOver - 1]} wins!`}
-          </div>
-          <button onClick={homeBtnHandler} className="nav-button">
-            Home
-          </button>
-        </div>
-      )}
       {mazeTool &&
         roster &&
         startingPlayers &&
@@ -382,6 +369,8 @@ function Game({ r, startingPlayers }) {
           <ScoreBoard
             playerCollectedArtifactsAll={playerCollectedArtifactsAll}
             roster={roster}
+            gameOver={gameOver}
+            userID={r.userID}
           >
             <MazeComponent maze={maze} />
           </ScoreBoard>
