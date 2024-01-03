@@ -14,16 +14,12 @@ import { listClients } from "../../../reflect/mutators";
 import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 
-//tool imports
-import UserTools from "../../users/getUserID";
-
-const userTool = new UserTools();
-
 const Lobby = ({
   setGameRoom,
   gameRoom,
   setStartingPlayers,
   roomAssignment,
+  userID,
 }) => {
   //protected route logic
   const navigate = useNavigate();
@@ -40,8 +36,6 @@ const Lobby = ({
   }, []);
 
   //lobby logic
-  const userID = userTool.getUserID();
-
   const [r, setR] = useState();
   // const [gameStartCountdown, setGameStartCountdown] = useState();
   // const [timeoutID, setTimeoutID] = useState();

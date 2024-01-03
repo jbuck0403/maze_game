@@ -40,6 +40,7 @@ export function MyRouter({ userID }) {
     setHasVisitedLobby(false);
   };
 
+  console.log(userID);
   const roomAssignment = useOrchestration(
     {
       server: server,
@@ -87,6 +88,7 @@ export function MyRouter({ userID }) {
                     setStartingPlayers={setStartingPlayers}
                     gameRoom={gameRoom}
                     roomAssignment={roomAssignment}
+                    userID={userID}
                   />
                 )}
               </ProtectedRoute>

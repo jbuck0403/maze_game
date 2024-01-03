@@ -34,6 +34,10 @@ function App() {
     fetchUserID();
   }, []);
 
+  useEffect(() => {
+    console.log(userID);
+  }, [userID]);
+
   return <>{userID && <MyRouter userID={userID} />}</>;
 }
 export default App;

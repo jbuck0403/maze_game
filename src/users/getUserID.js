@@ -10,18 +10,13 @@ const cookieTool = new CookieTools();
 
 export default class UserTools {
   getUserID() {
-    const user = auth.currentUser?.email;
-    if (user) {
-      return user;
-    } else {
-      const cookieUserName = cookieTool.getCookie("userID");
-      const userID =
-        cookieUserName === null
-          ? cookieTool.setCookie("userID", `#anon${nanoid()}`)
-          : cookieUserName;
+    const cookieUserName = cookieTool.getCookie("userID");
+    const userID =
+      cookieUserName === null
+        ? cookieTool.setCookie("userID", `#anon${nanoid()}`)
+        : cookieUserName;
 
-      return userID;
-    }
+    return userID;
   }
 
   async checkLoggedIn() {
@@ -36,13 +31,7 @@ export default class UserTools {
       if (user) {
         resolve(user.displayName);
       } else {
-        const cookieUserName = cookieTool.getCookie("userID");
-        const userID =
-          cookieUserName === null
-            ? cookieTool.setCookie("userID", `#anon${nanoid()}`)
-            : cookieUserName;
-
-        resolve(userID);
+        resolve(this.getUserID());
       }
     });
   }

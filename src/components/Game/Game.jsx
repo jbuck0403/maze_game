@@ -214,6 +214,7 @@ function Game({ r, startingPlayers }) {
   playerNum = roster.findIndex((player) => player === r.userID) + 1;
   const gameOver = useSubscribe(r, (tx) => tx.get("winner"), false);
 
+  console.log(roster);
   const artifactSpawningTriggered = useSubscribe(
     r,
     (tx) => tx.get("artifactSpawningTriggered"),
@@ -351,6 +352,7 @@ function Game({ r, startingPlayers }) {
     window.location.href = "/";
   };
 
+  console.log(roster, startingPlayers);
   return (
     <>
       {returningHomeCount && (
@@ -362,20 +364,25 @@ function Game({ r, startingPlayers }) {
       )}
       {gameOver && (
         <div className="nav-button-container">
-          <div
-            className={`score player${gameOver}-score`}
-          >{`Player ${gameOver} wins!`}</div>
+          <div className={`score player${gameOver}-score`}>{`${
+            roster[gameOver - 1]
+          } wins!`}</div>
           <button onClick={homeBtnHandler} className="nav-button">
             Home
           </button>
         </div>
       )}
-      {mazeTool && roster && playerCollectedArtifactsAll && (
-        <MazeComponent
-          maze={maze}
-          playerCollectedArtifactsAll={playerCollectedArtifactsAll}
-        />
-      )}
+      {mazeTool &&
+        roster &&
+        startingPlayers &&
+        playerCollectedArtifactsAll &&
+        roster.length === startingPlayers.length && (
+          <MazeComponent
+            maze={maze}
+            playerCollectedArtifactsAll={playerCollectedArtifactsAll}
+            roster={roster}
+          />
+        )}
     </>
   );
 }
