@@ -18,8 +18,6 @@ import { useNavigate } from "react-router-dom";
 import UserTools from "../../users/getUserID";
 
 const userTool = new UserTools();
-// const countdownTime = 1000;
-// const timeToStart = 5;
 
 const Lobby = ({
   setGameRoom,

@@ -4,8 +4,6 @@ import "./App.css";
 //react imports
 import React, { useEffect } from "react";
 import { useState } from "react";
-import { Navigate } from "react-router-dom";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 //component imports
 import { MyRouter } from "./components/Router/MyRouter";
