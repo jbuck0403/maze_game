@@ -24,6 +24,29 @@ export default class UserTools {
     }
   }
 
+  async checkLoggedIn() {
+    return new Promise(async (resolve) => {
+      const user = await new Promise((innerResolve) => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+          innerResolve(user);
+          unsubscribe();
+        });
+      });
+
+      if (user) {
+        resolve(user.displayName);
+      } else {
+        const cookieUserName = cookieTool.getCookie("userID");
+        const userID =
+          cookieUserName === null
+            ? cookieTool.setCookie("userID", `#anon${nanoid()}`)
+            : cookieUserName;
+
+        resolve(userID);
+      }
+    });
+  }
+
   clearUserIDCookie() {
     cookieTool.clearCookie("userID");
   }
