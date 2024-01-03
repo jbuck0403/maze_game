@@ -1,6 +1,6 @@
 //imports
 import "./Home.css";
-import { NavigationContext } from "../../App";
+import { NavigationContext } from "../Router/MyRouter";
 import Logo from "./Logo";
 
 //react imports

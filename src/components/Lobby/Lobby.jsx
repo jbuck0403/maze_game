@@ -1,7 +1,7 @@
 //imports
 import "./Lobby.css";
 import { server } from "../../App";
-import { NavigationContext } from "../../App";
+import { NavigationContext } from "../Router/MyRouter";
 
 //reflect imports
 import { Reflect } from "@rocicorp/reflect/client";
@@ -193,11 +193,6 @@ const Lobby = ({
     }
   };
 
-  // const handleAttemptToLeavePage = (e) => {
-  //   e.preventDefault();
-  //   e.returnValue = "";
-  // };
-
   useEffect(() => {
     window.addEventListener("unload", () => {
       handleLeaveLobby();
@@ -210,51 +205,6 @@ const Lobby = ({
       // window.removeEventListener("beforeunload", handleLeaveLobby);
     };
   }, []);
-
-  // console.log(roomAssignment, roster);
-
-  // return (
-  //   <>
-  //     {gameStartCountdown === undefined && (
-  //       <button
-  //         className="nav-button smaller"
-  //         onClick={() => {
-  //           handleLeaveLobby();
-  //           navigate("/");
-  //         }}
-  //       >
-  //         Home
-  //       </button>
-  //     )}
-  //     {gameStartCountdown === undefined ? (
-  //       <>
-  //         {roster && (
-  //           <>
-  //             {roster.length === 1 && <h1>Waiting for Match...</h1>}
-  //             {roster.length >= 2 && (
-  //               <>
-  //                 <div className="lobby-players-container">
-  //                   <div className="user">Players in Lobby</div>
-  //                   <div className="user">{`${roster.length} / 4`}</div>
-  //                 </div>
-  //                 <button
-  //                   className="nav-button force-start-button"
-  //                   onClick={() => handleForceStart()}
-  //                 >
-  //                   Force Start
-  //                 </button>
-  //                 <div>{`${forceStartOptedIn} / ${roster.length}`}</div>
-  //               </>
-  //             )}
-  //           </>
-  //         )}
-  //       </>
-  //     ) : (
-  //       // Content to display when gameStartCountdown is not undefined
-  //       <div className="user">Game starting in {gameStartCountdown} ...</div>
-  //     )}
-  //   </>
-  // );
 
   return (
     <>

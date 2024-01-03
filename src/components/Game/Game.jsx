@@ -1,6 +1,6 @@
 //imports
 import "./Game.css";
-import { NavigationContext } from "../../App";
+import { NavigationContext } from "../Router/MyRouter";
 
 //react imports
 import { useContext, useEffect, useState } from "react";
