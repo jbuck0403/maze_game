@@ -22,12 +22,11 @@ const Login = ({ user, setUserID }) => {
       .then((userCredential) => {
         // const user = userCredential.user;
         setUserID(userCredential.user?.displayName);
+        console.log(userCredential.user?.displayName);
         navigate("/");
       })
       .catch((e) => setError({ ...error, message: e.message }));
   };
-
-  console.log(user);
 
   useEffect(() => {
     if (user) {
@@ -44,15 +43,15 @@ const Login = ({ user, setUserID }) => {
           <MazeComponent maze={maze} />
         </div>
         <div className="nav-button-container">
+          <button
+            className="nav-button smaller auth-button"
+            onClick={() => {
+              navigate("/");
+            }}
+          >
+            Home
+          </button>
           <form onSubmit={handleSubmit}>
-            <button
-              className="nav-button smaller auth-button"
-              onClick={() => {
-                navigate("/");
-              }}
-            >
-              Home
-            </button>
             <div className="auth-form">
               <input
                 onChange={(e) => setEmail(e.target.value)}

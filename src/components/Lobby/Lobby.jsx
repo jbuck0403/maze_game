@@ -25,6 +25,8 @@ const Lobby = ({
   const navigate = useNavigate();
   const context = useContext(NavigationContext);
 
+  console.log(userID);
+
   useEffect(() => {
     if (!context.hasVisitedHome) {
       navigate("/");

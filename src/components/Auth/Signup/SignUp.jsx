@@ -56,15 +56,15 @@ const SignUp = ({ setFirebaseUser }) => {
           <MazeComponent maze={maze} />
         </div>
         <div className="nav-button-container">
+          <button
+            className="nav-button smaller"
+            onClick={() => {
+              navigate("/");
+            }}
+          >
+            Home
+          </button>
           <form onSubmit={handleSubmit}>
-            <button
-              className="nav-button smaller"
-              onClick={() => {
-                navigate("/");
-              }}
-            >
-              Home
-            </button>
             <div className="auth-form">
               <input
                 onChange={(e) => setEmail(e.target.value)}
