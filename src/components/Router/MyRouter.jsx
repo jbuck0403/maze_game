@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { server } from "../../App";
 
 //reflect imports
 import { useOrchestration } from "reflect-orchestrator";
@@ -15,8 +16,6 @@ import Game from "../Game/Game";
 import HowToPlay from "../HowToPlay/HowToPlay";
 import Login from "../Auth/Login/Login";
 import SignUp from "../Auth/Signup/SignUp";
-
-export const server = "http://localhost:8080";
 
 export const NavigationContext = React.createContext({
   hasVisitedHome: false,

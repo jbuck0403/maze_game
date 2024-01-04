@@ -12,7 +12,7 @@ import { MyRouter } from "./components/Router/MyRouter";
 import UserTools from "./users/getUserID";
 
 const userTool = new UserTools();
-export const server = "http://localhost:8080";
+export const server = import.meta.env.VITE_REFLECT_SERVER;
 
 function App() {
   useEffect(() => {
