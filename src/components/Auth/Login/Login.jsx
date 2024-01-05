@@ -18,15 +18,18 @@ const Login = ({ user, setUserID }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // const user = userCredential.user;
-        setUserID(userCredential.user?.displayName);
-        console.log(userCredential.user?.displayName);
-        navigate("/");
-      })
-      .catch((e) => setError({ ...error, message: e.message }));
+    if (email && password) {
+      signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          // const user = userCredential.user;
+          setUserID(userCredential.user?.displayName);
+          navigate("/");
+        })
+        .catch((e) => setError({ ...error, message: e.message }));
+    }
   };
+
+  console.log(user);
 
   useEffect(() => {
     if (user) {
@@ -43,28 +46,30 @@ const Login = ({ user, setUserID }) => {
           <MazeComponent maze={maze} />
         </div>
         <div className="nav-button-container">
-          <button
-            className="nav-button smaller auth-button"
-            onClick={() => {
-              navigate("/");
-            }}
-          >
-            Home
-          </button>
           <form onSubmit={handleSubmit}>
+            <button
+              className="nav-button smaller auth-button"
+              onClick={() => {
+                navigate("/");
+              }}
+            >
+              Home
+            </button>
             <div className="auth-form">
-              <input
-                onChange={(e) => setEmail(e.target.value)}
-                type="email"
-                placeholder="email"
-                className="auth-input"
-              />
-              <input
-                onChange={(e) => setPassword(e.target.value)}
-                type="password"
-                placeholder="password"
-                className="auth-input"
-              />
+              <div className="auth-input-container">
+                <input
+                  onChange={(e) => setEmail(e.target.value)}
+                  type="email"
+                  placeholder="email"
+                  className="auth-input"
+                />
+                <input
+                  onChange={(e) => setPassword(e.target.value)}
+                  type="password"
+                  placeholder="password"
+                  className="auth-input"
+                />
+              </div>
               <button type="submit" className="nav-button smaller">
                 Login
               </button>

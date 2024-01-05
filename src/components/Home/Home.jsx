@@ -57,42 +57,44 @@ const Home = ({ setUserID }) => {
           <div className="logo-container">
             <Logo />
           </div>
-          <button
-            className="nav-button play"
-            onClick={() => {
-              navigate("/lobby");
-            }}
-          >
-            Play
-          </button>
-          <button
-            className="nav-button smaller"
-            onClick={() => navigate("/HowToPlay")}
-          >
-            How to Play
-          </button>
-          {firebaseUser ? (
-            <>
-              <button className="nav-button smaller" onClick={signOut}>
-                Sign Out
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                className="nav-button smaller"
-                onClick={() => navigate("/signup")}
-              >
-                Sign Up
-              </button>
-              <button
-                className="nav-button smaller"
-                onClick={() => navigate("/login")}
-              >
-                Sign In
-              </button>
-            </>
-          )}
+          <div className="auth-input-container">
+            <button
+              className="nav-button play"
+              onClick={() => {
+                navigate("/lobby");
+              }}
+            >
+              Play
+            </button>
+            <button
+              className="nav-button smaller"
+              onClick={() => navigate("/HowToPlay")}
+            >
+              How to Play
+            </button>
+            {firebaseUser ? (
+              <>
+                <button className="nav-button smaller" onClick={signOut}>
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  className="nav-button smaller"
+                  onClick={() => navigate("/signup")}
+                >
+                  Sign Up
+                </button>
+                <button
+                  className="nav-button smaller"
+                  onClick={() => navigate("/login")}
+                >
+                  Sign In
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </>

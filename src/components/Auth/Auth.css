@@ -19,6 +19,16 @@
   letter-spacing: 2px;
 }
 
+.auth-input-container {
+  background-color: black;
+  padding-bottom: 1.5vh;
+  border-radius: 10px;
+  border: solid 2px;
+  margin-top: 1.5vh;
+  padding-left: 1vw;
+  padding-right: 1vw;
+}
+
 .auth-input:first-child {
   margin-top: 2.5vh;
 }
