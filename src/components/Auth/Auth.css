@@ -55,7 +55,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: -1; /* Ensures the maze is in the background */
+  z-index: 0; /* Ensures the maze is in the background */
   pointer-events: none; /* Makes the maze uninteractive */
   transform: translate(25%, 25%);
 }

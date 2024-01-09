@@ -5,9 +5,23 @@
   text-align: center;
 
   /* overflow: hidden; */
-  /* font-family: 'Poppins', sans-serif; */
+  /* font-family: "Poppins", sans-serif; */
 }
 
+html,
+body {
+  /* background-color: rgb(0, 0, 0); */
+  color: rgb(255, 255, 255);
+}
+
+input {
+  background-color: rgb(218, 212, 212);
+  color: black;
+}
+
+button {
+  color: white;
+}
 /* body,
 html {
   overflow: hidden;

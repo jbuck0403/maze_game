@@ -28,15 +28,33 @@ body {
   justify-content: center;
 }
 
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: rgb(21, 21, 21);
+  }
+  .wall {
+    background-color: rgb(155, 145, 145);
+  }
+}
+
+@media (prefers-color-scheme: white) {
+  body {
+    background-color: rgb(21, 21, 21);
+  }
+  .wall {
+    background-color: rgb(134, 128, 128);
+  }
+}
+
 .score-column {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
 }
 
-.wall {
-  background-color: rgba(255, 255, 255, 0.476);
-}
+/* .wall {
+  background-color: rgba(255, 255, 255, 0.662);
+} */
 
 .artifact {
   background-color: purple;
