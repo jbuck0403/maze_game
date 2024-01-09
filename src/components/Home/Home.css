@@ -43,3 +43,9 @@
 .auth-input-container {
   z-index: 1;
 }
+
+@media (prefers-color-scheme: light) {
+  button {
+    color: black;
+  }
+}

@@ -37,9 +37,9 @@ body {
   }
 }
 
-@media (prefers-color-scheme: white) {
+@media (prefers-color-scheme: light) {
   body {
-    background-color: rgb(21, 21, 21);
+    background-color: rgb(13, 13, 13);
   }
   .wall {
     background-color: rgb(134, 128, 128);
