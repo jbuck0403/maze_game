@@ -25,8 +25,6 @@ const Lobby = ({
   const navigate = useNavigate();
   const context = useContext(NavigationContext);
 
-  console.log(userID);
-
   useEffect(() => {
     if (!context.hasVisitedHome) {
       navigate("/");
@@ -156,7 +154,6 @@ const Lobby = ({
         (roster.length >= 2 && forceStartOptedIn >= 2)
       ) {
         if (roomAssignment.roomIsLocked === false) {
-          console.log("moving to game");
           roomAssignment.lockRoom();
           setStartingPlayers(generateStartingPlayers());
           setGameRoom(r);

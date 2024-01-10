@@ -29,8 +29,6 @@ const Login = ({ user, setUserID }) => {
     }
   };
 
-  console.log(user);
-
   useEffect(() => {
     if (user) {
       setEmail(user.email);

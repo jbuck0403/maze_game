@@ -19,6 +19,7 @@ const refreshRate = timeThreshold / inputLimit;
 const wallBreakInterval = timeThreshold * 10;
 const naturalArtifactSpawnInterval = timeThreshold * 1;
 const artifactDecayInterval = timeThreshold * 20;
+const attackInterval = timeThreshold * 3;
 const wallBreakKey = "q";
 const attackPlayerKey = "e";
 const destroyBarricadesKey = " ";
@@ -36,6 +37,7 @@ let numNaturalArtifactSpawns = 0;
 let artifactDecayTimeoutID;
 let numPlayerCollectedArtifacts;
 let winCountdownTimeoutID;
+let lastAttackTime = 0;
 
 const handleAttemptToLeavePage = (e) => {
   e.preventDefault();
@@ -62,7 +64,6 @@ function Game({ r, startingPlayers }) {
       numNaturalArtifactSpawns < 5 &&
       currentTime - lastNaturalArtifactSpawnTime > naturalArtifactSpawnInterval
     ) {
-      // console.log("spawning artifact");
       r.mutate.addArtifactToMaze();
       lastNaturalArtifactSpawnTime = currentTime;
       numNaturalArtifactSpawns += 1;
@@ -77,7 +78,6 @@ function Game({ r, startingPlayers }) {
   // Add event listener when the component mounts
   useEffect(() => {
     function handleCharacterMovement() {
-      // console.log("entering movement handler");
       if (keyDown.length > 0) {
         // if the player is currently holding a key
         const currentTime = Date.now();
@@ -147,18 +147,25 @@ function Game({ r, startingPlayers }) {
 
     async function attackPlayerHandler(event) {
       const { key } = event;
-      if (key === attackPlayerKey) {
+      const currentTime = Date.now();
+
+      if (
+        key === attackPlayerKey &&
+        currentTime - lastAttackTime > attackInterval
+      ) {
         const killedPlayers = await r.mutate.attackPlayer({
           playerNum: playerNum,
           startingPlayers: startingPlayers,
         });
-        console.log("numPlayerArtifacts", playerCollectedArtifactsAll);
+
         if (killedPlayers) {
           killedPlayers.forEach((player) => {
             r.mutate.dropArtifact(player);
             r.mutate.addArtifactToMaze();
           });
         }
+
+        lastAttackTime = currentTime;
       }
     }
 
@@ -222,7 +229,6 @@ function Game({ r, startingPlayers }) {
   );
 
   useEffect(() => {
-    // console.log(artifactSpawningTriggered);
     if (!artifactSpawningTriggered) {
       handleNaturalArtifactSpawning();
       r.mutate.initArtifacts();
@@ -310,7 +316,6 @@ function Game({ r, startingPlayers }) {
       winCountdownTimeoutID !== undefined &&
       playerCollectedArtifactsAll[playerNum - 1] < 3
     ) {
-      console.log("clearing win timeout");
       clearTimeout(winCountdownTimeoutID);
       winCountdownTimeoutID = undefined;
     }

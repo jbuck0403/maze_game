@@ -20,7 +20,6 @@ const SignUp = ({ setFirebaseUser }) => {
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         const user = userCredential.user.email;
-        console.log(user);
 
         updateProfile(userCredential.user, { displayName: displayName }).catch(
           (err) => setError({ ...error, message: err.message })

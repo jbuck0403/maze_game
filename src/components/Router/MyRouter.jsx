@@ -39,7 +39,6 @@ export function MyRouter({ userID, setUserID }) {
     setHasVisitedLobby(false);
   };
 
-  console.log(userID);
   const roomAssignment = useOrchestration(
     {
       server: server,
