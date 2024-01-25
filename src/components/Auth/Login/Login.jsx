@@ -18,6 +18,7 @@ const Login = ({ user, setUserID }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    console.log("submitted");
     if (email && password) {
       signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
@@ -46,6 +47,7 @@ const Login = ({ user, setUserID }) => {
         <div className="nav-button-container">
           <form onSubmit={handleSubmit}>
             <button
+              type="button"
               className="nav-button smaller auth-button"
               onClick={() => {
                 navigate("/");

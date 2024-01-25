@@ -57,6 +57,7 @@ const SignUp = ({ setFirebaseUser }) => {
         <div className="nav-button-container">
           <form onSubmit={handleSubmit}>
             <button
+              type="button"
               className="nav-button smaller"
               onClick={() => {
                 navigate("/");
